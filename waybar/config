@@ -1,0 +1,132 @@
+{
+
+//---------- General
+
+    "layer": "top",
+    "position": "top",
+    "height": 25,
+    "margin-top": 5,
+    "margin-bottom": 0,
+    "spacing": 0,
+
+//---------- Module Layout
+
+    "modules-left": ["clock", "custom/gnome-pomodoro-timer"],
+
+    "modules-center": ["hyprland/workspaces"] ,
+
+    "modules-right": [ "tray", "pulseaudio", "battery"],
+    
+//---------- Module Configs
+
+    "wlr/workspaces": {
+        "format": "{name}",
+        "sort-by-number": true,
+        "on-click": "activate",
+    },
+
+    "hyprland/workspaces": {
+        "format": "{name}",
+    },
+
+    "clock": {
+        "interval": 1,
+        "format": "{:%a  %d - %m  |  %H : %M : %S }",
+        "tooltip": true,
+        "tooltip-format": "{calendar}",
+    },
+
+    "backlight": {
+        "format": "bri: {icon}",
+        //"format-icons": ["▁","▂","▃","▄","▅","▆","▇"],
+        "format-icons": [".....","Ⅰ....","ⅠⅠ...","ⅠⅠⅠ..","ⅠⅠⅠⅠ.","ⅠⅠⅠⅠⅠ"],
+
+    },
+
+    "pulseaudio": {
+        "format": "vol: {volume}%",
+        "format-bluetooth": "blu: {icon}",
+        "format-muted": "vol: muted",
+        //"format-icons": ["▁","▂","▃","▄","▅","▆","▇"],
+        //"format-icons": ["..........","Ⅰ.........","ⅠⅠ........","ⅠⅠⅠ.......","ⅠⅠⅠⅠ......","ⅠⅠⅠⅠⅠ.....","ⅠⅠⅠⅠⅠⅠ....","ⅠⅠⅠⅠⅠⅠⅠ...","ⅠⅠⅠⅠⅠⅠⅠⅠ..","ⅠⅠⅠⅠⅠⅠⅠⅠⅠ.","ⅠⅠⅠⅠⅠⅠⅠⅠⅠⅠ"],
+        //"format-icons": ["▒▒▒▒▒","█▒▒▒▒","██▒▒▒","███▒▒","████▒","█████"],
+        "scroll-step": 0.5,
+        "on-click": "pavucontrol",
+    },
+
+    "battery": {
+        "format": "bat: {capacity}%",
+        //"format-charging": "bat: charging",
+        "icon-size": 10,
+        "states": {
+            "full": 100,
+            "warning": 20,
+            "critical": 10
+        },
+    },
+
+    "network": {
+        "format": "{icon} ",
+        "format-icons": ["󰤟","󰤢","󰤥","󰤨"],
+        "on-click": "nm-connection-editor",
+    },
+
+    "tray": {
+        "icon-size": 14,
+        "spacing": 25,
+    },
+
+    "sway/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "focused": "×",
+        },
+    },
+
+    "sway/scratchpad": {
+        "format": "scratch:   {count}",
+        "show-empty": false,
+        "tooltip": true,
+        "tooltip-format": "{app}: {title}"
+    },
+
+    "custom/wl-gammarelay-temperature": {
+        "format": "tem: {}",
+        "exec": "wl-gammarelay --subscribe Temperature",
+        "on-scroll-up": "busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n +100",
+        "on-scroll-down": "busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n -100"
+    },
+
+    "custom/wl-gammarelay-brightness": {
+        "format": "bri: {}",
+        "exec": "wl-gammarelay --subscribe Brightness",
+        "on-scroll-up": "busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateBrightness d +0.02",
+        "on-scroll-down": "busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateBrightness d -0.02"
+    },
+
+    "custom/gnome-pomodoro-timer": {
+        "exec": "/home/james/.config/waybar/scripts/gnome-pomodoro-timer-tail.bash",
+        "return-type": "json",
+        "format": "{icon}{}",
+        "format-icons": {
+            "null": "",
+            "pomodoro": "⏰  ",
+            "short-break": "☕  ",
+            "long-break": "🧘  ",
+            "paused": "⏸️   "
+        },
+        "tooltip": false,
+        "on-click": "gnome-pomodoro",
+    },
+
+}
+

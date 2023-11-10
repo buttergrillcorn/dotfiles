@@ -1,0 +1,148 @@
+* {
+  /* `otf-font-awesome` is required to be installed for icons */
+  font-family: Sarasa Term SC Nerd Font;
+  font-weight: 700;
+  font-size: 16px;
+  /* background: transparent; */
+/*  border-bottom: 3px solid transparent;*/
+}
+
+@define-color bg transparent;
+@define-color hl #d8dee9;
+@define-color text #d8dee9;
+@define-color darktext #2e3440;
+@define-color red #bf616a;
+@define-color orange #d08770;
+@define-color yellow #ebcb8b;
+@define-color green #a3be8c;
+@define-color purple #b48ead;
+@define-color border transparent;
+
+window#waybar {
+  background: transparent;
+}
+
+tooltip {
+  background-color: @darktext;
+  border: 3px solid;
+  border-color: @hl;
+}
+
+#workspaces {
+  background: @bg;
+  border: 3px solid @border;
+}
+
+#workspaces button {
+  background: @bg;
+  color: @text;
+  border-radius: 30px;
+}
+
+#workspaces button.focused {
+  background: @hl;
+  color: @darktext;
+}
+
+#workspaces button.active {
+  background: @hl;
+  color: @darktext;
+}
+
+#workspaces button.urgent {
+  background: @red;
+  color: @darktext;
+}
+
+#workspaces button.hover {
+  background: @bg;
+  color: @text;
+}
+
+#mode {
+  background: @hl;
+  color: @bg;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+#battery {
+  margin-right: 15px;
+  color: @text;
+  /* border-radius: 0px 20px 20px 0px; */
+  border-right: 3px solid @border;
+  border-top: 3px solid @border;
+  border-bottom: 3px solid @border;
+}
+
+#battery.charging {
+  color: @green;
+/*   border-bottom: 3px solid #A6E3A1; */
+}
+
+#battery.warning {
+  color: @orange;
+/*   border-bottom: 3px solid #FF8A65; */
+}
+
+#battery.critical {
+  color: @red;
+/*   border-bottom: 3px solid #F38BA8; */
+}
+
+#tray {
+  color: @text;
+  /* border-radius: 20px 0px 0px 20px; */
+  border-left: 3px solid @border;
+  border-top: 3px solid @border;
+  border-bottom: 3px solid @border;
+}
+
+#clock {
+  color: @text;
+  margin-left: 15px;
+/*   background: @bg; */
+/*   padding-left: 20px; */
+/*   padding-right: 20px; */
+  /* border-radius: 20px; */
+  border: 3px solid @border;
+}
+
+#pulseaudio {
+  color: @text;
+  border-top: 3px solid @border;
+  border-bottom: 3px solid @border;
+}
+
+#custom-wl-gammarelay-temperature {
+  border-top: 3px solid @border;
+  border-bottom: 3px solid @border;
+}
+
+#custom-wl-gammarelay-brightness {
+  border-top: 3px solid @border;
+  border-bottom: 3px solid @border;
+}
+
+#custom-gnome-pomodoro-timer {
+  /* border: 3px solid @border;
+  border-radius: 20px; */
+  background-color: @bg;
+  color: @text;
+}
+
+#custom-gnome-pomodoro-timer.null {
+  background: transparent;
+  border: transparent;
+}
+
+#clock,
+#tray,
+#pulseaudio,
+#battery,
+#custom-wl-gammarelay-temperature,
+#custom-wl-gammarelay-brightness {
+  background: @bg;
+  padding-left: 20px;
+  padding-right: 20px;
+}
