@@ -261,6 +261,8 @@ resume 'swaymsg "output * dpms on"'
 #+end_src
 
 * Zsh
+
+** Zsh Configuration
 #+begin_src sh :tangle packages/zsh/.zshrc
 # Zsh configuration
 HISTFILE=~/.histfile
@@ -271,6 +273,21 @@ SAVEHIST=10000
 if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
   exec ~/.local/bin/select-wm.sh sway
 fi
+#+end_src
+
+** WM Selector Script
+#+begin_src sh :tangle packages/zsh/.local/bin/select-wm.sh :shebang "#!/usr/bin/env sh"
+WM="${1:-sway}"
+
+case "$WM" in
+  sway|river|niri)
+    exec "$WM"
+    ;;
+  *)
+    echo "Unknown WM: $WM"
+    exit 1
+    ;;
+esac
 #+end_src
 
 * Pywal
