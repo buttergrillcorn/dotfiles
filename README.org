@@ -26,7 +26,7 @@ sudo pacman -S emacs stow git
 
 ** Required Packages
 #+begin_src sh
-sudo pacman -S sway waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal
+sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal
 #+end_src
 
 ** Additional Dependencies
@@ -135,6 +135,15 @@ stow -d packages -t ~ -D sway
 #+begin_src sh
 stow -d packages -t ~ -D sway
 ./scripts/stow-pkg.sh river
+#+end_src
+
+** Change wallpaper and theme
+#+begin_src sh
+# Change wallpaper and generate colors with pywal
+./scripts/change-theme.sh ~/dotfile/wallpapers/your-wallpaper.jpg
+
+# Or manually with pywal
+wal -i ~/dotfile/wallpapers/your-wallpaper.jpg -n
 #+end_src
 
 * Structure

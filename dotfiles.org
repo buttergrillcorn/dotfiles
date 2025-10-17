@@ -26,6 +26,11 @@ foot
 monospace 11
 #+end_src
 
+#+name: wallpaper
+#+begin_src text
+~/dotfile/wallpapers/default.jpg
+#+end_src
+
 * Sway
 
 ** Variables
@@ -54,7 +59,6 @@ input type:touchpad {
 
 ** Output Configuration
 #+begin_src conf :tangle packages/sway/.config/sway/config
-output * bg ~/wallpapers/default.png fill
 output eDP-1 mode 1920x1080@60Hz position 0,0
 #+end_src
 
@@ -73,6 +77,7 @@ client.urgent $urgent $urgent $fg $urgent $urgent
 
 ** Autostart
 #+begin_src conf :tangle packages/sway/.config/sway/config
+exec swaybg -i <<wallpaper>> -m fill
 exec fcitx5
 exec mako
 exec waybar
