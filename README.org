@@ -1,5 +1,6 @@
 #+TITLE: Arch Linux Dotfiles
 #+AUTHOR: James
+#+STARTUP: overview
 
 Minimal Arch Linux dotfiles managed with org-mode and GNU Stow.
 
@@ -16,21 +17,124 @@ Minimal Arch Linux dotfiles managed with org-mode and GNU Stow.
 - *Shell*: zsh
 - *Theming*: pywal
 
-* Usage
+* Installation
 
-** 1. Tangle configurations
+** Prerequisites
+#+begin_src sh
+sudo pacman -S emacs stow git
+#+end_src
+
+** Required Packages
+#+begin_src sh
+sudo pacman -S sway waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal
+#+end_src
+
+** Additional Dependencies
+#+begin_src sh
+# Audio control
+sudo pacman -S pamixer
+
+# Screenshot utilities
+sudo pacman -S grim slurp sway-contrib
+
+# Clipboard management
+sudo pacman -S wl-clipboard cliphist
+
+# Screen color temperature
+sudo pacman -S wlsunset
+
+# Brightness control
+sudo pacman -S light
+
+# Input method (for Chinese/multilingual)
+sudo pacman -S fcitx5 fcitx5-configtool
+#+end_src
+
+** Optional Tools
+#+begin_src sh
+# File manager GUI
+sudo pacman -S thunar
+
+# Network management
+sudo pacman -S networkmanager nm-applet networkmanager_dmenu
+#+end_src
+
+* Features
+
+** Keybindings
+- *Mod (Super/Win) + Return*: Terminal
+- *Mod + D*: Application launcher (fuzzel)
+- *Mod + B*: Browser (qutebrowser)
+- *Mod + E*: File manager (yazi in terminal)
+- *Mod + N*: Emacs client
+- *Mod + Q*: Close window
+- *Mod + H/J/K/L*: Navigate windows (vim keys)
+- *Mod + Ctrl + H/J/K/L*: Move windows
+- *Mod + 1-9*: Switch workspaces
+- *Mod + Ctrl + 1-9*: Move window to workspace
+- *Mod + M*: Notification actions
+- *Mod + V*: Clipboard manager
+- *XF86 Keys*: Volume, brightness, screenshot controls
+
+** Input Configuration
+- Caps Lock swapped with Ctrl
+- Touchpad tap-to-click enabled
+- Natural scrolling
+- Middle mouse emulation
+
+** Theming
+- Minimal color scheme (configurable via pywal)
+- 10px gaps between windows
+- 2px borders
+- Noweb-based shared variables for easy theming
+
+* Setup
+
+After installing packages, follow these steps:
+
+** 1. Clone repository
+#+begin_src sh
+git clone <your-repo-url> ~/dotfiles
+cd ~/dotfiles
+#+end_src
+
+** 2. Tangle configurations
 #+begin_src sh
 ./scripts/tangle.sh
 #+end_src
 
-** 2. Stow packages
+This extracts all code blocks from =dotfiles.org= into =packages/=.
+
+** 3. Stow packages
 #+begin_src sh
+# Deploy all packages
 ./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh pywal
+
+# Or deploy specific packages
+./scripts/stow-pkg.sh sway waybar mako
 #+end_src
 
-** 3. Unstow packages
+** 4. Launch sway
+#+begin_src sh
+# From TTY (auto-login configured in zsh)
+# Or manually:
+sway
+#+end_src
+
+* Usage
+
+** Edit configuration
+Edit =dotfiles.org= in Emacs, then re-tangle and re-stow.
+
+** Unstow packages
 #+begin_src sh
 stow -d packages -t ~ -D sway
+#+end_src
+
+** Switch window managers
+#+begin_src sh
+stow -d packages -t ~ -D sway
+./scripts/stow-pkg.sh river
 #+end_src
 
 * Structure
@@ -40,3 +144,5 @@ stow -d packages -t ~ -D sway
 
 * Extending
 Add new configurations to =dotfiles.org= with proper tangle headers, then re-run =./scripts/tangle.sh=.
+* TO-DO's
+** TODO Implement a helper pop-up function to show common shortcut or useful features, for anyone using the computer or in case I forget.
