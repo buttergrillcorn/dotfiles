@@ -48,6 +48,9 @@ sudo pacman -S light
 
 # Input method (for Chinese/multilingual)
 sudo pacman -S fcitx5 fcitx5-configtool
+
+# Shell enhancements
+sudo pacman -S zoxide bat trash-cli fastfetch
 #+end_src
 
 ** Optional Tools

@@ -23,7 +23,7 @@ foot
 
 #+name: font
 #+begin_src text
-monospace 11
+JetBrainsMono Nerd Font
 #+end_src
 
 #+name: wallpaper
@@ -75,7 +75,7 @@ client.unfocused $bg $bg $fg $bg $bg
 client.urgent $urgent $urgent $fg $urgent $urgent
 #+end_src
 
-** Autostart
+** Auto-start
 #+begin_src conf :tangle packages/sway/.config/sway/config
 exec swaybg -i <<wallpaper>> -m fill
 exec fcitx5
@@ -273,6 +273,65 @@ SAVEHIST=10000
 if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
   exec ~/.local/bin/select-wm.sh sway
 fi
+#+end_src
+
+** Fastfetch
+#+begin_src sh :tangle packages/zsh/.zshrc
+# Fastfetch
+if [[ -o interactive ]]; then
+  fastfetch
+fi
+#+end_src
+
+** PATH Configuration
+#+begin_src sh :tangle packages/zsh/.zshrc
+# Doom Emacs
+export PATH=/home/james/.config/emacs/bin:$PATH
+
+# NPM
+export PATH=/home/james/.npm/bin:$PATH
+#+end_src
+
+** Functions
+#+begin_src sh :tangle packages/zsh/.zshrc
+# Yazi - cd on quit
+function yy() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+}
+#+end_src
+
+** Aliases
+#+begin_src sh :tangle packages/zsh/.zshrc
+# Navigation
+alias cd="z"
+
+# Safe file operations
+alias rm="trash -i"
+alias cp="cp -i"
+alias mv="mv -i"
+
+# Better defaults
+alias cat="bat"
+alias neofetch="fastfetch"
+alias fetch="fastfetch"
+
+# Quick access
+alias zshrc="nvim ~/.zshrc"
+alias r="source ~/.zshrc"
+
+# Package management
+alias paci="sudo pacman --noconfirm -S"
+alias pacr="sudo pacman -Rns"
+alias yayi="yay -S"
+alias update="sudo pacman --noconfirm -Syyuu && yay --noconfirm -Syyuua"
+
+# System
+alias shutdown="shutdown now"
 #+end_src
 
 ** WM Selector Script
