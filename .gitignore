@@ -1,0 +1,11 @@
+# Generated packages
+packages/
+
+# Emacs temp files
+*~
+\#*\#
+*.elc
+.*.swp
+
+# Backup files
+*.bak

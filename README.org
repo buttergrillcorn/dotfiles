@@ -1,1 +1,42 @@
-* WIP
+#+TITLE: Arch Linux Dotfiles
+#+AUTHOR: James
+
+Minimal Arch Linux dotfiles managed with org-mode and GNU Stow.
+
+* Stack
+- *WM*: sway
+- *Bar*: waybar
+- *Notifications*: mako
+- *Launcher*: fuzzel
+- *Terminal*: foot
+- *File Manager*: yazi
+- *Browser*: qutebrowser
+- *Lock*: waylock
+- *Idle*: swayidle
+- *Shell*: zsh
+- *Theming*: pywal
+
+* Usage
+
+** 1. Tangle configurations
+#+begin_src sh
+./scripts/tangle.sh
+#+end_src
+
+** 2. Stow packages
+#+begin_src sh
+./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh pywal
+#+end_src
+
+** 3. Unstow packages
+#+begin_src sh
+stow -d packages -t ~ -D sway
+#+end_src
+
+* Structure
+- =dotfiles.org= - Main configuration file (edit this)
+- =scripts/= - Helper scripts
+- =packages/= - Generated configs (do not edit directly)
+
+* Extending
+Add new configurations to =dotfiles.org= with proper tangle headers, then re-run =./scripts/tangle.sh=.
