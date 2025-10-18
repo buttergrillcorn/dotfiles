@@ -26,7 +26,7 @@ sudo pacman -S emacs stow git
 
 ** Required Packages
 #+begin_src sh
-sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal autotiling
+sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal autotiling libinput-gestures
 #+end_src
 
 ** Additional Dependencies
@@ -124,6 +124,13 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 - Manual split controls: Mod+Shift+Minus (horizontal), Mod+Shift+V (vertical)
 - Resize mode with vim keys or arrows
 
+** Touchpad Gestures
+- 3-finger swipe left/right: Previous/next workspace
+- 3-finger swipe up: Toggle fullscreen
+- 3-finger swipe down: Toggle scratchpad
+- 4-finger swipe left/right: Move window to prev/next workspace and follow
+- 4-finger tap: Launch application launcher (fuzzel)
+
 ** Power Management
 - Conditional swayidle timeouts:
   - Battery: 5min screen off, 10min lock, 30min sleep
@@ -151,7 +158,7 @@ This extracts all code blocks from =dotfiles.org= into =packages/=.
 ** 3. Stow packages
 #+begin_src sh
 # Deploy all packages
-./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh pywal
+./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh pywal libinput-gestures
 
 # Or deploy specific packages
 ./scripts/stow-pkg.sh sway waybar mako
@@ -159,6 +166,17 @@ This extracts all code blocks from =dotfiles.org= into =packages/=.
 # Make scripts executable
 chmod +x ~/dotfile/packages/zsh/.local/bin/select-wm.sh
 chmod +x ~/dotfile/packages/swayidle/.local/bin/start-swayidle.sh
+#+end_src
+
+** 3.5. Setup libinput-gestures permissions
+#+begin_src sh
+# Add user to input group (required for libinput-gestures)
+sudo gpasswd -a $USER input
+
+# Log out and back in for group changes to take effect
+# Then enable and start the service
+libinput-gestures-setup autostart
+libinput-gestures-setup start
 #+end_src
 
 ** 4. Launch sway
