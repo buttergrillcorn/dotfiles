@@ -38,6 +38,10 @@ JetBrainsMono Nerd Font
 set $mod Mod4
 set $term <<terminal>>
 
+# Source pywal colors if available
+include $HOME/.cache/wal/colors-sway
+
+# Fallback colors if pywal not run
 <<colors>>
 #+end_src
 
@@ -54,6 +58,11 @@ input type:touchpad {
     scroll_factor 0.7
     accel_profile adaptive
     middle_emulation enabled
+    dwt enabled
+}
+
+input type:pointer {
+    dwt enabled
 }
 #+end_src
 
@@ -75,19 +84,60 @@ client.unfocused $bg $bg $fg $bg $bg
 client.urgent $urgent $urgent $fg $urgent $urgent
 #+end_src
 
+** Behavior
+#+begin_src conf :tangle packages/sway/.config/sway/config
+# Focus follows mouse
+focus_follows_mouse yes
+
+# Don't focus popup windows
+no_focus [window_role="pop-up"]
+no_focus [window_type="notification"]
+#+end_src
+
+** Window Rules
+#+begin_src conf :tangle packages/sway/.config/sway/config
+# Picture-in-Picture windows
+for_window [title="Picture-in-Picture"] floating enable, border none, move position 10 ppt 10 ppt, sticky enable
+
+# Floating terminal
+for_window [app_id="floating-foot"] floating enable, resize set 60 ppt 60 ppt, move position center
+
+# Floating applications
+for_window [app_id="blueberry.py"] floating enable
+for_window [app_id="blueman-manager"] floating enable
+for_window [app_id="pavucontrol"] floating enable
+for_window [app_id="fcitx5-config-qt"] floating enable
+for_window [class="Bitwarden"] floating enable
+for_window [app_id="LanMouse"] floating enable
+for_window [app_id="org.kde.kdeconnect.*"] floating enable
+for_window [class="prismlauncher"] floating enable
+for_window [app_id="nm-connection-editor"] floating enable
+#+end_src
+
 ** Auto-start
 #+begin_src conf :tangle packages/sway/.config/sway/config
+# Wayland essentials
 exec swaybg -i <<wallpaper>> -m fill
-exec fcitx5
 exec mako
 exec waybar
+
+# System utilities
+exec fcitx5
 exec light -N 5
 exec wlsunset -l 51.5 -L 0.1
+exec ~/.local/bin/start-swayidle.sh
+
+# User applications
+exec udiskie
+exec wluma
+exec kdeconnectd
+exec kdeconnect-indicator
 #+end_src
 
 ** Keybindings - Launch Programs
 #+begin_src conf :tangle packages/sway/.config/sway/config
 bindsym $mod+Return exec $term
+bindsym $mod+Shift+Return exec $term --app-id=floating-foot
 bindsym $mod+d exec fuzzel
 bindsym $mod+b exec qutebrowser
 bindsym $mod+e exec $term -e yazi
@@ -98,9 +148,14 @@ bindsym $mod+Shift+n exec emacs
 ** Keybindings - Window Management
 #+begin_src conf :tangle packages/sway/.config/sway/config
 bindsym $mod+q kill
-bindsym $mod+f fullscreen toggle
-bindsym $mod+Shift+space floating toggle
-bindsym $mod+space focus mode_toggle
+bindsym $mod+Shift+Ctrl+f fullscreen toggle
+bindsym $mod+Shift+f fullscreen toggle global
+bindsym $mod+f floating toggle
+bindsym $mod+Tab focus mode_toggle
+bindsym $mod+Ctrl+s sticky toggle
+bindsym $mod+Shift+minus splith
+bindsym $mod+Shift+v splitv
+bindsym $mod+Shift+s layout toggle split
 #+end_src
 
 ** Keybindings - Navigation
@@ -125,10 +180,21 @@ bindsym $mod+Ctrl+Left move left
 bindsym $mod+Ctrl+Down move down
 bindsym $mod+Ctrl+Up move up
 bindsym $mod+Ctrl+Right move right
+
+# Move window to output
+bindsym $mod+Ctrl+Shift+h move output left
+bindsym $mod+Ctrl+Shift+j move output down
+bindsym $mod+Ctrl+Shift+k move output up
+bindsym $mod+Ctrl+Shift+l move output right
+bindsym $mod+Ctrl+Shift+Left move output left
+bindsym $mod+Ctrl+Shift+Down move output down
+bindsym $mod+Ctrl+Shift+Up move output up
+bindsym $mod+Ctrl+Shift+Right move output right
 #+end_src
 
 ** Keybindings - Workspaces
 #+begin_src conf :tangle packages/sway/.config/sway/config
+# Switch to workspace
 bindsym $mod+1 workspace number 1
 bindsym $mod+2 workspace number 2
 bindsym $mod+3 workspace number 3
@@ -138,16 +204,30 @@ bindsym $mod+6 workspace number 6
 bindsym $mod+7 workspace number 7
 bindsym $mod+8 workspace number 8
 bindsym $mod+9 workspace number 9
+bindsym $mod+w workspace special
 
-bindsym $mod+Ctrl+1 move container to workspace number 1
-bindsym $mod+Ctrl+2 move container to workspace number 2
-bindsym $mod+Ctrl+3 move container to workspace number 3
-bindsym $mod+Ctrl+4 move container to workspace number 4
-bindsym $mod+Ctrl+5 move container to workspace number 5
-bindsym $mod+Ctrl+6 move container to workspace number 6
-bindsym $mod+Ctrl+7 move container to workspace number 7
-bindsym $mod+Ctrl+8 move container to workspace number 8
-bindsym $mod+Ctrl+9 move container to workspace number 9
+# Move to workspace (without switching)
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+w move container to workspace special
+
+# Move to workspace and switch
+bindsym $mod+Ctrl+1 move container to workspace number 1; workspace number 1
+bindsym $mod+Ctrl+2 move container to workspace number 2; workspace number 2
+bindsym $mod+Ctrl+3 move container to workspace number 3; workspace number 3
+bindsym $mod+Ctrl+4 move container to workspace number 4; workspace number 4
+bindsym $mod+Ctrl+5 move container to workspace number 5; workspace number 5
+bindsym $mod+Ctrl+6 move container to workspace number 6; workspace number 6
+bindsym $mod+Ctrl+7 move container to workspace number 7; workspace number 7
+bindsym $mod+Ctrl+8 move container to workspace number 8; workspace number 8
+bindsym $mod+Ctrl+9 move container to workspace number 9; workspace number 9
 #+end_src
 
 ** Keybindings - Hardware
@@ -177,10 +257,39 @@ bindsym $mod+Shift+m exec makoctl menu fuzzel
 bindsym $mod+v exec cliphist list | fuzzel --dmenu | cliphist decode | wl-copy
 #+end_src
 
+** Keybindings - Resize Mode
+#+begin_src conf :tangle packages/sway/.config/sway/config
+mode "resize" {
+    bindsym h resize shrink width 10px
+    bindsym j resize grow height 10px
+    bindsym k resize shrink height 10px
+    bindsym l resize grow width 10px
+
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+bindsym $mod+r mode "resize"
+#+end_src
+
 ** Keybindings - System
 #+begin_src conf :tangle packages/sway/.config/sway/config
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Exit sway?' -B 'Yes' 'swaymsg exit'
+#+end_src
+
+** Lid Switch
+#+begin_src conf :tangle packages/sway/.config/sway/config
+# Lid close: turn off screen, lock, and sleep
+bindswitch --reload --locked lid:on exec 'swaymsg "output * dpms off" && swaylock && systemctl suspend'
+
+# Lid open: wake screen
+bindswitch --reload --locked lid:off exec 'swaymsg "output * dpms on"'
 #+end_src
 
 * Waybar
@@ -254,10 +363,39 @@ color=1a1b26
 #+end_src
 
 * Swayidle
-#+begin_src conf :tangle packages/swayidle/.config/swayidle/config
-timeout 300 'swaylock'
-timeout 600 'swaymsg "output * dpms off"'
-resume 'swaymsg "output * dpms on"'
+
+** Swayidle Launcher Script
+#+begin_src sh :tangle packages/swayidle/.local/bin/start-swayidle.sh :shebang "#!/usr/bin/env bash"
+# Kill any existing swayidle instances
+pkill swayidle
+
+# Check if on battery or AC
+if [ -d /sys/class/power_supply/AC ] || [ -d /sys/class/power_supply/AC0 ] || [ -d /sys/class/power_supply/ACAD ]; then
+    # Find the AC adapter
+    AC_PATH=$(find /sys/class/power_supply -name 'AC*' -o -name 'ACAD' | head -n 1)
+
+    if [ -n "$AC_PATH" ] && [ "$(cat $AC_PATH/online)" = "0" ]; then
+        # On battery
+        swayidle -w \
+            timeout 300 'swaymsg "output * dpms off"' \
+            resume 'swaymsg "output * dpms on"' \
+            timeout 600 'swaylock' \
+            timeout 1800 'systemctl suspend'
+    else
+        # Plugged in
+        swayidle -w \
+            timeout 600 'swaymsg "output * dpms off"' \
+            resume 'swaymsg "output * dpms on"' \
+            timeout 900 'swaylock' \
+            timeout 3600 'systemctl suspend'
+    fi
+else
+    # Fallback if no AC adapter found (desktop)
+    swayidle -w \
+        timeout 600 'swaymsg "output * dpms off"' \
+        resume 'swaymsg "output * dpms on"' \
+        timeout 900 'swaylock'
+fi
 #+end_src
 
 * Zsh
@@ -290,6 +428,12 @@ export PATH=/home/james/.config/emacs/bin:$PATH
 
 # NPM
 export PATH=/home/james/.npm/bin:$PATH
+#+end_src
+
+** Tool Initialization
+#+begin_src sh :tangle packages/zsh/.zshrc
+# Zoxide - smart directory jumping
+eval "$(zoxide init zsh)"
 #+end_src
 
 ** Functions

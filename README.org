@@ -51,6 +51,12 @@ sudo pacman -S fcitx5 fcitx5-configtool
 
 # Shell enhancements
 sudo pacman -S zoxide bat trash-cli fastfetch
+
+# System utilities
+sudo pacman -S udiskie wluma
+
+# KDE Connect
+sudo pacman -S kdeconnect
 #+end_src
 
 ** Optional Tools
@@ -66,15 +72,28 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 
 ** Keybindings
 - *Mod (Super/Win) + Return*: Terminal
+- *Mod + Shift + Return*: Floating terminal
 - *Mod + D*: Application launcher (fuzzel)
 - *Mod + B*: Browser (qutebrowser)
 - *Mod + E*: File manager (yazi in terminal)
 - *Mod + N*: Emacs client
 - *Mod + Q*: Close window
+- *Mod + F*: Toggle floating
+- *Mod + Shift + F*: Fake fullscreen (global)
+- *Mod + Shift + Ctrl + F*: True fullscreen
+- *Mod + Tab*: Swap focus (floating ↔ tiling)
+- *Mod + R*: Resize mode (use hjkl or arrows)
 - *Mod + H/J/K/L*: Navigate windows (vim keys)
 - *Mod + Ctrl + H/J/K/L*: Move windows
+- *Mod + Ctrl + Shift + Direction*: Move window to output
 - *Mod + 1-9*: Switch workspaces
-- *Mod + Ctrl + 1-9*: Move window to workspace
+- *Mod + Shift + 1-9*: Move window to workspace
+- *Mod + Ctrl + 1-9*: Move window to workspace and follow
+- *Mod + W*: Special workspace
+- *Mod + Shift + Minus*: Split horizontally
+- *Mod + Shift + V*: Split vertically
+- *Mod + Shift + S*: Toggle split layout
+- *Mod + Ctrl + S*: Toggle sticky
 - *Mod + M*: Notification actions
 - *Mod + V*: Clipboard manager
 - *XF86 Keys*: Volume, brightness, screenshot controls
@@ -84,12 +103,27 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 - Touchpad tap-to-click enabled
 - Natural scrolling
 - Middle mouse emulation
+- Disable-while-typing enabled (touchpad & trackpoint)
+- Focus follows mouse
 
 ** Theming
-- Minimal color scheme (configurable via pywal)
+- Pywal integration for dynamic colors
+- Minimal fallback color scheme
 - 10px gaps between windows
 - 2px borders
 - Noweb-based shared variables for easy theming
+
+** Window Rules
+- Picture-in-Picture windows: floating, no border, bottom-right corner, sticky
+- Floating terminal: centered, 60% width/height
+- Auto-floating apps: bluetooth managers, audio control, kdeconnect, etc.
+
+** Power Management
+- Conditional swayidle timeouts:
+  - Battery: 5min screen off, 10min lock, 30min sleep
+  - Plugged in: 10min screen off, 15min lock, 1hr sleep
+- Lid close: screen off, lock, and sleep
+- Lid open: wake screen
 
 * Setup
 
@@ -115,6 +149,10 @@ This extracts all code blocks from =dotfiles.org= into =packages/=.
 
 # Or deploy specific packages
 ./scripts/stow-pkg.sh sway waybar mako
+
+# Make scripts executable
+chmod +x ~/dotfile/packages/zsh/.local/bin/select-wm.sh
+chmod +x ~/dotfile/packages/swayidle/.local/bin/start-swayidle.sh
 #+end_src
 
 ** 4. Launch sway
@@ -174,3 +212,4 @@ After auto-login is configured, sway will start automatically on TTY1.
 Add new configurations to =dotfiles.org= with proper tangle headers, then re-run =./scripts/tangle.sh=.
 * TO-DO's
 ** TODO Implement a helper pop-up function to show common shortcut or useful features, for anyone using the computer or in case I forget.
+** TODO Add zsh plugins (syntax highlighting, autosuggestions, completions)
