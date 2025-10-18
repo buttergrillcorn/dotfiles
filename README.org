@@ -26,7 +26,7 @@ sudo pacman -S emacs stow git
 
 ** Required Packages
 #+begin_src sh
-sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal
+sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal autotiling
 #+end_src
 
 ** Additional Dependencies
@@ -118,6 +118,11 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 - Picture-in-Picture windows: floating, no border, bottom-right corner, sticky
 - Floating terminal: centered, 60% width/height
 - Auto-floating apps: bluetooth managers, audio control, kdeconnect, etc.
+
+** Tiling Behavior
+- Autotiling: Automatically switches between horizontal/vertical splits based on window dimensions
+- Manual split controls: Mod+Shift+Minus (horizontal), Mod+Shift+V (vertical)
+- Resize mode with vim keys or arrows
 
 ** Power Management
 - Conditional swayidle timeouts:
@@ -214,3 +219,4 @@ Add new configurations to =dotfiles.org= with proper tangle headers, then re-run
 * TO-DO's
 ** TODO Implement a helper pop-up function to show common shortcut or useful features, for anyone using the computer or in case I forget.
 ** TODO Add zsh plugins (syntax highlighting, autosuggestions, completions)
+** TODO Implement a module for showing how many packages need updating on Waybar

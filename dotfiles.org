@@ -127,6 +127,9 @@ exec light -N 5
 exec wlsunset -l 51.5 -L 0.1
 exec ~/.local/bin/start-swayidle.sh
 
+# Tiling enhancements
+exec_always autotiling
+
 # User applications
 exec udiskie
 exec wluma
