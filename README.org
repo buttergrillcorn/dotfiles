@@ -89,7 +89,8 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 - *Mod + 1-9*: Switch workspaces
 - *Mod + Shift + 1-9*: Move window to workspace
 - *Mod + Ctrl + 1-9*: Move window to workspace and follow
-- *Mod + W*: Special workspace
+- *Mod + W*: Show scratchpad
+- *Mod + Shift + W*: Move to scratchpad
 - *Mod + Shift + Minus*: Split horizontally
 - *Mod + Shift + V*: Split vertically
 - *Mod + Shift + S*: Toggle split layout
