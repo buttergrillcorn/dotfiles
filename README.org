@@ -68,16 +68,6 @@ sudo pacman -S thunar
 sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 #+end_src
 
-** AUR Packages
-#+begin_src sh
-# Install an AUR helper if you don't have one
-# Using yay:
-yay -S libinput-gestures
-
-# Or using paru:
-# paru -S libinput-gestures
-#+end_src
-
 * Features
 
 ** Keybindings
@@ -134,12 +124,6 @@ yay -S libinput-gestures
 - Manual split controls: Mod+Shift+Minus (horizontal), Mod+Shift+V (vertical)
 - Resize mode with vim keys or arrows
 
-** Touchpad Gestures
-- 3-finger swipe left/right: Previous/next workspace
-- 3-finger swipe up: Toggle fullscreen
-- 3-finger swipe down: Toggle scratchpad
-- 4-finger swipe left/right: Move window to prev/next workspace and follow
-
 ** Power Management
 - Conditional swayidle timeouts:
   - Battery: 5min screen off, 10min lock, 30min sleep
@@ -167,7 +151,7 @@ This extracts all code blocks from =dotfiles.org= into =packages/=.
 ** 3. Stow packages
 #+begin_src sh
 # Deploy all packages
-./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh pywal libinput-gestures
+./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh pywal
 
 # Or deploy specific packages
 ./scripts/stow-pkg.sh sway waybar mako
@@ -175,20 +159,6 @@ This extracts all code blocks from =dotfiles.org= into =packages/=.
 # Make scripts executable
 chmod +x ~/dotfile/packages/zsh/.local/bin/select-wm.sh
 chmod +x ~/dotfile/packages/swayidle/.local/bin/start-swayidle.sh
-#+end_src
-
-** 3.5. Setup libinput-gestures (AUR package)
-#+begin_src sh
-# Install from AUR first (if not already installed)
-yay -S libinput-gestures
-
-# Add user to input group (required for libinput-gestures)
-sudo gpasswd -a $USER input
-
-# Log out and back in for group changes to take effect
-# Then enable and start the service
-libinput-gestures-setup autostart
-libinput-gestures-setup start
 #+end_src
 
 ** 4. Launch sway
@@ -247,6 +217,10 @@ After auto-login is configured, sway will start automatically on TTY1.
 * Extending
 Add new configurations to =dotfiles.org= with proper tangle headers, then re-run =./scripts/tangle.sh=.
 * TO-DO's
-** TODO Implement a helper pop-up function to show common shortcut or useful features, for anyone using the computer or in case I forget.
-** TODO Add zsh plugins (syntax highlighting, autosuggestions, completions)
-** TODO Implement a module for showing how many packages need updating on Waybar
+** Sway/WM
+*** TODO Implement a helper pop-up function to show common shortcut or useful features, for anyone using the computer or in case I forget.
+** Misc
+*** TODO Add zsh plugins (syntax highlighting, autosuggestions, completions)
+** Waybar
+*** TODO Implement a module for showing how many packages need updating on Waybar
+*** TODO Scratchpad status.

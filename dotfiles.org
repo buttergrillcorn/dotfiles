@@ -130,9 +130,6 @@ exec ~/.local/bin/start-swayidle.sh
 # Tiling enhancements
 exec_always autotiling
 
-# Touchpad gestures
-exec libinput-gestures
-
 # User applications
 exec udiskie
 exec wluma
@@ -368,24 +365,6 @@ c.fonts.default_family = "<<font>>"
 * Swaylock
 #+begin_src conf :tangle packages/swaylock/.config/swaylock/config
 color=1a1b26
-#+end_src
-
-* Libinput-gestures
-
-** Gesture Configuration
-#+begin_src conf :tangle packages/libinput-gestures/.config/libinput-gestures.conf
-# Workspace navigation
-gesture swipe left 3 swaymsg workspace prev
-gesture swipe right 3 swaymsg workspace next
-
-# Window management
-gesture swipe up 3 swaymsg fullscreen toggle
-gesture swipe down 3 swaymsg scratchpad show
-
-# Move window between workspaces
-gesture swipe left 4 swaymsg move container to workspace prev, workspace prev
-gesture swipe right 4 swaymsg move container to workspace next, workspace next
-
 #+end_src
 
 * Swayidle
