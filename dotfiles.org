@@ -386,8 +386,6 @@ gesture swipe down 3 swaymsg scratchpad show
 gesture swipe left 4 swaymsg move container to workspace prev, workspace prev
 gesture swipe right 4 swaymsg move container to workspace next, workspace next
 
-# Quick launcher
-gesture tap 4 fuzzel
 #+end_src
 
 * Swayidle

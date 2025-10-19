@@ -26,7 +26,7 @@ sudo pacman -S emacs stow git
 
 ** Required Packages
 #+begin_src sh
-sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal autotiling libinput-gestures
+sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal autotiling
 #+end_src
 
 ** Additional Dependencies
@@ -66,6 +66,16 @@ sudo pacman -S thunar
 
 # Network management
 sudo pacman -S networkmanager nm-applet networkmanager_dmenu
+#+end_src
+
+** AUR Packages
+#+begin_src sh
+# Install an AUR helper if you don't have one
+# Using yay:
+yay -S libinput-gestures
+
+# Or using paru:
+# paru -S libinput-gestures
 #+end_src
 
 * Features
@@ -129,7 +139,6 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 - 3-finger swipe up: Toggle fullscreen
 - 3-finger swipe down: Toggle scratchpad
 - 4-finger swipe left/right: Move window to prev/next workspace and follow
-- 4-finger tap: Launch application launcher (fuzzel)
 
 ** Power Management
 - Conditional swayidle timeouts:
@@ -168,8 +177,11 @@ chmod +x ~/dotfile/packages/zsh/.local/bin/select-wm.sh
 chmod +x ~/dotfile/packages/swayidle/.local/bin/start-swayidle.sh
 #+end_src
 
-** 3.5. Setup libinput-gestures permissions
+** 3.5. Setup libinput-gestures (AUR package)
 #+begin_src sh
+# Install from AUR first (if not already installed)
+yay -S libinput-gestures
+
 # Add user to input group (required for libinput-gestures)
 sudo gpasswd -a $USER input
 
