@@ -32,7 +32,7 @@ The `packages/` directory is gitignored - only the org source is tracked.
 
 ### Deploy all packages to home directory
 ```sh
-./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh pywal
+./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh matugen
 ```
 
 ### Deploy specific package
@@ -82,4 +82,5 @@ Then tangle and stow as usual.
 
 ## Target Stack
 
-sway, waybar, mako, fuzzel, foot, yazi, qutebrowser, waylock, swayidle, zsh, pywal
+sway, waybar, mako, fuzzel, foot, yazi, qutebrowser, waylock, swayidle, zsh, matugen
+- Always make sure changes are updated in README.org where necessary.

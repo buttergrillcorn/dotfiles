@@ -15,7 +15,7 @@ Minimal Arch Linux dotfiles managed with org-mode and GNU Stow.
 - *Lock*: waylock
 - *Idle*: swayidle
 - *Shell*: zsh
-- *Theming*: pywal
+- *Theming*: matugen
 
 * Installation
 
@@ -26,7 +26,8 @@ sudo pacman -S emacs stow git
 
 ** Required Packages
 #+begin_src sh
-sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh python-pywal autotiling
+sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh autotiling
+yay -S matugen-bin  # or cargo install matugen
 #+end_src
 
 ** Additional Dependencies
@@ -71,33 +72,65 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 * Features
 
 ** Keybindings
+*** Applications
 - *Mod (Super/Win) + Return*: Terminal
-- *Mod + Shift + Return*: Floating terminal
+- *Mod + Shift + Return*: Floating scratchpad terminal
 - *Mod + D*: Application launcher (fuzzel)
 - *Mod + B*: Browser (qutebrowser)
-- *Mod + E*: File manager (yazi in terminal)
+- *Mod + Shift + E*: File manager (yazi in terminal)
 - *Mod + N*: Emacs client
+- *Mod + P*: Wallpaper selector (interactive theme picker)
+
+*** Window Management
 - *Mod + Q*: Close window
 - *Mod + F*: Toggle floating
 - *Mod + Shift + F*: Fake fullscreen (global)
 - *Mod + Shift + Ctrl + F*: True fullscreen
 - *Mod + Tab*: Swap focus (floating ↔ tiling)
-- *Mod + R*: Resize mode (use hjkl or arrows)
-- *Mod + H/J/K/L*: Navigate windows (vim keys)
-- *Mod + Ctrl + H/J/K/L*: Move windows
-- *Mod + Ctrl + Shift + Direction*: Move window to output
+- *Mod + Alt + S*: Toggle sticky
+
+*** Navigation & Movement (i3 standard)
+- *Mod + H/J/K/L* or *Arrows*: Navigate windows (focus)
+- *Mod + Shift + H/J/K/L* or *Arrows*: Move window in direction
+- *Mod + Ctrl + Shift + Direction*: Move window to output (monitor)
+- *Mod + Drag*: Move window with mouse/trackpad
+- *Mod + Right-Click Drag*: Resize window with mouse/trackpad
+
+*** Layout Modes (i3 standard)
+- *Mod + W*: Tabbed layout
+- *Mod + S*: Stacked layout
+- *Mod + E*: Toggle split layout (horizontal ↔ vertical)
+- *Mod + T*: Cycle through all layouts
+- *Mod + V*: Split next window vertically
+- *Mod + Minus*: Split next window horizontally
+
+*** Resizing
+- *Mod + R*: Enter resize mode (use hjkl or arrows, 15px increments)
+
+*** Workspaces
 - *Mod + 1-9*: Switch workspaces
 - *Mod + Shift + 1-9*: Move window to workspace
 - *Mod + Ctrl + 1-9*: Move window to workspace and follow
-- *Mod + W*: Show scratchpad
-- *Mod + Shift + W*: Move to scratchpad
-- *Mod + Shift + Minus*: Split horizontally
-- *Mod + Shift + V*: Split vertically
-- *Mod + Shift + S*: Toggle split layout
-- *Mod + Ctrl + S*: Toggle sticky
+
+*** Scratchpad
+- *Mod + Grave (`)*: Show/hide scratchpad
+- *Mod + Shift + Grave*: Move window to scratchpad
+
+*** Utilities
 - *Mod + M*: Notification actions
-- *Mod + V*: Clipboard manager
-- *XF86 Keys*: Volume, brightness, screenshot controls
+- *Mod + Shift + V*: Clipboard manager
+- *Print* or *Mod + Shift + S*: Screenshot selector (fuzzel menu)
+- *Shift + Print* or *Mod + Shift + Ctrl + S*: Quick full screenshot
+
+*** System
+- *Mod + Shift + C*: Reload sway, waybar, and mako
+- *Mod + Shift + Q*: Exit sway (with confirmation)
+- *XF86 Keys*: Volume and brightness controls
+
+** Gestures
+- *3-Finger Swipe Right*: Previous workspace
+- *3-Finger Swipe Left*: Next workspace
+- *3-Finger Swipe Down*: Toggle scratchpad
 
 ** Input Configuration
 - Caps Lock swapped with Ctrl
@@ -107,22 +140,47 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 - Disable-while-typing enabled (touchpad & trackpoint)
 - Focus follows mouse
 
+** Waybar
+- Minimal design with 5px height bar
+- Sway-specific modules:
+  - Workspace indicator with persistent workspaces 1-9
+  - Window title display with app_id
+  - Mode indicator (shows when in resize mode, etc.)
+  - Scratchpad indicator (shows count and tooltips)
+- System monitors: volume, brightness, dual battery support, clock
+- Privacy indicator for camera/microphone usage
+- Idle inhibitor toggle
+- System tray integration
+- Pywal color integration for dynamic theming
+- Interactive calendar on clock (click/scroll)
+
 ** Theming
-- Pywal integration for dynamic colors
+- Matugen (Material You) integration for dynamic colors
+- Automatic light/dark mode detection from wallpaper
+- Beautiful, cohesive color schemes across all apps:
+  - Sway window manager borders and UI
+  - Waybar status bar
+  - Foot terminal
+  - Mako notifications
+  - Fuzzel launcher
 - Minimal fallback color scheme
 - 10px gaps between windows
-- 2px borders
+- 3px borders with minimal title bars showing window names
 - Noweb-based shared variables for easy theming
 
 ** Window Rules
 - Picture-in-Picture windows: floating, no border, bottom-right corner, sticky
-- Floating terminal: centered, 60% width/height
+- Floating scratchpad terminal: centered, 50% width/height, automatically moved to scratchpad
 - Auto-floating apps: bluetooth managers, audio control, kdeconnect, etc.
+- Notifications and PiP windows don't steal focus
 
 ** Tiling Behavior
-- Autotiling: Automatically switches between horizontal/vertical splits based on window dimensions
-- Manual split controls: Mod+Shift+Minus (horizontal), Mod+Shift+V (vertical)
-- Resize mode with vim keys or arrows
+- Automatic tiling with autotiling: Intelligently switches between horizontal/vertical splits based on window dimensions (Hyprland/Niri-like)
+- Window swapping: Mod+Ctrl+Direction swaps windows with their neighbors, maintaining focus on the moved window
+- Manual split override: Mod+Shift+Minus (horizontal), Mod+Shift+V (vertical) for explicit split control
+- Quick resize: Mod+Shift+Direction for fast resizing (50px increments)
+- Precision resize: Mod+R enters resize mode with vim keys or arrows (15px increments)
+- Mouse controls: Mod+Drag to move windows, Mod+Right-Drag to resize
 
 ** Power Management
 - Conditional swayidle timeouts:
@@ -151,7 +209,7 @@ This extracts all code blocks from =dotfiles.org= into =packages/=.
 ** 3. Stow packages
 #+begin_src sh
 # Deploy all packages
-./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh pywal
+./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh matugen
 
 # Or deploy specific packages
 ./scripts/stow-pkg.sh sway waybar mako
@@ -159,7 +217,13 @@ This extracts all code blocks from =dotfiles.org= into =packages/=.
 # Make scripts executable
 chmod +x ~/dotfile/packages/zsh/.local/bin/select-wm.sh
 chmod +x ~/dotfile/packages/swayidle/.local/bin/start-swayidle.sh
+chmod +x ~/dotfile/packages/matugen/.local/bin/select-wallpaper.sh
+chmod +x ~/dotfile/packages/sway/.local/bin/screenshot.sh
 #+end_src
+
+#+RESULTS:
+| Stowing: | sway | waybar | mako | fuzzel | foot | yazi | qutebrowser | swaylock | swayidle | zsh | matugen |
+| Stowing: | sway | waybar | mako |        |      |      |             |          |          |     |         |
 
 ** 4. Launch sway
 #+begin_src sh
@@ -186,11 +250,15 @@ stow -d packages -t ~ -D sway
 
 ** Change wallpaper and theme
 #+begin_src sh
-# Change wallpaper and generate colors with pywal
-./scripts/change-theme.sh ~/dotfile/wallpapers/your-wallpaper.jpg
+# Generate dark theme (default)
+matugen image ~/dotfile/wallpapers/your-wallpaper.jpg
 
-# Or manually with pywal
-wal -i ~/dotfile/wallpapers/your-wallpaper.jpg -n
+# Generate light theme for bright wallpapers
+matugen image ~/dotfile/wallpapers/your-wallpaper.jpg -m light
+
+# Reload sway to apply changes (also reloads waybar and mako)
+# Use Mod+Shift+C keybinding or run manually:
+swaymsg reload
 #+end_src
 
 ** Setup auto-login (optional)
@@ -214,6 +282,43 @@ After auto-login is configured, sway will start automatically on TTY1.
 - =scripts/= - Helper scripts
 - =packages/= - Generated configs (do not edit directly)
 
+* Scripts Reference
+
+** Setup Scripts (in =scripts/=)
+- =tangle.sh= - Extract code blocks from dotfiles.org into packages/
+- =stow-pkg.sh= - Deploy packages using GNU Stow
+
+** Runtime Scripts (require =chmod +x=)
+- =~/.local/bin/select-wm.sh= - Window manager selector (used by zsh auto-login)
+  - Package: =packages/zsh/.local/bin/select-wm.sh=
+  - Usage: Automatically runs on login to select WM
+
+- =~/.local/bin/start-swayidle.sh= - Conditional idle management based on power state
+  - Package: =packages/swayidle/.local/bin/start-swayidle.sh=
+  - Usage: Auto-started by sway, manages screen timeout/lock/sleep
+
+- =~/.local/bin/select-wallpaper.sh= - Interactive wallpaper and theme selector
+  - Package: =packages/matugen/.local/bin/select-wallpaper.sh=
+  - Usage: Mod+P keybinding, uses fuzzel to choose wallpaper and light/dark mode
+
+- =~/.local/bin/screenshot.sh= - Screenshot utility with fuzzel selector
+  - Package: =packages/sway/.local/bin/screenshot.sh=
+  - Usage: Print key or Mod+Shift+S, saves to ~/Pictures/Screenshots and copies to clipboard
+
+- =~/.local/bin/get-layout.sh= - Container layout indicator for waybar
+  - Package: =packages/waybar/.local/bin/get-layout.sh=
+  - Usage: Auto-called by waybar, shows current container layout mode
+
+** Making Scripts Executable
+After deploying packages with stow, run:
+#+begin_src sh
+chmod +x ~/dotfile/packages/zsh/.local/bin/select-wm.sh
+chmod +x ~/dotfile/packages/swayidle/.local/bin/start-swayidle.sh
+chmod +x ~/dotfile/packages/matugen/.local/bin/select-wallpaper.sh
+chmod +x ~/dotfile/packages/sway/.local/bin/screenshot.sh
+chmod +x ~/dotfile/packages/waybar/.local/bin/get-layout.sh
+#+end_src
+
 * Extending
 Add new configurations to =dotfiles.org= with proper tangle headers, then re-run =./scripts/tangle.sh=.
 * TO-DO's
@@ -223,4 +328,7 @@ Add new configurations to =dotfiles.org= with proper tangle headers, then re-run
 *** TODO Add zsh plugins (syntax highlighting, autosuggestions, completions)
 ** Waybar
 *** TODO Implement a module for showing how many packages need updating on Waybar
-*** TODO Scratchpad status.
+*** DONE Add scratchpad indicator module (show count/window titles of scratchpad windows)
+*** TODO Add network module (WiFi SSID, connection status)
+** Qutebrowser
+*** TODO Port over my previous config and bookmarks, etc.
