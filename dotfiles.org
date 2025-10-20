@@ -371,6 +371,505 @@ bindswitch --reload --locked lid:on exec 'swaymsg "output * dpms off" && swayloc
 bindswitch --reload --locked lid:off exec 'swaymsg "output * dpms on"'
 #+end_src
 
+* Hyprland
+
+** Variables
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Hyprland Configuration
+# See https://wiki.hypr.land/ for more
+
+$mainMod = SUPER
+$terminal = foot
+$menu = fuzzel
+$browser = qutebrowser
+$fileManager = foot -e yazi
+#+end_src
+
+** Source Matugen Colors
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Source Material You colors from matugen
+source = ~/.cache/matugen/colors-hyprland.conf
+#+end_src
+
+** Monitor Configuration
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Monitor configuration
+monitor = eDP-1, 1920x1080@60, 0x0, 1
+#+end_src
+
+** Auto-start Programs
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Execute on launch
+exec-once = waybar
+exec-once = mako
+exec-once = hyprpaper
+exec-once = hypridle
+exec-once = fcitx5
+exec-once = light -N 5
+exec-once = hyprsunset -l 51.5 -L 0.1
+exec-once = udiskie
+exec-once = wluma
+exec-once = kdeconnectd
+exec-once = kdeconnect-indicator
+exec-once = hyprpolkitagent
+exec-once = wl-paste --type text --watch cliphist store
+exec-once = wl-paste --type image --watch cliphist store
+#+end_src
+
+** Environment Variables
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Environment variables
+env = XCURSOR_SIZE,24
+env = HYPRCURSOR_SIZE,24
+#+end_src
+
+** Input Configuration
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+input {
+    kb_layout = us
+    kb_options = ctrl:swapcaps
+
+    follow_mouse = 1
+    float_switch_override_focus = 1
+
+    touchpad {
+        natural_scroll = true
+        scroll_factor = 0.7
+        middle_button_emulation = true
+        disable_while_typing = true
+    }
+
+    sensitivity = 0
+}
+
+gestures {
+    workspace_swipe = true
+    workspace_swipe_fingers = 3
+}
+#+end_src
+
+** General Settings
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+general {
+    gaps_in = 5
+    gaps_out = 0
+    border_size = 3
+
+    # Colors will be set by matugen
+    col.active_border = $primary
+    col.inactive_border = $surface_dim
+
+    layout = dwindle
+    allow_tearing = false
+}
+#+end_src
+
+** Decoration
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+decoration {
+    rounding = 0
+
+    active_opacity = 1.0
+    inactive_opacity = 1.0
+
+    drop_shadow = false
+    shadow_range = 4
+    shadow_render_power = 3
+    col.shadow = rgba(1a1a1aee)
+
+    blur {
+        enabled = false
+    }
+}
+#+end_src
+
+** Animations (Minimal/Fast)
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+animations {
+    enabled = true
+
+    # Fast bezier curve for minimal animations
+    bezier = fastCurve, 0.4, 0.0, 0.2, 1.0
+
+    animation = windows, 1, 3, fastCurve
+    animation = windowsOut, 1, 3, fastCurve, popin 90%
+    animation = border, 1, 5, default
+    animation = fade, 1, 3, default
+    animation = workspaces, 1, 3, fastCurve, slide
+}
+#+end_src
+
+** Layouts
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+dwindle {
+    pseudotile = true
+    preserve_split = true
+    smart_split = false
+    smart_resizing = true
+}
+
+master {
+    new_status = master
+}
+#+end_src
+
+** Misc Settings
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+misc {
+    force_default_wallpaper = 0
+    disable_hyprland_logo = true
+    disable_splash_rendering = true
+    mouse_move_enables_dpms = true
+    key_press_enables_dpms = true
+    vrr = 0
+}
+#+end_src
+
+** Window Rules
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Floating scratchpad terminal
+windowrulev2 = float, class:(floating-foot)
+windowrulev2 = size 50% 50%, class:(floating-foot)
+windowrulev2 = center, class:(floating-foot)
+windowrulev2 = workspace special:scratchpad silent, class:(floating-foot)
+
+# Picture-in-Picture
+windowrulev2 = float, title:^(Picture-in-Picture)$
+windowrulev2 = pin, title:^(Picture-in-Picture)$
+windowrulev2 = move 100%-w-20 100%-h-20, title:^(Picture-in-Picture)$
+windowrulev2 = size 25% 25%, title:^(Picture-in-Picture)$
+windowrulev2 = noborder, title:^(Picture-in-Picture)$
+
+# Floating windows
+windowrulev2 = float, class:(blueman-manager)
+windowrulev2 = float, class:(pavucontrol)
+windowrulev2 = float, class:(nm-connection-editor)
+windowrulev2 = float, class:(kdeconnect.*)
+windowrulev2 = float, title:(Volume Control)
+
+# Inhibit idle for fullscreen
+windowrulev2 = idleinhibit fullscreen, class:.*
+
+# No focus stealing
+windowrulev2 = noinitialfocus, class:(mako)
+windowrulev2 = noinitialfocus, title:^(Picture-in-Picture)$
+#+end_src
+
+** Keybindings - Applications
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Applications
+bind = $mainMod, Return, exec, $terminal
+bind = $mainMod SHIFT, Return, exec, $terminal --app-id=floating-foot
+bind = $mainMod, D, exec, $menu
+bind = $mainMod, B, exec, $browser
+bind = $mainMod SHIFT, E, exec, $fileManager
+bind = $mainMod, N, exec, emacsclient -c
+bind = $mainMod SHIFT, N, exec, emacs
+bind = $mainMod, P, exec, ~/.local/bin/select-wallpaper.sh
+#+end_src
+
+** Keybindings - Window Management
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Window management
+bind = $mainMod, Q, killactive
+bind = $mainMod SHIFT CTRL, F, fullscreen, 0
+bind = $mainMod SHIFT, F, fullscreen, 1
+bind = $mainMod, F, togglefloating
+bind = $mainMod, Tab, focuscurrentorlast
+bind = $mainMod ALT, S, pin
+
+# Layout modes
+bind = $mainMod, W, togglegroup
+bind = $mainMod, S, changegroupactive, f
+bind = $mainMod, E, togglesplit
+bind = $mainMod, T, cyclenext
+
+# Pseudo-tiling
+bind = $mainMod, P, pseudo
+#+end_src
+
+** Keybindings - Navigation
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Focus windows
+bind = $mainMod, H, movefocus, l
+bind = $mainMod, J, movefocus, d
+bind = $mainMod, K, movefocus, u
+bind = $mainMod, L, movefocus, r
+bind = $mainMod, Left, movefocus, l
+bind = $mainMod, Down, movefocus, d
+bind = $mainMod, Up, movefocus, u
+bind = $mainMod, Right, movefocus, r
+#+end_src
+
+** Keybindings - Moving Windows
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Move windows
+bind = $mainMod SHIFT, H, movewindow, l
+bind = $mainMod SHIFT, J, movewindow, d
+bind = $mainMod SHIFT, K, movewindow, u
+bind = $mainMod SHIFT, L, movewindow, r
+bind = $mainMod SHIFT, Left, movewindow, l
+bind = $mainMod SHIFT, Down, movewindow, d
+bind = $mainMod SHIFT, Up, movewindow, u
+bind = $mainMod SHIFT, Right, movewindow, r
+
+# Move window to output
+bind = $mainMod CTRL SHIFT, H, movewindow, mon:l
+bind = $mainMod CTRL SHIFT, J, movewindow, mon:d
+bind = $mainMod CTRL SHIFT, K, movewindow, mon:u
+bind = $mainMod CTRL SHIFT, L, movewindow, mon:r
+#+end_src
+
+** Keybindings - Workspaces
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Switch workspaces
+bind = $mainMod, 1, workspace, 1
+bind = $mainMod, 2, workspace, 2
+bind = $mainMod, 3, workspace, 3
+bind = $mainMod, 4, workspace, 4
+bind = $mainMod, 5, workspace, 5
+bind = $mainMod, 6, workspace, 6
+bind = $mainMod, 7, workspace, 7
+bind = $mainMod, 8, workspace, 8
+bind = $mainMod, 9, workspace, 9
+
+# Move to workspace (without switching)
+bind = $mainMod SHIFT, 1, movetoworkspacesilent, 1
+bind = $mainMod SHIFT, 2, movetoworkspacesilent, 2
+bind = $mainMod SHIFT, 3, movetoworkspacesilent, 3
+bind = $mainMod SHIFT, 4, movetoworkspacesilent, 4
+bind = $mainMod SHIFT, 5, movetoworkspacesilent, 5
+bind = $mainMod SHIFT, 6, movetoworkspacesilent, 6
+bind = $mainMod SHIFT, 7, movetoworkspacesilent, 7
+bind = $mainMod SHIFT, 8, movetoworkspacesilent, 8
+bind = $mainMod SHIFT, 9, movetoworkspacesilent, 9
+
+# Move to workspace and switch
+bind = $mainMod CTRL, 1, movetoworkspace, 1
+bind = $mainMod CTRL, 2, movetoworkspace, 2
+bind = $mainMod CTRL, 3, movetoworkspace, 3
+bind = $mainMod CTRL, 4, movetoworkspace, 4
+bind = $mainMod CTRL, 5, movetoworkspace, 5
+bind = $mainMod CTRL, 6, movetoworkspace, 6
+bind = $mainMod CTRL, 7, movetoworkspace, 7
+bind = $mainMod CTRL, 8, movetoworkspace, 8
+bind = $mainMod CTRL, 9, movetoworkspace, 9
+
+# Special workspace (scratchpad replacement)
+bind = $mainMod, grave, togglespecialworkspace, scratchpad
+bind = $mainMod SHIFT, grave, movetoworkspace, special:scratchpad
+#+end_src
+
+** Keybindings - Hardware
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Volume controls
+bind = , XF86AudioRaiseVolume, exec, pamixer -i 5
+bind = , XF86AudioLowerVolume, exec, pamixer -d 5
+bind = , XF86AudioMute, exec, pamixer -t
+bind = , XF86AudioMicMute, exec, pamixer --default-source -t
+
+# Brightness controls
+bind = , XF86MonBrightnessUp, exec, light -A 5
+bind = , XF86MonBrightnessDown, exec, light -U 5
+
+# Screenshots
+bind = , Print, exec, ~/.local/bin/screenshot.sh
+bind = $mainMod SHIFT, S, exec, ~/.local/bin/screenshot.sh
+bind = SHIFT, Print, exec, ~/.local/bin/screenshot.sh screen
+bind = $mainMod SHIFT CTRL, S, exec, ~/.local/bin/screenshot.sh screen
+#+end_src
+
+** Keybindings - Utilities
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Notifications
+bind = $mainMod, M, exec, makoctl invoke
+bind = $mainMod CTRL, M, exec, makoctl dismiss
+bind = $mainMod SHIFT, M, exec, makoctl menu fuzzel
+
+# Clipboard manager
+bind = $mainMod SHIFT, V, exec, cliphist list | fuzzel --dmenu | cliphist decode | wl-copy
+#+end_src
+
+** Keybindings - Resizing
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Resize mode
+bind = $mainMod, R, submap, resize
+submap = resize
+
+binde = , H, resizeactive, -15 0
+binde = , J, resizeactive, 0 15
+binde = , K, resizeactive, 0 -15
+binde = , L, resizeactive, 15 0
+binde = , Left, resizeactive, -15 0
+binde = , Down, resizeactive, 0 15
+binde = , Up, resizeactive, 0 -15
+binde = , Right, resizeactive, 15 0
+
+bind = , Return, submap, reset
+bind = , Escape, submap, reset
+
+submap = reset
+#+end_src
+
+** Keybindings - System
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# System controls
+bind = $mainMod SHIFT, C, exec, hyprctl reload && pkill waybar && pkill mako && sleep 0.2 && waybar & mako & notify-send "Hyprland" "Configuration reloaded successfully" -u low
+bind = $mainMod SHIFT, Q, exit
+#+end_src
+
+** Mouse Bindings
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Mouse bindings
+bindm = $mainMod, mouse:272, movewindow
+bindm = $mainMod, mouse:273, resizewindow
+#+end_src
+
+** Lid Switch
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Lid switch handled by hypridle
+#+end_src
+
+* Hyprpaper
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprpaper.conf
+# Hyprpaper Configuration
+# Wallpaper daemon for Hyprland
+
+preload = <<wallpaper>>
+wallpaper = , <<wallpaper>>
+
+splash = false
+ipc = on
+#+end_src
+
+* Hypridle
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hypridle.conf
+# Hypridle Configuration
+# Idle management daemon for Hyprland
+
+general {
+    lock_cmd = pidof hyprlock || hyprlock
+    before_sleep_cmd = loginctl lock-session
+    after_sleep_cmd = hyprctl dispatch dpms on
+    ignore_dbus_inhibit = false
+}
+
+# Screen off (5 minutes on battery, 10 minutes on AC)
+listener {
+    timeout = 300
+    on-timeout = hyprctl dispatch dpms off
+    on-resume = hyprctl dispatch dpms on
+}
+
+# Lock screen (10 minutes on battery, 15 minutes on AC)
+listener {
+    timeout = 600
+    on-timeout = loginctl lock-session
+}
+
+# Suspend (30 minutes on battery, 60 minutes on AC)
+listener {
+    timeout = 1800
+    on-timeout = systemctl suspend
+}
+#+end_src
+
+* Hyprlock
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprlock.conf
+# Hyprlock Configuration
+# Screen lock for Hyprland
+
+# Source Material You colors
+source = ~/.cache/matugen/colors-hyprlock.conf
+
+general {
+    disable_loading_bar = false
+    hide_cursor = true
+    grace = 0
+    no_fade_in = false
+    no_fade_out = false
+    ignore_empty_input = false
+    immediate_render = false
+}
+
+background {
+    monitor =
+    path = <<wallpaper>>
+    blur_passes = 3
+    blur_size = 5
+    noise = 0.0117
+    contrast = 0.8916
+    brightness = 0.8172
+    vibrancy = 0.1696
+    vibrancy_darkness = 0.0
+}
+
+input-field {
+    monitor =
+    size = 300, 60
+    outline_thickness = 2
+    dots_size = 0.2
+    dots_spacing = 0.35
+    dots_center = true
+    dots_rounding = -1
+
+    outer_color = $primary
+    inner_color = $surface
+    font_color = $on_surface
+
+    fade_on_empty = false
+    fade_timeout = 2000
+
+    placeholder_text = <span foreground="##$on_surface_variant">Enter Password...</span>
+    hide_input = false
+
+    rounding = 0
+    check_color = $tertiary
+    fail_color = $error
+    fail_text = <span foreground="##$on_error">Authentication Failed</span>
+
+    position = 0, -120
+    halign = center
+    valign = center
+}
+
+label {
+    monitor =
+    text = cmd[update:1000] echo "$(date +"%H:%M")"
+    color = $on_surface
+    font_size = 72
+    font_family = <<font>>
+
+    position = 0, 80
+    halign = center
+    valign = center
+}
+
+label {
+    monitor =
+    text = cmd[update:1000] echo "$(date +"%A, %B %d")"
+    color = $on_surface_variant
+    font_size = 20
+    font_family = <<font>>
+
+    position = 0, 20
+    halign = center
+    valign = center
+}
+
+label {
+    monitor =
+    text = $USER
+    color = $on_surface
+    font_size = 18
+    font_family = <<font>>
+
+    position = 0, -180
+    halign = center
+    valign = center
+}
+#+end_src
+
 * Waybar
 
 ** Configuration
@@ -386,16 +885,14 @@ bindswitch --reload --locked lid:off exec 'swaymsg "output * dpms on"'
   "margin-right": 0,
 
   "modules-left": [
-    "sway/mode",
-    "custom/layout",
+    "hyprland/submap",
     "idle_inhibitor",
-    "sway/workspaces",
-    "sway/scratchpad",
+    "hyprland/workspaces",
     "tray"
   ],
 
   "modules-center": [
-    "sway/window"
+    "hyprland/window"
   ],
 
   "modules-right": [
@@ -407,19 +904,20 @@ bindswitch --reload --locked lid:off exec 'swaymsg "output * dpms on"'
     "clock"
   ],
 
-  "sway/mode": {
-    "format": "{}"
+  "hyprland/submap": {
+    "format": "{}",
+    "tooltip": false
   },
 
-  "sway/window": {
-    "format": "[ {app_id} ]  {title}",
+  "hyprland/window": {
+    "format": "[ {} ]",
     "max-length": 80,
-    "icon": true,
-    "icon-size": 12
+    "separate-outputs": true
   },
 
-  "sway/workspaces": {
-    "format": "{index}",
+  "hyprland/workspaces": {
+    "format": "{id}",
+    "on-click": "activate",
     "disable-scroll": false,
     "all-outputs": false,
     "persistent-workspaces": {
@@ -433,13 +931,6 @@ bindswitch --reload --locked lid:off exec 'swaymsg "output * dpms on"'
       "8": [],
       "9": []
     }
-  },
-
-  "sway/scratchpad": {
-    "format": "❏ {count}",
-    "show-empty": false,
-    "tooltip": true,
-    "tooltip-format": "{app}: {title}"
   },
 
   "clock": {
@@ -512,13 +1003,6 @@ bindswitch --reload --locked lid:off exec 'swaymsg "output * dpms on"'
       "warning": 25,
       "critical": 15
     }
-  },
-
-  "custom/layout": {
-    "exec": "~/.local/bin/get-layout.sh",
-    "interval": 1,
-    "format": "{}",
-    "tooltip": false
   }
 }
 #+end_src
@@ -971,13 +1455,17 @@ esac
 
 [config]
 reload_apps = true
-reload_apps_list = ["sway", "waybar"]
+reload_apps_list = ["hyprland", "waybar"]
 # Use scheme-content for better color generation
 scheme_type = "content"
 
-[templates.sway]
-input_path = "~/.config/matugen/templates/sway.conf"
-output_path = "~/.cache/matugen/colors-sway"
+[templates.hyprland]
+input_path = "~/.config/matugen/templates/hyprland.conf"
+output_path = "~/.cache/matugen/colors-hyprland.conf"
+
+[templates.hyprlock]
+input_path = "~/.config/matugen/templates/hyprlock.conf"
+output_path = "~/.cache/matugen/colors-hyprlock.conf"
 
 [templates.waybar]
 input_path = "~/.config/matugen/templates/waybar.css"
@@ -1023,6 +1511,45 @@ set $on_surface_variant {{colors.on_surface_variant.default.hex}}
 set $surface_dim {{colors.surface_dim.default.hex}}
 set $error {{colors.error.default.hex}}
 set $on_error {{colors.on_error.default.hex}}
+#+end_src
+
+** Hyprland Template
+#+begin_src conf :tangle packages/matugen/.config/matugen/templates/hyprland.conf
+# Generated by matugen - Hyprland colors
+
+$background = rgb({{colors.background.default.hex_stripped}})
+$foreground = rgb({{colors.on_background.default.hex_stripped}})
+$primary = rgb({{colors.primary.default.hex_stripped}})
+$on_primary = rgb({{colors.on_primary.default.hex_stripped}})
+$primary_container = rgb({{colors.primary_container.default.hex_stripped}})
+$on_primary_container = rgb({{colors.on_primary_container.default.hex_stripped}})
+$secondary = rgb({{colors.secondary.default.hex_stripped}})
+$on_secondary = rgb({{colors.on_secondary.default.hex_stripped}})
+$tertiary = rgb({{colors.tertiary.default.hex_stripped}})
+$surface = rgb({{colors.surface.default.hex_stripped}})
+$on_surface = rgb({{colors.on_surface.default.hex_stripped}})
+$surface_variant = rgb({{colors.surface_variant.default.hex_stripped}})
+$on_surface_variant = rgb({{colors.on_surface_variant.default.hex_stripped}})
+$surface_dim = rgb({{colors.surface_dim.default.hex_stripped}})
+$error = rgb({{colors.error.default.hex_stripped}})
+$on_error = rgb({{colors.on_error.default.hex_stripped}})
+#+end_src
+
+** Hyprlock Template
+#+begin_src conf :tangle packages/matugen/.config/matugen/templates/hyprlock.conf
+# Generated by matugen - Hyprlock colors
+
+$background = {{colors.background.default.hex_stripped}}
+$foreground = {{colors.on_background.default.hex_stripped}}
+$primary = {{colors.primary.default.hex_stripped}}
+$on_primary = {{colors.on_primary.default.hex_stripped}}
+$surface = {{colors.surface.default.hex_stripped}}
+$on_surface = {{colors.on_surface.default.hex_stripped}}
+$surface_variant = {{colors.surface_variant.default.hex_stripped}}
+$on_surface_variant = {{colors.on_surface_variant.default.hex_stripped}}
+$tertiary = {{colors.tertiary.default.hex_stripped}}
+$error = {{colors.error.default.hex_stripped}}
+$on_error = {{colors.on_error.default.hex_stripped}}
 #+end_src
 
 ** Waybar Template
