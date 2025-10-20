@@ -406,12 +406,12 @@ exec-once = hyprpaper
 exec-once = hypridle
 exec-once = fcitx5
 exec-once = light -N 5
-exec-once = hyprsunset -l 51.5 -L 0.1
+exec-once = hyprsunset
 exec-once = udiskie
 exec-once = wluma
 exec-once = kdeconnectd
 exec-once = kdeconnect-indicator
-exec-once = hyprpolkitagent
+exec-once = systemctl --user start hyprpolkitagent
 exec-once = wl-paste --type text --watch cliphist store
 exec-once = wl-paste --type image --watch cliphist store
 #+end_src
@@ -441,11 +441,6 @@ input {
 
     sensitivity = 0
 }
-
-gestures {
-    workspace_swipe = true
-    workspace_swipe_fingers = 3
-}
 #+end_src
 
 ** General Settings
@@ -471,11 +466,6 @@ decoration {
 
     active_opacity = 1.0
     inactive_opacity = 1.0
-
-    drop_shadow = false
-    shadow_range = 4
-    shadow_render_power = 3
-    col.shadow = rgba(1a1a1aee)
 
     blur {
         enabled = false
@@ -711,6 +701,11 @@ bind = , Escape, submap, reset
 submap = reset
 #+end_src
 
+** Keybindings - Gestures
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+gesture = 3, horizontal, workspace
+#+end_src
+
 ** Keybindings - System
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # System controls
@@ -723,6 +718,7 @@ bind = $mainMod SHIFT, Q, exit
 # Mouse bindings
 bindm = $mainMod, mouse:272, movewindow
 bindm = $mainMod, mouse:273, resizewindow
+bindm = $mainMod SHIFT, mouse:272, resizewindow
 #+end_src
 
 ** Lid Switch
@@ -1208,7 +1204,7 @@ include=~/.cache/matugen/colors-foot.ini
 ratio = [1, 4, 3]
 #+end_src
 
-** Screenshot Selector Script
+** Screenshot Selector Script (Sway)
 #+begin_src bash :tangle packages/sway/.local/bin/screenshot.sh :shebang "#!/usr/bin/env bash"
 set -euo pipefail
 
@@ -1268,6 +1264,76 @@ case "$MODE" in
         ;;
     "Output (monitor)")
         take_screenshot "output"
+        ;;
+esac
+#+end_src
+
+** Screenshot Selector Script (Hyprland)
+#+begin_src bash :tangle packages/hyprland/.local/bin/screenshot.sh :shebang "#!/usr/bin/env bash"
+set -euo pipefail
+
+# Screenshot directory
+SCREENSHOT_DIR="$HOME/Pictures/Screenshots"
+mkdir -p "$SCREENSHOT_DIR"
+
+# Screenshot filename with timestamp
+FILENAME="$SCREENSHOT_DIR/screenshot_$(date +%Y%m%d_%H%M%S).png"
+
+# Function to take screenshot, copy, and save
+take_screenshot() {
+    local mode=$1
+
+    # Take screenshot based on mode using hyprshot
+    case "$mode" in
+        "screen")
+            hyprshot -m output -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
+            ;;
+        "area")
+            hyprshot -m region -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
+            ;;
+        "window")
+            hyprshot -m window -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
+            ;;
+    esac
+
+    # Check if screenshot was created
+    if [ -f "$FILENAME" ]; then
+        notify-send "Screenshot Saved" \
+            "Mode: $mode\nFile: $(basename "$FILENAME")\nCopied to clipboard" \
+            -i "$FILENAME" \
+            -u normal
+    else
+        notify-send "Screenshot Failed" \
+            "Failed to capture $mode" \
+            -u critical
+    fi
+}
+
+# If argument provided, take screenshot directly
+if [ $# -gt 0 ]; then
+    take_screenshot "$1"
+    exit 0
+fi
+
+# Show fuzzel menu to select mode
+MODE=$(printf "Screen (full)\nArea (selection)\nWindow (active)" | \
+    fuzzel --dmenu --prompt "Screenshot: ")
+
+# Exit if cancelled
+if [ -z "$MODE" ]; then
+    exit 0
+fi
+
+# Map selection to screenshot mode
+case "$MODE" in
+    "Screen (full)")
+        take_screenshot "screen"
+        ;;
+    "Area (selection)")
+        take_screenshot "area"
+        ;;
+    "Window (active)")
+        take_screenshot "window"
         ;;
 esac
 #+end_src
@@ -1363,7 +1429,7 @@ SAVEHIST=10000
 
 # Auto-start WM on TTY1
 if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
-  exec ~/.local/bin/select-wm.sh sway
+  exec ~/.local/bin/select-wm.sh hyprland
 fi
 #+end_src
 
@@ -1434,11 +1500,16 @@ alias shutdown="shutdown now"
 
 ** WM Selector Script
 #+begin_src sh :tangle packages/zsh/.local/bin/select-wm.sh :shebang "#!/usr/bin/env sh"
-WM="${1:-sway}"
+WM="${1:-hyprland}"
 
 case "$WM" in
-  sway|river|niri)
-    exec "$WM"
+  hyprland|sway|river|niri)
+    # Special handling for hyprland executable
+    if [ "$WM" = "hyprland" ]; then
+      exec Hyprland
+    else
+      exec "$WM"
+    fi
     ;;
   *)
     echo "Unknown WM: $WM"
@@ -1642,8 +1713,75 @@ selection-match={{colors.primary.default.hex}}ff
 border={{colors.outline.default.hex}}ff
 #+end_src
 
-** Wallpaper Selector Script
-#+begin_src bash :tangle packages/matugen/.local/bin/select-wallpaper.sh :shebang "#!/usr/bin/env bash"
+** Wallpaper Selector Script (Hyprland)
+#+begin_src bash :tangle packages/hyprland/.local/bin/select-wallpaper.sh :shebang "#!/usr/bin/env bash"
+set -euo pipefail
+
+# Wallpaper directory
+WALLPAPER_DIR="$HOME/dotfile/wallpapers"
+
+# Check if directory exists
+if [ ! -d "$WALLPAPER_DIR" ]; then
+    notify-send "Error" "Wallpaper directory not found: $WALLPAPER_DIR" -u critical
+    exit 1
+fi
+
+# Get list of wallpapers (excluding README)
+wallpapers=$(find "$WALLPAPER_DIR" -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" \) -exec basename {} \; | sort)
+
+# Check if any wallpapers found
+if [ -z "$wallpapers" ]; then
+    notify-send "Error" "No wallpapers found in $WALLPAPER_DIR" -u critical
+    exit 1
+fi
+
+# Select wallpaper using fuzzel
+selected_wallpaper=$(echo "$wallpapers" | fuzzel --dmenu --prompt "Select wallpaper: ")
+
+# Exit if cancelled
+if [ -z "$selected_wallpaper" ]; then
+    exit 0
+fi
+
+# Select theme mode
+mode=$(printf "dark\nlight" | fuzzel --dmenu --prompt "Select theme: ")
+
+# Exit if cancelled
+if [ -z "$mode" ]; then
+    exit 0
+fi
+
+# Full path to selected wallpaper
+wallpaper_path="$WALLPAPER_DIR/$selected_wallpaper"
+
+# Generate colors with matugen
+notify-send "Matugen" "Generating $mode theme from $selected_wallpaper..." -u low
+
+if matugen image "$wallpaper_path" -m "$mode"; then
+    # Set wallpaper with hyprpaper
+    hyprctl hyprpaper unload all
+    hyprctl hyprpaper preload "$wallpaper_path"
+    hyprctl hyprpaper wallpaper ",$wallpaper_path"
+
+    # Reload hyprland
+    hyprctl reload
+
+    # Reload waybar and mako explicitly
+    pkill waybar || true
+    pkill mako || true
+    sleep 0.2
+    waybar &
+    mako &
+
+    notify-send "Theme Applied" "Wallpaper: $selected_wallpaper\nMode: $mode" -u normal
+else
+    notify-send "Error" "Failed to generate theme" -u critical
+    exit 1
+fi
+#+end_src
+
+** Wallpaper Selector Script (Sway)
+#+begin_src bash :tangle packages/sway/.local/bin/select-wallpaper.sh :shebang "#!/usr/bin/env bash"
 set -euo pipefail
 
 # Wallpaper directory
