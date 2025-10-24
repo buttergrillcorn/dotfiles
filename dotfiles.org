@@ -5,8 +5,8 @@
 
 * Shared Configuration
 
-** Colors
-#+name: colors
+** Colours
+#+name: colours
 #+begin_src conf
 # Fallback color scheme (Tokyo Night inspired)
 set $bg #1a1b26
@@ -37,6 +37,16 @@ foot
 #+name: font
 #+begin_src text
 JetBrainsMono Nerd Font
+#+end_src
+
+#+name: font-serif
+#+begin_src text
+Noto Serif CJK SC
+#+end_src
+
+#+name: font-sans
+#+begin_src text
+Noto Sans CJK SC
 #+end_src
 
 #+name: wallpaper
@@ -171,7 +181,8 @@ bindsym $mod+Return exec $term
 bindsym $mod+Shift+Return exec $term --app-id=floating-foot
 bindsym $mod+d exec fuzzel
 bindsym $mod+b exec qutebrowser
-bindsym $mod+Shift+e exec $term -e yazi
+bindsym $mod+Shift+b exec ~/.local/bin/bitwarden-fuzzel
+bindsym $mod+y exec $term -e yazi
 bindsym $mod+n exec emacsclient -c
 bindsym $mod+Shift+n exec emacs
 bindsym $mod+p exec ~/.local/bin/select-wallpaper.sh
@@ -231,8 +242,10 @@ bindsym $mod+Ctrl+Shift+Up move output up
 bindsym $mod+Ctrl+Shift+Right move output right
 #+end_src
 
-** [X] Keybindings - Moving Windows
-#+begin_src conf :tangle no #packages/sway/.config/sway/config
+** Keybindings - Window Swapping (Disabled)
+# This section contains alternative window swapping keybindings that were replaced
+# by the simpler move keybindings in the previous section. Kept here for reference.
+#+begin_src conf :tangle no
 # Swap windows in direction (Hyprland-like behavior)
 bindsym $mod+Ctrl+h mark --add _swap, focus left, swap container with mark _swap, unmark _swap, focus left
 bindsym $mod+Ctrl+j mark --add _swap, focus down, swap container with mark _swap, unmark _swap, focus down
@@ -322,6 +335,10 @@ bindsym $mod+Shift+m exec makoctl menu fuzzel
 
 ** Keybindings - Utilities
 #+begin_src conf :tangle packages/sway/.config/sway/config
+# Lock screen
+bindsym $mod+Escape exec rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache && swaylock
+
+# Clipboard history
 bindsym $mod+Shift+v exec cliphist list | fuzzel --dmenu | cliphist decode | wl-copy
 #+end_src
 
@@ -385,7 +402,7 @@ $browser = qutebrowser
 $fileManager = foot -e yazi
 #+end_src
 
-** Source Matugen Colors
+** Source Matugen Colours
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Source Material You colors from matugen
 source = ~/.cache/matugen/colors-hyprland.conf
@@ -433,10 +450,10 @@ input {
     float_switch_override_focus = 1
 
     touchpad {
+        disable_while_typing = true
         natural_scroll = true
         scroll_factor = 0.7
         middle_button_emulation = true
-        disable_while_typing = true
     }
 
     sensitivity = 0
@@ -446,19 +463,21 @@ input {
 ** General Settings
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 general {
-    gaps_in = 5
-    gaps_out = 0
     border_size = 3
 
-    # Colors will be set by matugen
-    col.active_border = $primary
-    col.inactive_border = $surface_dim
+    gaps_in = 5
+    gaps_out = 10
 
     layout = dwindle
     allow_tearing = false
+    resize_on_border = true
+    hover_icon_on_border = true
+
+    snap {
+        enabled = true
+    }
 }
 #+end_src
-
 ** Decoration
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 decoration {
@@ -467,12 +486,60 @@ decoration {
     active_opacity = 1.0
     inactive_opacity = 1.0
 
+    dim_modal = false
+    dim_special = 0.3
+
     blur {
+        enabled = true
+        special = true
+        size = 1
+        passes = 1
+    }
+
+    shadow {
         enabled = false
     }
 }
 #+end_src
+** Group Settings
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+group {
+    groupbar {
+        render_titles = false
+        font_family = "<<font>>"
+        font_size = 12
+        rounding = 0
+        indicator_height = 6
+        gaps_in = 2
+        gaps_out = 3
+        keep_upper_gap = false
+    }
+}
+#+end_src
+** Colours
+These will be set by Matugen
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+general {
+    col.active_border = $primary
+    col.inactive_border = $background
+}
 
+group {
+    col.border_active = $secondary
+    col.border_inactive = $secondary_container
+    col.border_locked_active = $tertiary
+    col.border_locked_inactive = $tertiary_container
+
+    groupbar {
+        text_color = $on_secondary
+        text_color_inactive = $on_primary_container
+        col.active = $secondary
+        col.inactive = $secondary_container
+        col.locked_active = $tertiary
+        col.locked_inactive = $tertiary_container
+    }
+}
+#+end_src
 ** Animations (Minimal/Fast)
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 animations {
@@ -492,17 +559,20 @@ animations {
 ** Layouts
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 dwindle {
-    pseudotile = true
-    preserve_split = true
-    smart_split = false
-    smart_resizing = true
+    # pseudotile = true
+    # preserve_split = false
+    # smart_split = false
+    # smart_resizing = true
 }
 
 master {
-    new_status = master
 }
 #+end_src
-
+** Gesture Settings
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+gestures {
+}
+#+end_src
 ** Misc Settings
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 misc {
@@ -513,15 +583,18 @@ misc {
     key_press_enables_dpms = true
     vrr = 0
 }
+
+ecosystem {
+    no_donation_nag = true
+}
 #+end_src
 
 ** Window Rules
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
-# Floating scratchpad terminal
+# Floating terminal
 windowrulev2 = float, class:(floating-foot)
 windowrulev2 = size 50% 50%, class:(floating-foot)
 windowrulev2 = center, class:(floating-foot)
-windowrulev2 = workspace special:scratchpad silent, class:(floating-foot)
 
 # Picture-in-Picture
 windowrulev2 = float, title:^(Picture-in-Picture)$
@@ -533,9 +606,13 @@ windowrulev2 = noborder, title:^(Picture-in-Picture)$
 # Floating windows
 windowrulev2 = float, class:(blueman-manager)
 windowrulev2 = float, class:(pavucontrol)
+windowrulev2 = float, class:(Wiremix)
+windowrulev2 = size 50% 50%, class:(Wiremix)
+windowrulev2 = center, class:(Wiremix)
 windowrulev2 = float, class:(nm-connection-editor)
 windowrulev2 = float, class:(kdeconnect.*)
 windowrulev2 = float, title:(Volume Control)
+windowrulev2 = float, class:(blueberry.py)
 
 # Inhibit idle for fullscreen
 windowrulev2 = idleinhibit fullscreen, class:.*
@@ -545,33 +622,39 @@ windowrulev2 = noinitialfocus, class:(mako)
 windowrulev2 = noinitialfocus, title:^(Picture-in-Picture)$
 #+end_src
 
+** Workspace Rules
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+workspace = s[true], gapsin:10, gapsout:30
+#+end_src
 ** Keybindings - Applications
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Applications
 bind = $mainMod, Return, exec, $terminal
-bind = $mainMod SHIFT, Return, exec, $terminal --app-id=floating-foot
+bind = $mainMod SHIFT, Return, exec, [workspace special:scratchpad] $terminal
 bind = $mainMod, D, exec, $menu
 bind = $mainMod, B, exec, $browser
-bind = $mainMod SHIFT, E, exec, $fileManager
+bind = $mainMod SHIFT, B, exec, ~/.local/bin/bitwarden-fuzzel
+bind = $mainMod, E, exec, $fileManager
 bind = $mainMod, N, exec, emacsclient -c
 bind = $mainMod SHIFT, N, exec, emacs
-bind = $mainMod, P, exec, ~/.local/bin/select-wallpaper.sh
+bind = $mainMod SHIFT, P, exec, ~/.local/bin/select-wallpaper.sh
 #+end_src
 
 ** Keybindings - Window Management
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Window management
 bind = $mainMod, Q, killactive
-bind = $mainMod SHIFT CTRL, F, fullscreen, 0
+bind = $mainMod CTRL, F, fullscreen, 0
 bind = $mainMod SHIFT, F, fullscreen, 1
 bind = $mainMod, F, togglefloating
 bind = $mainMod, Tab, focuscurrentorlast
 bind = $mainMod ALT, S, pin
 
 # Layout modes
-bind = $mainMod, W, togglegroup
+bind = $mainMod, G, togglegroup
+bind = $mainMod SHIFT, G, moveoutofgroup
+bind = $mainMod CTRL, G, lockactivegroup, toggle
 bind = $mainMod, S, changegroupactive, f
-bind = $mainMod, E, togglesplit
 bind = $mainMod, T, cyclenext
 
 # Pseudo-tiling
@@ -602,6 +685,15 @@ bind = $mainMod SHIFT, Left, movewindow, l
 bind = $mainMod SHIFT, Down, movewindow, d
 bind = $mainMod SHIFT, Up, movewindow, u
 bind = $mainMod SHIFT, Right, movewindow, r
+
+bind = $mainMod CTRL, H, movewindoworgroup, l
+bind = $mainMod CTRL, J, movewindoworgroup, d
+bind = $mainMod CTRL, K, movewindoworgroup, u
+bind = $mainMod CTRL, L, movewindoworgroup, r
+bind = $mainMod CTRL, Left, movewindoworgroup, l
+bind = $mainMod CTRL, Down, movewindoworgroup, d
+bind = $mainMod CTRL, Up, movewindoworgroup, u
+bind = $mainMod CTRL, Right, movewindoworgroup, r
 
 # Move window to output
 bind = $mainMod CTRL SHIFT, H, movewindow, mon:l
@@ -646,8 +738,8 @@ bind = $mainMod CTRL, 8, movetoworkspace, 8
 bind = $mainMod CTRL, 9, movetoworkspace, 9
 
 # Special workspace (scratchpad replacement)
-bind = $mainMod, grave, togglespecialworkspace, scratchpad
-bind = $mainMod SHIFT, grave, movetoworkspace, special:scratchpad
+bind = $mainMod, w, togglespecialworkspace, scratchpad
+bind = $mainMod SHIFT, w, movetoworkspace, special:scratchpad
 #+end_src
 
 ** Keybindings - Hardware
@@ -671,13 +763,18 @@ bind = $mainMod SHIFT CTRL, S, exec, ~/.local/bin/screenshot.sh screen
 
 ** Keybindings - Utilities
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Lock screen (clears Bitwarden session and cache before locking)
+bind = $mainMod, Escape, exec, rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache && loginctl lock-session
+
 # Notifications
 bind = $mainMod, M, exec, makoctl invoke
 bind = $mainMod CTRL, M, exec, makoctl dismiss
 bind = $mainMod SHIFT, M, exec, makoctl menu fuzzel
+bind = $mainMod CTRL SHIFT, M, exec, makoctl list
 
 # Clipboard manager
-bind = $mainMod SHIFT, V, exec, cliphist list | fuzzel --dmenu | cliphist decode | wl-copy
+bind = $mainMod SHIFT, V, exec, cliphist list | fuzzel --dmenu --width 50 --placeholder "Search in clipboard" | cliphist decode | wl-copy
+bind = $mainMod CTRL SHIFT, V, exec, cliphist wipe | notify-send "Cliboard" "Clipboard history has been cleared."
 #+end_src
 
 ** Keybindings - Resizing
@@ -711,19 +808,15 @@ gesture = 3, horizontal, workspace
 # System controls
 bind = $mainMod SHIFT, C, exec, hyprctl reload && pkill waybar && pkill mako && sleep 0.2 && waybar & mako & notify-send "Hyprland" "Configuration reloaded successfully" -u low
 bind = $mainMod SHIFT, Q, exit
+bind = $mainMod SHIFT, R, exec, ~/dotfile/scripts/tangle.sh & notify-send "Dotfiles" "Dotfiles tangled successfully!"
 #+end_src
 
-** Mouse Bindings
+** Keybindings - Mouse
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Mouse bindings
 bindm = $mainMod, mouse:272, movewindow
 bindm = $mainMod, mouse:273, resizewindow
-bindm = $mainMod SHIFT, mouse:272, resizewindow
-#+end_src
-
-** Lid Switch
-#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
-# Lid switch handled by hypridle
+bindm = $mainMod, z, resizewindow
 #+end_src
 
 * Hyprpaper
@@ -745,7 +838,7 @@ ipc = on
 
 general {
     lock_cmd = pidof hyprlock || hyprlock
-    before_sleep_cmd = loginctl lock-session
+    before_sleep_cmd = loginctl lock-session && rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache
     after_sleep_cmd = hyprctl dispatch dpms on
     ignore_dbus_inhibit = false
 }
@@ -760,7 +853,7 @@ listener {
 # Lock screen (10 minutes on battery, 15 minutes on AC)
 listener {
     timeout = 600
-    on-timeout = loginctl lock-session
+    on-timeout = loginctl lock-session && rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache
 }
 
 # Suspend (30 minutes on battery, 60 minutes on AC)
@@ -871,51 +964,65 @@ label {
 ** Configuration
 #+begin_src json :tangle packages/waybar/.config/waybar/config
 {
+  "reload_style_on_change": true,
   "layer": "top",
   "position": "top",
-  "height": 5,
-  "spacing": 5,
+    "height": 30,
+  "spacing": 0,
   "margin-top": 0,
   "margin-bottom": 0,
   "margin-left": 0,
   "margin-right": 0,
 
   "modules-left": [
-    "hyprland/submap",
     "idle_inhibitor",
     "hyprland/workspaces",
-    "tray"
+    "custom/special"
   ],
 
   "modules-center": [
-    "hyprland/window"
+    "clock",
+    "custom/update"
   ],
 
   "modules-right": [
-    "privacy",
+    "group/tray-expander",
+    "cpu",
+    "memory",
+    "network",
+    "bluetooth",
     "pulseaudio",
     "backlight",
-    "battery",
-    "battery#bat2",
-    "clock"
+    "custom/battery"
   ],
 
-  "hyprland/submap": {
-    "format": "{}",
-    "tooltip": false
-  },
-
-  "hyprland/window": {
-    "format": "[ {} ]",
-    "max-length": 80,
-    "separate-outputs": true
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "󰅶",
+      "deactivated": "󰾪"
+    },
+    "tooltip-format-activated": "Idle Inhibitor: Active",
+    "tooltip-format-deactivated": "Idle Inhibitor: Inactive"
   },
 
   "hyprland/workspaces": {
-    "format": "{id}",
     "on-click": "activate",
-    "disable-scroll": false,
-    "all-outputs": false,
+    "format": "{icon}",
+    "format-icons": {
+      "default": "",
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8",
+      "9": "9",
+      "active": "󱓻",
+      "urgent": "󱓻"
+    },
     "persistent-workspaces": {
       "1": [],
       "2": [],
@@ -929,8 +1036,16 @@ label {
     }
   },
 
+  "custom/special": {
+    "format": "{}",
+    "exec": "~/.local/bin/waybar-special",
+    "return-type": "json",
+    "interval": 2
+  },
+
   "clock": {
-    "format": "{:%Y-%m-%d  [ %H:%M ]}",
+    "format": "{:L%A %H:%M}",
+    "format-alt": "{:L%d %B W%V %Y}",
     "tooltip-format": "<tt>{calendar}</tt>",
     "calendar": {
       "mode": "month",
@@ -938,13 +1053,13 @@ label {
       "weeks-pos": "left",
       "on-scroll": 1,
       "on-click-right": "mode",
-      "format": {
-        "months": "<span color='#f7768e'><b>{}</b></span>",
-        "days": "<span color='#c0caf5'><b>{}</b></span>",
-        "weeks": "<span color='#9ece6a'>W{}</span>",
-        "weekdays": "<span color='#7aa2f7'>{}</span>",
-        "today": "<span color='#ff9e64'><b><u>{}</u></b></span>"
-      }
+      // "format": {
+      //   "months": "<span color='#f7768e'><b>{}</b></span>",
+      //   "days": "<span color='#c0caf5'><b>{}</b></span>",
+      //   "weeks": "<span color='#9ece6a'>W{}</span>",
+      //   "weekdays": "<span color='#7aa2f7'>{}</span>",
+      //   "today": "<span color='#ff9e64'><b><u>{}</u></b></span>"
+      // }
     },
     "actions": {
       "on-click-right": "mode",
@@ -953,190 +1068,255 @@ label {
     }
   },
 
-  "privacy": {
-    "icon-size": 12
+  "custom/update": {
+    "format": "{}",
+    "exec": "~/.local/bin/waybar-updates",
+    "on-click": "foot --app-id=floating-foot -e sh -c 'yay -Syu && echo && echo Done! Press Enter to close && read'",
+    "return-type": "json",
+    "interval": 3600,
+    "signal": 7
+  },
+
+  "cpu": {
+    "interval": 5,
+    "format": "󰍛",
+    "tooltip-format": "CPU: {usage}%",
+    "on-click": "foot --app-id=floating-foot -e btop"
+  },
+
+  "memory": {
+    "interval": 5,
+    "format": "󰘚",
+    "tooltip-format": "RAM: {used:0.1f}G / {total:0.1f}G ({percentage}%)",
+    "on-click": "foot --app-id=floating-foot -e btop"
+  },
+
+  "network": {
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format": "{icon}",
+    "format-wifi": "{icon}",
+    "format-ethernet": "󰀂",
+    "format-disconnected": "󰤮",
+    "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-ethernet": "Wired\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-disconnected": "Disconnected",
+    "interval": 3,
+    "on-click": "networkmanager_dmenu"
+  },
+
+  "bluetooth": {
+    "format": "󰂯",
+    "format-disabled": "󰂲",
+    "format-connected": "",
+      "format-connected-battery": "{icon}",
+      "format-icons": {
+          "connected-battery": ["󰤾", "󰤿", "󰥀", "󰥁", "󰥂", "󰥃", "󰥄", "󰥅", "󰥆", "󰥈" ]
+      },
+    "tooltip-format": "Bluetooth: {num_connections} connected",
+    "on-click": "blueberry"
   },
 
   "pulseaudio": {
-    "format": "V = {volume}  |",
-    "format-muted": "[M]  |",
-    "format-bluetooth": "[BT] = {volume}  |",
-    "on-click": "pavucontrol"
+    "format": "{icon}",
+    "format-muted": "",
+    "format-icons": {
+      "default": ["", "", "", "", "", "", "", "", "", ""],
+    },
+    "tooltip-format": "Volume: {volume}%",
+    "scroll-step": 5,
+    "on-click": "foot --class=Wiremix -e wiremix",
+    "on-click-right": "pamixer -t"
   },
 
   "backlight": {
-    "format": "L = {percent}  |"
+    "format": "{icon}",
+    "format-icons": ["󱩎", "󱩏", "󱩐", "󱩑", "󱩒", "󱩓", "󱩔", "󱩕", "󱩖", "󰛨"],
+    "tooltip-format": "Brightness: {percent}%"
+  },
+
+  "custom/battery": {
+    "format": "{}",
+    "exec": "~/.local/bin/waybar-battery",
+    "return-type": "json",
+    "interval": 10
+  },
+
+  "group/tray-expander": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 600,
+      "children-class": "tray-group-item"
+    },
+    "modules": ["custom/expand-icon", "tray"]
+  },
+
+  "custom/expand-icon": {
+    "format": "󰇙",
+    "tooltip": false
   },
 
   "tray": {
-    "icon-size": 14,
-    "spacing": 15
-  },
-
-  "idle_inhibitor": {
-    "format": "{icon}",
-    "format-icons": {
-      "activated": "[ ON ]",
-      "deactivated": "[ OFF ]"
-    },
-    "tooltip-format-activated": "Keep Screen On: {status}",
-    "tooltip-format-deactivated": "Keep Screen On: {status}"
-  },
-
-  "battery": {
-    "bat": "BAT0",
-    "format": "B = {capacity}",
-    "states": {
-      "warning": 25,
-      "critical": 15
-    }
-  },
-
-  "battery#bat2": {
-    "bat": "BAT1",
-    "format": "+ {capacity}  |",
-    "states": {
-      "warning": 25,
-      "critical": 15
-    }
+    "icon-size": 12,
+    "spacing": 30
   }
 }
 #+end_src
 
 ** Styling
 #+begin_src css :tangle packages/waybar/.config/waybar/style.css
-,* {
+. * {
   border: none;
   font-family: <<font>>;
-  font-weight: Bold;
+  font-weight: bold;
   font-size: 14px;
   border-radius: 0;
+  min-height: 0;
 }
 
 @import url("/home/james/.cache/matugen/colors-waybar.css");
 
 window#waybar {
   background: @background;
-  color: @foreground;
-  border: solid 2px @color0;
+  opacity: 0.9;
+  color: @on_surface;
 }
 
-#window {
-  padding: 0 200px;
-}
-
-window#waybar.empty #window {
-  color: transparent;
-  background-color: transparent;
-}
-
+/* Tooltip styling */
 #tooltip {
   background: @background;
-  border: 2px solid @foreground;
-  color: @foreground;
+  border: 2px solid @primary;
+  color: @on_surface;
 }
 
 #tooltip label {
-  color: @foreground;
+  color: @on_surface;
 }
 
-#mode {
-  padding-left: 12px;
-  padding-right: 15px;
-  background: @color0;
-  color: @foreground;
-  border-top: solid 2px;
-  border-bottom: solid 2px;
-  border-left: solid 2px;
-  border-color: @color0;
+/* Left section - idle inhibitor and workspaces */
+.modules-left {
+    margin-left: 5px;
 }
 
 #idle_inhibitor {
-  padding-left: 5px;
-  padding-right: 14px;
-  background-color: @color0;
-  color: @foreground;
-  border-top: solid 2px;
-  border-bottom: solid 2px;
-  border-left: solid 2px;
-  border-color: @color0;
+    margin:0 10px;
+}
+
+#idle_inhibitor.activated {
+  color: @primary;
 }
 
 #workspaces {
-  background-color: @color0;
-  border-top: solid 2px;
-  border-bottom: solid 2px;
-  border-color: @color0;
+    margin-left: 2px;
 }
 
 #workspaces button {
-  min-width: 25px;
-  padding: 0 3px;
-  background-color: @color0;
-  color: @foreground;
+  all: initial;
+  padding: 0 5px;
+  margin: 0 5px;
 }
 
-#workspaces button.focused {
-  background: @foreground;
-  color: @background;
+#workspaces button.active {
+  color: @primary;
 }
 
 #workspaces button.urgent {
-  background: @color1;
-  color: @foreground;
+  color: @error;
 }
 
-#scratchpad {
-  padding-left: 20px;
-  color: @color5;
+#workspaces button:hover {
+  color: @primary;
+}
+
+#workspaces button.empty {
+    opacity: 0.5;
+}
+
+#custom-special {
+    margin: 0 10px;
+}
+
+#custom-special.active {
+    color: @primary;
+}
+
+/* Center section - clock and update */
+#clock {
+  margin: 0 10px;
+}
+
+#custom-update {
+  margin: 0 5px;
+}
+
+#custom-update.updates {
+  color: @tertiary;
+}
+
+/* Right section - system info modules */
+.modules-right {
+    margin-right: 5px;
+}
+
+#cpu,
+#memory,
+#network,
+#bluetooth,
+#pulseaudio,
+#backlight,
+#custom-battery {
+    margin: 0 15px;
+}
+
+/* Expandable tray group */
+group#tray-expander {
+}
+
+#custom-expand-icon {
+    margin: 0 15px;
 }
 
 #tray {
-  color: @foreground;
-  padding-left: 20px;
+    margin: 0 15px;
 }
 
-#privacy {
-  padding-left: 12px;
+#tray > .passive {
+  -gtk-icon-effect: dim;
 }
 
-#pulseaudio {
-  padding-right: 20px;
+#tray > .needs-attention {
+  -gtk-icon-effect: highlight;
 }
 
-#backlight {
-  padding-right: 20px;
+.tray-group-item {
 }
 
-#battery {
-  padding-right: 20px;
+
+/* Battery states */
+#custom-battery.charging {
+  color: @tertiary;
 }
 
-#battery.charging {
-  color: @color2;
+#custom-battery.warning {
+  color: @secondary;
 }
 
-#battery.warning {
-  color: @color3;
+#custom-battery.critical {
+  color: @error;
 }
 
-#battery.critical {
-  color: @color1;
+/* Bluetooth states */
+#bluetooth.connected {
+  color: @primary-container;
 }
 
-#battery.bat2 {
-  margin-left: -12px;
-  padding-right: 20px;
+/* Network states */
+#network.disconnected {
+  color: @error;
 }
 
-#clock {
-  background-color: @color0;
-  color: @foreground;
-  padding-right: 5px;
-  border-top: solid 2px;
-  border-bottom: solid 2px;
-  border-right: solid 2px;
-  border-color: @color0;
+/* Audio muted state */
+#pulseaudio.muted {
+  color: @error;
 }
 #+end_src
 * Mako
@@ -1144,6 +1324,8 @@ window#waybar.empty #window {
 font=<<font>>
 border-size=2
 default-timeout=5000
+
+outer-margin=25
 
 # Source matugen colors
 include=~/.cache/matugen/colors-mako
@@ -1163,17 +1345,19 @@ include=~/.cache/matugen/colors-fuzzel.ini
 font=<<font>>:size=8
 use-bold=yes
 anchor=top-left
-x-margin=10
-y-margin=10
+x-margin=35
+y-margin=35
 width=30
 horizontal-pad=10
 vertical-pad=10
+inner-pad=5
 lines=15
 icons-enabled=no
 minimal-lines=yes
 keyboard-focus=exclusive
 exit-on-keyboard-focus-loss=no
-prompt= "Launch: "
+prompt= ""
+placeholder="Search to launch..."
 
 [border]
 width=3
@@ -1183,9 +1367,9 @@ radius=0
 # Unbind default to avoid conflicts
 delete-line-forward=none
 
-# Vim-style navigation
-next-with-wrap=Down Control+j
-prev-with-wrap=Up Control+k
+# Vim-style navigation (Down/Up are already mapped to next/prev by default)
+next-with-wrap=Control+j
+prev-with-wrap=Control+k
 
 #+end_src
 
@@ -1202,6 +1386,117 @@ include=~/.cache/matugen/colors-foot.ini
 #+begin_src toml :tangle packages/yazi/.config/yazi/yazi.toml
 [manager]
 ratio = [1, 4, 3]
+#+end_src
+
+* GTK
+
+** GTK 3.0 Settings
+#+begin_src ini :tangle packages/matugen/.config/gtk-3.0/settings.ini
+[Settings]
+gtk-application-prefer-dark-theme=true
+gtk-theme-name=Adwaita
+gtk-icon-theme-name=Adwaita
+gtk-font-name=Sans 10
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=24
+gtk-toolbar-style=GTK_TOOLBAR_BOTH_HORIZ
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=0
+gtk-menu-images=0
+gtk-enable-event-sounds=1
+gtk-enable-input-feedback-sounds=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintfull
+gtk-xft-rgba=rgb
+#+end_src
+
+** GTK 4.0 Settings
+#+begin_src ini :tangle packages/matugen/.config/gtk-4.0/settings.ini
+[Settings]
+gtk-application-prefer-dark-theme=true
+gtk-theme-name=Adwaita
+gtk-icon-theme-name=Adwaita
+gtk-font-name=Sans 10
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=24
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintfull
+gtk-xft-rgba=rgb
+#+end_src
+
+* Qt
+
+** Qt6ct Configuration
+#+begin_src ini :tangle packages/matugen/.config/qt6ct/qt6ct.conf
+[Appearance]
+color_scheme_path=/home/james/.config/qt6ct/colors/matugen.conf
+custom_palette=true
+icon_theme=Adwaita
+standard_dialogs=default
+style=Fusion
+
+[Fonts]
+fixed="@monospace,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+general="@Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+
+[Interface]
+activate_item_on_single_click=1
+buttonbox_layout=0
+cursor_flash_time=1000
+dialog_buttons_have_icons=0
+double_click_interval=400
+gui_effects=@Invalid()
+keyboard_scheme=2
+menus_have_icons=true
+show_shortcuts_in_context_menus=true
+stylesheets=@Invalid()
+toolbutton_style=4
+underline_shortcut=1
+wheel_scroll_lines=3
+
+[SettingsWindow]
+geometry=@ByteArray()
+#+end_src
+
+** Qt5ct Configuration
+#+begin_src ini :tangle packages/matugen/.config/qt5ct/qt5ct.conf
+[Appearance]
+color_scheme_path=/home/james/.config/qt5ct/colors/matugen.conf
+custom_palette=true
+icon_theme=Adwaita
+standard_dialogs=default
+style=Fusion
+
+[Fonts]
+fixed="@monospace,10,-1,5,50,0,0,0,0,0"
+general="@Sans,10,-1,5,50,0,0,0,0,0"
+
+[Interface]
+activate_item_on_single_click=1
+buttonbox_layout=0
+cursor_flash_time=1000
+dialog_buttons_have_icons=0
+double_click_interval=400
+gui_effects=@Invalid()
+keyboard_scheme=2
+menus_have_icons=true
+show_shortcuts_in_context_menus=true
+stylesheets=@Invalid()
+toolbutton_style=4
+underline_shortcut=1
+wheel_scroll_lines=3
+
+[SettingsWindow]
+geometry=@ByteArray()
+#+end_src
+
+** Qt Environment Variables
+#+begin_src conf :tangle packages/matugen/.config/environment.d/qt.conf
+# Qt theming configuration
+QT_QPA_PLATFORMTHEME=qt6ct
+QT_STYLE_OVERRIDE=kvantum
 #+end_src
 
 ** Screenshot Selector Script (Sway)
@@ -1244,7 +1539,7 @@ fi
 
 # Show fuzzel menu to select mode
 MODE=$(printf "Screen (full)\nArea (selection)\nWindow (active)\nOutput (monitor)" | \
-    fuzzel --dmenu --prompt "Screenshot: ")
+    fuzzel --dmenu --placeholder "What to screenshot...")
 
 # Exit if cancelled
 if [ -z "$MODE" ]; then
@@ -1317,7 +1612,7 @@ fi
 
 # Show fuzzel menu to select mode
 MODE=$(printf "Screen (full)\nArea (selection)\nWindow (active)" | \
-    fuzzel --dmenu --prompt "Screenshot: ")
+    fuzzel --dmenu --placeholder "Screenshot...")
 
 # Exit if cancelled
 if [ -z "$MODE" ]; then
@@ -1372,9 +1667,564 @@ esac
 #+end_src
 
 * Qutebrowser
+
+** Configuration
+*** Auto Config
 #+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
+# Autogenerated config.py
+#
+# NOTE: config.py is intended for advanced users who are comfortable
+# with manually migrating the config file on qutebrowser upgrades. If
+# you prefer, you can also configure qutebrowser using the
+# :set/:bind/:config-* commands without having to write a config.py
+# file.
+#
+# Documentation:
+#   qute://help/configuring.html
+#   qute://help/settings.html
+
+# Change the argument to True to still load settings configured via autoconfig.yml
 config.load_autoconfig(False)
-c.fonts.default_family = "<<font>>"
+
+# Which cookies to accept. With QtWebEngine, this setting also controls
+# other features with tracking capabilities similar to those of cookies;
+# including IndexedDB, DOM storage, filesystem API, service workers, and
+# AppCache. Note that with QtWebKit, only `all` and `never` are
+# supported as per-domain values. Setting `no-3rdparty` or `no-
+# unknown-3rdparty` per-domain on QtWebKit will have the same effect as
+# `all`. If this setting is used with URL patterns, the pattern gets
+# applied to the origin/first party URL of the page making the request,
+# not the request URL. With QtWebEngine 5.15.0+, paths will be stripped
+# from URLs, so URL patterns using paths will not match. With
+# QtWebEngine 5.15.2+, subdomains are additionally stripped as well, so
+# you will typically need to set this setting for `example.com` when the
+# cookie is set on `somesubdomain.example.com` for it to work properly.
+# To debug issues with this setting, start qutebrowser with `--debug
+# --logfilter network --debug-flag log-cookies` which will show all
+# cookies being set.
+# Type: String
+# Valid values:
+#   - all: Accept all cookies.
+#   - no-3rdparty: Accept cookies from the same origin only. This is known to break some sites, such as GMail.
+#   - no-unknown-3rdparty: Accept cookies from the same origin only, unless a cookie is already set for the domain. On QtWebEngine, this is the same as no-3rdparty.
+#   - never: Don't accept cookies at all.
+config.set('content.cookies.accept', 'all', 'chrome-devtools://*')
+
+# Which cookies to accept. With QtWebEngine, this setting also controls
+# other features with tracking capabilities similar to those of cookies;
+# including IndexedDB, DOM storage, filesystem API, service workers, and
+# AppCache. Note that with QtWebKit, only `all` and `never` are
+# supported as per-domain values. Setting `no-3rdparty` or `no-
+# unknown-3rdparty` per-domain on QtWebKit will have the same effect as
+# `all`. If this setting is used with URL patterns, the pattern gets
+# applied to the origin/first party URL of the page making the request,
+# not the request URL. With QtWebEngine 5.15.0+, paths will be stripped
+# from URLs, so URL patterns using paths will not match. With
+# QtWebEngine 5.15.2+, subdomains are additionally stripped as well, so
+# you will typically need to set this setting for `example.com` when the
+# cookie is set on `somesubdomain.example.com` for it to work properly.
+# To debug issues with this setting, start qutebrowser with `--debug
+# --logfilter network --debug-flag log-cookies` which will show all
+# cookies being set.
+# Type: String
+# Valid values:
+#   - all: Accept all cookies.
+#   - no-3rdparty: Accept cookies from the same origin only. This is known to break some sites, such as GMail.
+#   - no-unknown-3rdparty: Accept cookies from the same origin only, unless a cookie is already set for the domain. On QtWebEngine, this is the same as no-3rdparty.
+#   - never: Don't accept cookies at all.
+config.set('content.cookies.accept', 'all', 'devtools://*')
+
+# Value to send in the `Accept-Language` header. Note that the value
+# read from JavaScript is always the global value.
+# Type: String
+config.set('content.headers.accept_language', '', 'https://matchmaker.krunker.io/*')
+
+# User agent to send.  The following placeholders are defined:  *
+# `{os_info}`: Something like "X11; Linux x86_64". * `{webkit_version}`:
+# The underlying WebKit version (set to a fixed value   with
+# QtWebEngine). * `{qt_key}`: "Qt" for QtWebKit, "QtWebEngine" for
+# QtWebEngine. * `{qt_version}`: The underlying Qt version. *
+# `{upstream_browser_key}`: "Version" for QtWebKit, "Chrome" for
+# QtWebEngine. * `{upstream_browser_version}`: The corresponding
+# Safari/Chrome version. * `{qutebrowser_version}`: The currently
+# running qutebrowser version.  The default value is equal to the
+# unchanged user agent of QtWebKit/QtWebEngine.  Note that the value
+# read from JavaScript is always the global value. With QtWebEngine
+# between 5.12 and 5.14 (inclusive), changing the value exposed to
+# JavaScript requires a restart.
+# Type: FormatString
+config.set('content.headers.user_agent', 'Mozilla/5.0 ({os_info}) AppleWebKit/{webkit_version} (KHTML, like Gecko) {upstream_browser_key}/{upstream_browser_version} Safari/{webkit_version}', 'https://web.whatsapp.com/')
+
+# User agent to send.  The following placeholders are defined:  *
+# `{os_info}`: Something like "X11; Linux x86_64". * `{webkit_version}`:
+# The underlying WebKit version (set to a fixed value   with
+# QtWebEngine). * `{qt_key}`: "Qt" for QtWebKit, "QtWebEngine" for
+# QtWebEngine. * `{qt_version}`: The underlying Qt version. *
+# `{upstream_browser_key}`: "Version" for QtWebKit, "Chrome" for
+# QtWebEngine. * `{upstream_browser_version}`: The corresponding
+# Safari/Chrome version. * `{qutebrowser_version}`: The currently
+# running qutebrowser version.  The default value is equal to the
+# unchanged user agent of QtWebKit/QtWebEngine.  Note that the value
+# read from JavaScript is always the global value. With QtWebEngine
+# between 5.12 and 5.14 (inclusive), changing the value exposed to
+# JavaScript requires a restart.
+# Type: FormatString
+config.set('content.headers.user_agent', 'Mozilla/5.0 ({os_info}; rv:90.0) Gecko/20100101 Firefox/90.0', 'https://accounts.google.com/*')
+
+# Load images automatically in web pages.
+# Type: Bool
+config.set('content.images', True, 'chrome-devtools://*')
+
+# Load images automatically in web pages.
+# Type: Bool
+config.set('content.images', True, 'devtools://*')
+
+# Enable JavaScript.
+# Type: Bool
+config.set('content.javascript.enabled', True, 'chrome-devtools://*')
+
+# Enable JavaScript.
+# Type: Bool
+config.set('content.javascript.enabled', True, 'devtools://*')
+
+# Enable JavaScript.
+# Type: Bool
+config.set('content.javascript.enabled', True, 'chrome://*/*')
+
+# Enable JavaScript.
+# Type: Bool
+config.set('content.javascript.enabled', True, 'qute://*/*')
+
+# Allow locally loaded documents to access remote URLs.
+# Type: Bool
+config.set('content.local_content_can_access_remote_urls', True, 'file:///home/james/.local/share/qutebrowser/userscripts/*')
+
+# Allow locally loaded documents to access other local URLs.
+# Type: Bool
+config.set('content.local_content_can_access_file_urls', False, 'file:///home/james/.local/share/qutebrowser/userscripts/*')
+
+#+end_src
+
+*** General Settings
+#+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
+# Session management
+c.auto_save.session = True
+c.session.lazy_restore = True
+
+# Start page
+c.url.default_page = 'file:///home/james/.cache/matugen/qutebrowser-startpage.html'
+c.url.start_pages = ['file:///home/james/.cache/matugen/qutebrowser-startpage.html']
+
+# Content blocking (requires: python-adblock from extra repo)
+c.content.blocking.enabled = True
+c.content.blocking.method = 'both'  # Use both hosts and brave's adblock
+c.content.blocking.hosts.lists = [
+    'https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts',
+]
+c.content.blocking.adblock.lists = [
+    'https://easylist.to/easylist/easylist.txt',
+    'https://easylist.to/easylist/easyprivacy.txt',
+    'https://secure.fanboy.co.nz/fanboy-annoyance.txt',
+    'https://easylist-downloads.adblockplus.org/antiadblockfilters.txt',
+]
+
+# Privacy
+c.content.cookies.accept = 'no-3rdparty'
+c.content.headers.do_not_track = True
+c.content.webgl = False
+
+# Smooth scrolling
+c.scrolling.smooth = True
+
+# Downloads
+c.downloads.location.directory = '~/Downloads'
+c.downloads.location.prompt = True
+c.downloads.remove_finished = 5000
+
+# Zoom
+c.zoom.default = '110%'
+#+end_src
+
+*** Fonts
+#+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
+# Font configuration
+c.fonts.default_family = '<<font>>'
+c.fonts.default_size = '11pt'
+c.fonts.web.family.sans_serif = '<<font-sans>>'
+c.fonts.web.family.serif = '<<font-serif>>'
+c.fonts.web.family.fixed = '<<font>>'
+c.fonts.web.size.default = 18
+c.fonts.hints = '<<font>>'
+#+end_src
+
+*** Appearance
+#+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
+# Hints
+c.hints.border = '2px solid'
+c.hints.padding = {"bottom": 3, "top": 3, "left": 3, "right": 3}
+c.hints.radius = 0
+c.hints.uppercase = True
+c.fonts.hints = 'bold 12pt <<font>>'
+
+# Tabs
+c.tabs.position = "top"
+c.tabs.background = True
+c.tabs.select_on_remove = 'prev'
+c.tabs.favicons.show = "always"
+c.tabs.show = 'always'
+c.tabs.show_switching_delay = 900
+c.tabs.width = '25%'
+c.tabs.padding = {"bottom": 5, "left": 10, "right": 10, "top": 5}
+c.tabs.indicator.padding = {"bottom": 0, "left": 0, "right": 5, "top": 0}
+c.tabs.indicator.width = 0
+c.tabs.last_close = 'default-page'
+c.tabs.min_width = 150
+
+# Status bar
+c.statusbar.show = 'in-mode'
+c.statusbar.padding = {"bottom": 5, "left": 10, "right": 10, "top": 5}
+
+# Scrollbar
+c.scrolling.bar = 'always'
+
+# Completion
+c.completion.height = '30%'
+c.completion.show = 'always'
+c.completion.shrink = True
+c.completion.quick = True
+#+end_src
+
+*** Editor
+#+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
+# External editor
+c.editor.command = ['emacsclient', '-c', '-a', ' ', '+{line}:{column}', '{}']
+#+end_src
+
+*** Search Engines
+#+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
+# Custom search engines
+c.url.searchengines['DEFAULT'] = 'https://duckduckgo.com/?q={}'
+c.url.searchengines['gg'] = 'https://www.google.com/search?q={}'
+c.url.searchengines['am'] = 'https://www.amazon.co.uk/s?k={}'
+c.url.searchengines['yt'] = 'https://www.youtube.com/results?search_query={}'
+c.url.searchengines['aur'] = 'https://aur.archlinux.org/packages?O=0&K={}'
+c.url.searchengines['arp'] = 'https://archlinux.org/packages/?sort=&q={}&maintainer=&flagged='
+c.url.searchengines['ar'] = 'https://wiki.archlinux.org/index.php?search={}'
+c.url.searchengines['rd'] = 'https://www.reddit.com/search/?q={}'
+c.url.searchengines['ghr'] = 'https://github.com/search?q={}&type=repositories'
+c.url.searchengines['ghc'] = 'https://github.com/search?q={}&type=code'
+c.url.searchengines['man'] = 'https://man.archlinux.org/search?q={}'
+c.url.searchengines['img'] = 'https://www.google.com/search?tbm=isch&q={}'
+c.url.searchengines['maps'] = 'https://www.google.com/maps/search/{}'
+c.url.searchengines['wiki'] = 'https://en.wikipedia.org/wiki/{}'
+c.url.searchengines['trans'] = 'https://translate.google.com/?sl=auto&tl=en&text={}'
+#+end_src
+
+*** Keybindings
+#+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
+# General keybinds
+config.bind('t.', 'config-source')
+config.bind('M', 'hint links spawn mpv {hint-url}')
+config.bind('gh', 'home')
+config.bind('gp', 'open -p')
+config.bind('pp', 'hint links run open -p {hint-url}')
+
+# Tabs
+config.bind(',tp', 'config-cycle tabs.position "top" "left"')
+config.bind(',ts', 'config-cycle tabs.show "always" "switching"')
+config.bind('tt', 'config-cycle tabs.show "always" "switching"')
+config.bind('tpo', 'config-cycle tabs.position "top" "left"')
+
+# Dark mode toggle
+config.bind('td', 'config-cycle colors.webpage.darkmode.enabled "true" "false"')
+
+# Userscripts
+config.bind('zv', 'spawn --userscript video-download')
+config.bind('zr', 'spawn --userscript reading-mode')
+config.bind('zt', 'spawn --userscript translate-page')
+config.bind('za', 'spawn --userscript paywall-bypass')
+
+# Vim-style navigation for completion/prompts
+config.bind('<Ctrl-j>', 'completion-item-focus next', mode='command')
+config.bind('<Ctrl-k>', 'completion-item-focus prev', mode='command')
+config.bind('<Ctrl-j>', 'prompt-item-focus next', mode='prompt')
+config.bind('<Ctrl-k>', 'prompt-item-focus prev', mode='prompt')
+#+end_src
+
+*** Colours (Matugen)
+#+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
+# Source matugen colors
+import os
+
+matugen_colors = os.path.expanduser('~/.cache/matugen/colors-qutebrowser.py')
+if os.path.exists(matugen_colors):
+    config.source(matugen_colors)
+#+end_src
+
+** User-scripts
+
+*** Video Download
+#+begin_src bash :tangle packages/qutebrowser/.local/share/qutebrowser/userscripts/video-download :shebang "#!/usr/bin/env bash"
+# Download video from current URL using yt-dlp
+# Requires: yt-dlp
+
+url="$QUTE_URL"
+download_dir="$HOME/Downloads/videos"
+
+mkdir -p "$download_dir"
+
+echo "message-info 'Downloading video from $url...'" >> "$QUTE_FIFO"
+
+# Download in background
+(
+    cd "$download_dir" || exit
+    yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' "$url" 2>&1
+    if [ $? -eq 0 ]; then
+        notify-send "Video Download" "Successfully downloaded from $url"
+    else
+        notify-send "Video Download" "Failed to download from $url"
+    fi
+) &
+
+echo "message-info 'Video download started in background'" >> "$QUTE_FIFO"
+#+end_src
+
+*** Reading Mode
+#+begin_src bash :tangle packages/qutebrowser/.local/share/qutebrowser/userscripts/reading-mode :shebang "#!/usr/bin/env bash"
+# Toggle reading mode using readability
+# Requires: python-readability-lxml
+
+url="$QUTE_URL"
+tmpfile="/tmp/qutebrowser-reading-$$.html"
+
+# Use python-readability-lxml
+if ! python3 -c "import readability" 2>/dev/null; then
+    echo "message-error 'Reading mode: Install python-readability-lxml'" >> "$QUTE_FIFO"
+    exit 1
+fi
+
+python3 << EOF > "$tmpfile"
+from readability import Document
+import requests
+import sys
+
+try:
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+    }
+    response = requests.get('$url', headers=headers, timeout=10)
+    response.raise_for_status()
+    doc = Document(response.text)
+
+    html = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{doc.title()}</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        body {{
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            font-family: "Georgia", "Cambria", "Times New Roman", serif;
+            font-size: 18px;
+            line-height: 1.7;
+            color: #333;
+            background: #fafafa;
+        }}
+        h1, h2, h3, h4, h5, h6 {{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }}
+        h1 {{ font-size: 2.5rem; margin-top: 0; }}
+        h2 {{ font-size: 2rem; }}
+        h3 {{ font-size: 1.5rem; }}
+        h4 {{ font-size: 1.25rem; }}
+        p {{
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }}
+        a {{
+            color: #0066cc;
+            text-decoration: none;
+            border-bottom: 1px solid #0066cc;
+        }}
+        a:hover {{ color: #004499; }}
+        img {{
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 2rem auto;
+            border-radius: 4px;
+        }}
+        pre, code {{
+            font-family: "Consolas", "Monaco", "Courier New", monospace;
+            background: #f5f5f5;
+            border-radius: 3px;
+        }}
+        pre {{
+            padding: 1rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }}
+        code {{
+            padding: 0.2rem 0.4rem;
+            font-size: 0.9em;
+        }}
+        pre code {{
+            padding: 0;
+            background: none;
+        }}
+        blockquote {{
+            margin: 1.5rem 0;
+            padding-left: 1.5rem;
+            border-left: 4px solid #ddd;
+            color: #666;
+            font-style: italic;
+        }}
+        ul, ol {{
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }}
+        li {{
+            margin-bottom: 0.5rem;
+        }}
+        hr {{
+            border: none;
+            border-top: 2px solid #ddd;
+            margin: 2rem 0;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }}
+        th, td {{
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }}
+        th {{
+            background: #f5f5f5;
+            font-weight: 600;
+        }}
+        @media (prefers-color-scheme: dark) {{
+            body {{
+                background: #1a1a1a;
+                color: #e0e0e0;
+            }}
+            h1, h2, h3, h4, h5, h6 {{
+                color: #f0f0f0;
+            }}
+            a {{
+                color: #6699ff;
+                border-bottom-color: #6699ff;
+            }}
+            a:hover {{ color: #99bbff; }}
+            pre, code {{
+                background: #2a2a2a;
+            }}
+            blockquote {{
+                border-left-color: #444;
+                color: #aaa;
+            }}
+            hr {{
+                border-top-color: #444;
+            }}
+            th {{
+                background: #2a2a2a;
+            }}
+            th, td {{
+                border-color: #444;
+            }}
+        }}
+    </style>
+</head>
+<body>
+{doc.summary()}
+</body>
+</html>'''
+
+    print(html)
+except Exception as e:
+    print(f'<html><body style="padding:2rem;font-family:sans-serif;"><h1>Reading Mode Error</h1><p>{str(e)}</p></body></html>')
+    sys.exit(1)
+EOF
+
+if [ $? -eq 0 ]; then
+    echo "open -t file://$tmpfile" >> "$QUTE_FIFO"
+    echo "message-info 'Reading mode activated'" >> "$QUTE_FIFO"
+else
+    echo "message-error 'Reading mode: Failed to process page'" >> "$QUTE_FIFO"
+    rm -f "$tmpfile"
+fi
+#+end_src
+
+*** Translate Page
+#+begin_src bash :tangle packages/qutebrowser/.local/share/qutebrowser/userscripts/translate-page :shebang "#!/usr/bin/env bash"
+# Translate current page using Google Translate
+
+url="$QUTE_URL"
+target_lang="${1:-en}"
+
+# Use Google Translate
+translate_url="https://translate.google.com/translate?sl=auto&tl=${target_lang}&u=$(echo "$url" | jq -sRr @uri)"
+
+echo "open -t $translate_url" >> "$QUTE_FIFO"
+echo "message-info 'Translating page to $target_lang'" >> "$QUTE_FIFO"
+#+end_src
+
+*** Paywall Bypass
+#+begin_src bash :tangle packages/qutebrowser/.local/share/qutebrowser/userscripts/paywall-bypass :shebang "#!/usr/bin/env bash"
+# Bypass paywalls using archive.is
+
+url="$QUTE_URL"
+
+# Check if already on archive.is
+if [[ "$url" == *"archive."* ]]; then
+    echo "message-warning 'Already on archive site'" >> "$QUTE_FIFO"
+    exit 0
+fi
+
+# Try archive.is
+archive_url="https://archive.is/newest/$url"
+
+echo "open -t $archive_url" >> "$QUTE_FIFO"
+echo "message-info 'Opening archived version'" >> "$QUTE_FIFO"
+#+end_src
+
+** Grease-monkey
+Qutebrowser supports Grease-monkey scripts in =~/.local/share/qutebrowser/greasemonkey/=.
+
+To install scripts:
+1. Download .js files from greasyfork.org or other sources
+2. Place them in =~/.local/share/qutebrowser/greasemonkey/=
+3. Run =:greasemonkey-reload= in qutebrowser
+
+Recommended scripts:
+- YouTube: *SponsorBlock*, *Return YouTube Dislike*
+- Reddit: *Reddit Enhancement Suite (RES)* - Note: Use old.reddit.com redirect instead
+- General: *Dark Reader*, *uBlock Origin Extra*
+
+** Bookmarks
+Bookmarks are managed directly by qutebrowser at =~/.config/qutebrowser/bookmarks/urls=.
+
+Initial import (one-time):
+#+begin_src sh :tangle no
+mkdir -p ~/.config/qutebrowser/bookmarks
+cp ~/stow/qutebrowser/.config/qutebrowser/bookmarks/urls ~/.config/qutebrowser/bookmarks/urls
 #+end_src
 
 * Swaylock
@@ -1450,7 +2300,7 @@ export PATH=/home/james/.config/emacs/bin:$PATH
 export PATH=/home/james/.npm/bin:$PATH
 #+end_src
 
-** Tool Initialization
+** Tool Initialisation
 #+begin_src sh :tangle packages/zsh/.zshrc
 # Zoxide - smart directory jumping
 eval "$(zoxide init zsh)"
@@ -1528,11 +2378,12 @@ esac
 reload_apps = true
 reload_apps_list = ["hyprland", "waybar"]
 # Use scheme-content for better color generation
-scheme_type = "content"
+# scheme_type = "content"
 
 [templates.hyprland]
 input_path = "~/.config/matugen/templates/hyprland.conf"
 output_path = "~/.cache/matugen/colors-hyprland.conf"
+post_hook = 'hyprctl reload'
 
 [templates.hyprlock]
 input_path = "~/.config/matugen/templates/hyprlock.conf"
@@ -1553,6 +2404,34 @@ output_path = "~/.cache/matugen/colors-mako"
 [templates.fuzzel]
 input_path = "~/.config/matugen/templates/fuzzel.ini"
 output_path = "~/.cache/matugen/colors-fuzzel.ini"
+
+[templates.sway]
+input_path = "~/.config/matugen/templates/sway.conf"
+output_path = "~/.cache/matugen/colors-sway"
+
+[templates.qutebrowser]
+input_path = "~/.config/matugen/templates/qutebrowser.py"
+output_path = "~/.cache/matugen/colors-qutebrowser.py"
+
+[templates.qutebrowser-startpage]
+input_path = "~/.config/matugen/templates/qutebrowser-startpage.html"
+output_path = "~/.cache/matugen/qutebrowser-startpage.html"
+
+[templates.gtk3]
+input_path = "~/.config/matugen/templates/gtk.css"
+output_path = "~/.config/gtk-3.0/gtk.css"
+
+[templates.gtk4]
+input_path = "~/.config/matugen/templates/gtk.css"
+output_path = "~/.config/gtk-4.0/gtk.css"
+
+[templates.qt6ct]
+input_path = "~/.config/matugen/templates/qt6ct.conf"
+output_path = "~/.config/qt6ct/colors/matugen.conf"
+
+[templates.qt5ct]
+input_path = "~/.config/matugen/templates/qt5ct.conf"
+output_path = "~/.config/qt5ct/colors/matugen.conf"
 #+end_src
 
 ** Sway Template
@@ -1586,7 +2465,6 @@ set $on_error {{colors.on_error.default.hex}}
 
 ** Hyprland Template
 #+begin_src conf :tangle packages/matugen/.config/matugen/templates/hyprland.conf
-# Generated by matugen - Hyprland colors
 
 $background = rgb({{colors.background.default.hex_stripped}})
 $foreground = rgb({{colors.on_background.default.hex_stripped}})
@@ -1595,8 +2473,10 @@ $on_primary = rgb({{colors.on_primary.default.hex_stripped}})
 $primary_container = rgb({{colors.primary_container.default.hex_stripped}})
 $on_primary_container = rgb({{colors.on_primary_container.default.hex_stripped}})
 $secondary = rgb({{colors.secondary.default.hex_stripped}})
+$secondary_container = rgb({{colors.secondary_container.default.hex_stripped}})
 $on_secondary = rgb({{colors.on_secondary.default.hex_stripped}})
 $tertiary = rgb({{colors.tertiary.default.hex_stripped}})
+$tertiary_container = rgb({{colors.tertiary_container.default.hex_stripped}})
 $surface = rgb({{colors.surface.default.hex_stripped}})
 $on_surface = rgb({{colors.on_surface.default.hex_stripped}})
 $surface_variant = rgb({{colors.surface_variant.default.hex_stripped}})
@@ -1604,6 +2484,10 @@ $on_surface_variant = rgb({{colors.on_surface_variant.default.hex_stripped}})
 $surface_dim = rgb({{colors.surface_dim.default.hex_stripped}})
 $error = rgb({{colors.error.default.hex_stripped}})
 $on_error = rgb({{colors.on_error.default.hex_stripped}})
+# <* for name, value in colors *>
+# $image = {{image}}
+# ${{name}} = rgba({{value.default.hex_stripped}}ff)
+# <* endfor *>
 #+end_src
 
 ** Hyprlock Template
@@ -1710,11 +2594,936 @@ match={{colors.primary.default.hex}}ff
 selection={{colors.primary_container.default.hex}}ff
 selection-text={{colors.on_primary_container.default.hex}}ff
 selection-match={{colors.primary.default.hex}}ff
-border={{colors.outline.default.hex}}ff
+border={{colors.primary.default.hex}}ff
+#+end_src
+
+** Qutebrowser Template
+#+begin_src python :tangle packages/matugen/.config/matugen/templates/qutebrowser.py
+# Generated by matugen - Qutebrowser colors
+# This file is sourced by qutebrowser's config.py
+
+# Color palette from matugen
+bg = '{{colors.background.default.hex}}'
+fg = '{{colors.on_background.default.hex}}'
+primary = '{{colors.primary.default.hex}}'
+on_primary = '{{colors.on_primary.default.hex}}'
+primary_container = '{{colors.primary_container.default.hex}}'
+on_primary_container = '{{colors.on_primary_container.default.hex}}'
+secondary = '{{colors.secondary.default.hex}}'
+on_secondary = '{{colors.on_secondary.default.hex}}'
+secondary_container = '{{colors.secondary_container.default.hex}}'
+on_secondary_container = '{{colors.on_secondary_container.default.hex}}'
+tertiary = '{{colors.tertiary.default.hex}}'
+on_tertiary = '{{colors.on_tertiary.default.hex}}'
+tertiary_container = '{{colors.tertiary_container.default.hex}}'
+on_tertiary_container = '{{colors.on_tertiary_container.default.hex}}'
+surface = '{{colors.surface.default.hex}}'
+on_surface = '{{colors.on_surface.default.hex}}'
+surface_variant = '{{colors.surface_variant.default.hex}}'
+on_surface_variant = '{{colors.on_surface_variant.default.hex}}'
+surface_dim = '{{colors.surface_dim.default.hex}}'
+error = '{{colors.error.default.hex}}'
+on_error = '{{colors.on_error.default.hex}}'
+outline = '{{colors.outline.default.hex}}'
+
+# Completion (minimal - no alternating stripes, high contrast)
+c.colors.completion.category.bg = surface_dim
+c.colors.completion.category.border.bottom = outline
+c.colors.completion.category.border.top = outline
+c.colors.completion.category.fg = primary
+c.colors.completion.even.bg = bg
+c.colors.completion.odd.bg = bg
+c.colors.completion.fg = fg
+c.colors.completion.item.selected.bg = primary
+c.colors.completion.item.selected.border.bottom = primary
+c.colors.completion.item.selected.border.top = primary
+c.colors.completion.item.selected.fg = on_primary
+c.colors.completion.item.selected.match.fg = tertiary
+c.colors.completion.match.fg = primary
+c.colors.completion.scrollbar.bg = surface_variant
+c.colors.completion.scrollbar.fg = primary
+
+# Context menu
+c.colors.contextmenu.disabled.bg = surface_dim
+c.colors.contextmenu.disabled.fg = on_surface_variant
+c.colors.contextmenu.menu.bg = surface
+c.colors.contextmenu.menu.fg = on_surface
+c.colors.contextmenu.selected.bg = primary
+c.colors.contextmenu.selected.fg = on_primary
+
+# Downloads
+c.colors.downloads.bar.bg = surface
+c.colors.downloads.error.bg = error
+c.colors.downloads.error.fg = on_error
+c.colors.downloads.start.bg = primary
+c.colors.downloads.start.fg = on_primary
+c.colors.downloads.stop.bg = tertiary
+c.colors.downloads.stop.fg = on_tertiary
+
+# Hints
+c.colors.hints.bg = primary
+c.colors.hints.fg = on_primary
+c.colors.hints.match.fg = on_primary
+
+# Keyhints
+c.colors.keyhint.bg = surface
+c.colors.keyhint.fg = on_surface
+c.colors.keyhint.suffix.fg = primary
+
+# Messages
+c.colors.messages.error.bg = error
+c.colors.messages.error.border = error
+c.colors.messages.error.fg = on_error
+c.colors.messages.info.bg = primary
+c.colors.messages.info.border = primary
+c.colors.messages.info.fg = on_primary
+c.colors.messages.warning.bg = secondary
+c.colors.messages.warning.border = secondary
+c.colors.messages.warning.fg = on_secondary
+
+# Prompts
+c.colors.prompts.bg = surface
+c.colors.prompts.border = outline
+c.colors.prompts.fg = on_surface
+c.colors.prompts.selected.bg = primary
+c.colors.prompts.selected.fg = on_primary
+
+# Statusbar (proper contrast for all modes)
+c.colors.statusbar.caret.bg = primary
+c.colors.statusbar.caret.fg = on_primary
+c.colors.statusbar.caret.selection.bg = primary
+c.colors.statusbar.caret.selection.fg = on_primary
+c.colors.statusbar.command.bg = bg
+c.colors.statusbar.command.fg = fg
+c.colors.statusbar.command.private.bg = surface_dim
+c.colors.statusbar.command.private.fg = fg
+c.colors.statusbar.insert.bg = tertiary_container
+c.colors.statusbar.insert.fg = on_tertiary_container
+c.colors.statusbar.normal.bg = bg
+c.colors.statusbar.normal.fg = fg
+c.colors.statusbar.passthrough.bg = secondary
+c.colors.statusbar.passthrough.fg = on_secondary
+c.colors.statusbar.private.bg = surface_dim
+c.colors.statusbar.private.fg = fg
+c.colors.statusbar.progress.bg = primary
+c.colors.statusbar.url.error.fg = error
+c.colors.statusbar.url.fg = fg
+c.colors.statusbar.url.hover.fg = primary
+c.colors.statusbar.url.success.http.fg = fg
+c.colors.statusbar.url.success.https.fg = fg
+c.colors.statusbar.url.warn.fg = on_secondary_container
+
+# Tabs (matches Hyprland border colors)
+c.colors.tabs.bar.bg = surface_dim
+c.colors.tabs.even.bg = bg
+c.colors.tabs.even.fg = fg
+c.colors.tabs.indicator.error = error
+c.colors.tabs.indicator.start = primary
+c.colors.tabs.indicator.stop = tertiary
+c.colors.tabs.odd.bg = bg
+c.colors.tabs.odd.fg = fg
+c.colors.tabs.pinned.even.bg = surface_variant
+c.colors.tabs.pinned.even.fg = on_surface
+c.colors.tabs.pinned.odd.bg = surface_variant
+c.colors.tabs.pinned.odd.fg = on_surface
+c.colors.tabs.pinned.selected.even.bg = primary
+c.colors.tabs.pinned.selected.even.fg = on_primary
+c.colors.tabs.pinned.selected.odd.bg = primary
+c.colors.tabs.pinned.selected.odd.fg = on_primary
+c.colors.tabs.selected.even.bg = primary
+c.colors.tabs.selected.even.fg = on_primary
+c.colors.tabs.selected.odd.bg = primary
+c.colors.tabs.selected.odd.fg = on_primary
+
+# Webpage colors (respects site preferences, but provides fallback)
+c.colors.webpage.bg = bg
+# Convert mode to lowercase (matugen outputs "Dark"/"Light", qutebrowser needs "dark"/"light")
+mode = '{{mode}}'
+c.colors.webpage.preferred_color_scheme = mode.lower()
+# Enable darkmode based on matugen theme
+c.colors.webpage.darkmode.enabled = (mode.lower() == 'dark')
+#+end_src
+
+** Qutebrowser Start-page Template
+#+begin_src html :tangle packages/matugen/.config/matugen/templates/qutebrowser-startpage.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: monospace;
+            background-color: {{colors.background.default.hex}};
+            color: {{colors.on_background.default.hex}};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: {{colors.primary.default.hex}};
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            font-weight: normal;
+        }
+
+        form {
+            width: 100%;
+        }
+
+        input[type="search"] {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-family: monospace;
+            background-color: {{colors.surface.default.hex}};
+            color: {{colors.on_surface.default.hex}};
+            border: 2px solid {{colors.outline.default.hex}};
+            border-radius: 0;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="search"]:focus {
+            border-color: {{colors.primary.default.hex}};
+        }
+
+        input[type="search"]::placeholder {
+            color: {{colors.on_surface_variant.default.hex}};
+        }
+    </style>
+    <script>
+        function handleSearch(event) {
+            event.preventDefault();
+            const query = document.getElementById('search-input').value.trim();
+            if (query) {
+                window.location.href = 'https://duckduckgo.com/?q=' + encodeURIComponent(query);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>~</h1>
+        <form onsubmit="handleSearch(event)">
+            <input type="search" id="search-input" placeholder="search" autofocus autocomplete="off">
+        </form>
+    </div>
+</body>
+</html>
+#+end_src
+
+** GTK Template
+#+begin_src css :tangle packages/matugen/.config/matugen/templates/gtk.css
+/* Generated by matugen - GTK 3.0/4.0 theme */
+
+/* Base colors */
+@define-color theme_bg_color {{colors.background.default.hex}};
+@define-color theme_fg_color {{colors.on_background.default.hex}};
+@define-color theme_base_color {{colors.surface.default.hex}};
+@define-color theme_text_color {{colors.on_surface.default.hex}};
+@define-color theme_selected_bg_color {{colors.primary.default.hex}};
+@define-color theme_selected_fg_color {{colors.on_primary.default.hex}};
+
+/* Material You colors */
+@define-color background {{colors.background.default.hex}};
+@define-color foreground {{colors.on_background.default.hex}};
+@define-color surface {{colors.surface.default.hex}};
+@define-color on_surface {{colors.on_surface.default.hex}};
+@define-color surface_variant {{colors.surface_variant.default.hex}};
+@define-color on_surface_variant {{colors.on_surface_variant.default.hex}};
+
+@define-color primary {{colors.primary.default.hex}};
+@define-color on_primary {{colors.on_primary.default.hex}};
+@define-color primary_container {{colors.primary_container.default.hex}};
+@define-color on_primary_container {{colors.on_primary_container.default.hex}};
+
+@define-color secondary {{colors.secondary.default.hex}};
+@define-color on_secondary {{colors.on_secondary.default.hex}};
+@define-color secondary_container {{colors.secondary_container.default.hex}};
+@define-color on_secondary_container {{colors.on_secondary_container.default.hex}};
+
+@define-color tertiary {{colors.tertiary.default.hex}};
+@define-color on_tertiary {{colors.on_tertiary.default.hex}};
+@define-color tertiary_container {{colors.tertiary_container.default.hex}};
+@define-color on_tertiary_container {{colors.on_tertiary_container.default.hex}};
+
+@define-color error {{colors.error.default.hex}};
+@define-color on_error {{colors.on_error.default.hex}};
+@define-color error_container {{colors.error_container.default.hex}};
+@define-color on_error_container {{colors.on_error_container.default.hex}};
+
+@define-color outline {{colors.outline.default.hex}};
+@define-color outline_variant {{colors.outline_variant.default.hex}};
+
+/* Legacy GTK color definitions */
+@define-color insensitive_bg_color {{colors.surface_variant.default.hex}};
+@define-color insensitive_fg_color {{colors.on_surface_variant.default.hex}};
+@define-color insensitive_base_color {{colors.surface_dim.default.hex}};
+@define-color borders {{colors.outline.default.hex}};
+@define-color warning_color {{colors.tertiary.default.hex}};
+@define-color error_color {{colors.error.default.hex}};
+@define-color success_color {{colors.tertiary.default.hex}};
+
+/* Widget styling */
+. * {
+    outline-color: @primary;
+    outline-width: 2px;
+    outline-offset: -2px;
+}
+
+window {
+    background-color: @background;
+    color: @foreground;
+}
+
+/* Buttons */
+button {
+    background-color: @surface;
+    color: @on_surface;
+    border: 1px solid @outline;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+
+button:hover {
+    background-color: @surface_variant;
+}
+
+button:active,
+button:checked {
+    background-color: @primary;
+    color: @on_primary;
+    border-color: @primary;
+}
+
+button:disabled {
+    background-color: @insensitive_bg_color;
+    color: @insensitive_fg_color;
+    border-color: @outline_variant;
+}
+
+/* Entries */
+entry {
+    background-color: @surface;
+    color: @on_surface;
+    border: 1px solid @outline;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+entry:focus {
+    border-color: @primary;
+}
+
+entry:disabled {
+    background-color: @insensitive_bg_color;
+    color: @insensitive_fg_color;
+}
+
+/* Selections */
+selection {
+    background-color: @primary;
+    color: @on_primary;
+}
+
+/* Menus */
+menubar,
+menu {
+    background-color: @surface;
+    color: @on_surface;
+    border: 1px solid @outline;
+}
+
+menuitem {
+    padding: 6px;
+}
+
+menuitem:hover {
+    background-color: @primary_container;
+    color: @on_primary_container;
+}
+
+/* Scrollbars */
+scrollbar slider {
+    background-color: @surface_variant;
+    border: 1px solid @outline;
+    border-radius: 4px;
+}
+
+scrollbar slider:hover {
+    background-color: @primary;
+}
+
+/* Headerbars */
+headerbar {
+    background-color: @surface;
+    color: @on_surface;
+    border-bottom: 1px solid @outline;
+}
+
+/* Tooltips */
+tooltip {
+    background-color: @surface_variant;
+    color: @on_surface_variant;
+    border: 1px solid @outline;
+    border-radius: 4px;
+}
+
+/* Notebooks/Tabs */
+notebook > header {
+    background-color: @surface;
+    border-bottom: 1px solid @outline;
+}
+
+notebook > header > tabs > tab {
+    padding: 8px 16px;
+    color: @on_surface_variant;
+}
+
+notebook > header > tabs > tab:checked {
+    background-color: @primary_container;
+    color: @on_primary_container;
+    border-bottom: 2px solid @primary;
+}
+
+/* Lists and Trees */
+list,
+treeview {
+    background-color: @surface;
+    color: @on_surface;
+}
+
+list > row:selected,
+treeview:selected {
+    background-color: @primary;
+    color: @on_primary;
+}
+
+list > row:hover,
+treeview:hover {
+    background-color: @surface_variant;
+}
+#+end_src
+
+** Qt6ct Template
+#+begin_src conf :tangle packages/matugen/.config/matugen/templates/qt6ct.conf
+# Generated by matugen - Qt6ct color scheme
+
+[ColorScheme]
+active_colors={{colors.on_background.default.hex}}, {{colors.surface.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.outline.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_primary.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.background.default.hex}}, {{colors.surface.default.hex}}, {{colors.outline.default.hex}}, {{colors.primary.default.hex}}, {{colors.on_primary.default.hex}}, {{colors.primary.default.hex}}, {{colors.tertiary.default.hex}}, {{colors.surface.default.hex}}, {{colors.on_background.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface.default.hex}}
+disabled_colors={{colors.on_surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}
+inactive_colors={{colors.on_background.default.hex}}, {{colors.surface.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.outline.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.background.default.hex}}, {{colors.surface.default.hex}}, {{colors.outline.default.hex}}, {{colors.primary_container.default.hex}}, {{colors.on_primary_container.default.hex}}, {{colors.primary.default.hex}}, {{colors.tertiary.default.hex}}, {{colors.surface.default.hex}}, {{colors.on_background.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface.default.hex}}
+#+end_src
+
+** Qt5ct Template
+#+begin_src conf :tangle packages/matugen/.config/matugen/templates/qt5ct.conf
+# Generated by matugen - Qt5ct color scheme
+
+[ColorScheme]
+active_colors={{colors.on_background.default.hex}}, {{colors.surface.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.outline.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_primary.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.background.default.hex}}, {{colors.surface.default.hex}}, {{colors.outline.default.hex}}, {{colors.primary.default.hex}}, {{colors.on_primary.default.hex}}, {{colors.primary.default.hex}}, {{colors.tertiary.default.hex}}, {{colors.surface.default.hex}}, {{colors.on_background.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface.default.hex}}
+disabled_colors={{colors.on_surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface_variant.default.hex}}
+inactive_colors={{colors.on_background.default.hex}}, {{colors.surface.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.surface_dim.default.hex}}, {{colors.outline.default.hex}}, {{colors.outline_variant.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.background.default.hex}}, {{colors.surface.default.hex}}, {{colors.outline.default.hex}}, {{colors.primary_container.default.hex}}, {{colors.on_primary_container.default.hex}}, {{colors.primary.default.hex}}, {{colors.tertiary.default.hex}}, {{colors.surface.default.hex}}, {{colors.on_background.default.hex}}, {{colors.surface_variant.default.hex}}, {{colors.on_surface.default.hex}}, {{colors.on_surface_variant.default.hex}}, {{colors.on_surface.default.hex}}
+#+end_src
+
+#+RESULTS:
+
+** Waybar Update Checker Script
+#+begin_src bash :tangle packages/matugen/.local/bin/waybar-updates :shebang "#!/usr/bin/env bash"
+# Check for Arch and AUR updates
+# Returns JSON for waybar
+
+set -euo pipefail
+
+# Count official repo updates
+official_updates=$(checkupdates 2>/dev/null | wc -l)
+
+# Count AUR updates (using yay or paru, whichever is available)
+if command -v yay &>/dev/null; then
+    aur_updates=$(yay -Qua 2>/dev/null | wc -l)
+elif command -v paru &>/dev/null; then
+    aur_updates=$(paru -Qua 2>/dev/null | wc -l)
+else
+    aur_updates=0
+fi
+
+# Calculate total
+total_updates=$((official_updates + aur_updates))
+
+if [ "$total_updates" -gt 0 ]; then
+    # Build tooltip
+    tooltip="Updates available:\n"
+    tooltip+="Official: $official_updates\n"
+    tooltip+="AUR: $aur_updates"
+
+    # Return JSON
+    echo "{\"text\":\"󰚰\",\"tooltip\":\"$tooltip\",\"class\":\"updates\"}"
+else
+    # No updates
+    echo "{\"text\":\"\",\"tooltip\":\"System is up to date\",\"class\":\"no-updates\"}"
+fi
+#+end_src
+
+** Waybar Smart Dual Battery Script
+#+begin_src bash :tangle packages/matugen/.local/bin/waybar-battery :shebang "#!/usr/bin/env bash"
+# Smart dual battery indicator for Lenovo T480
+# Combines BAT0 (internal, 24Wh) and BAT1 (external, 72Wh) into single percentage
+# Returns JSON for waybar
+
+set -euo pipefail
+
+# Battery capacities in Wh (adjust these to match your actual batteries)
+BAT0_CAPACITY=24  # Internal battery capacity in Wh
+BAT1_CAPACITY=72  # External battery capacity in Wh
+TOTAL_CAPACITY=$((BAT0_CAPACITY + BAT1_CAPACITY))
+
+# Read battery info
+BAT0_PATH="/sys/class/power_supply/BAT0"
+BAT1_PATH="/sys/class/power_supply/BAT1"
+AC_PATH="/sys/class/power_supply/AC"
+
+# Check if batteries exist
+if [[ ! -d "$BAT0_PATH" || ! -d "$BAT1_PATH" ]]; then
+    echo "{\"text\":\"󰂑\",\"tooltip\":\"Battery not found\",\"class\":\"missing\"}"
+    exit 0
+fi
+
+# Read battery percentages
+bat0_percent=$(cat "$BAT0_PATH/capacity" 2>/dev/null || echo "0")
+bat1_percent=$(cat "$BAT1_PATH/capacity" 2>/dev/null || echo "0")
+
+# Read battery status
+bat0_status=$(cat "$BAT0_PATH/status" 2>/dev/null || echo "Unknown")
+bat1_status=$(cat "$BAT1_PATH/status" 2>/dev/null || echo "Unknown")
+
+# Read AC status
+ac_online=$(cat "$AC_PATH/online" 2>/dev/null || echo "0")
+
+# Calculate energy remaining in Wh
+bat0_energy=$(awk "BEGIN {printf \"%.1f\", $bat0_percent * $BAT0_CAPACITY / 100}")
+bat1_energy=$(awk "BEGIN {printf \"%.1f\", $bat1_percent * $BAT1_CAPACITY / 100}")
+total_energy=$(awk "BEGIN {printf \"%.1f\", $bat0_energy + $bat1_energy}")
+
+# Calculate combined percentage
+combined_percent=$(awk "BEGIN {printf \"%d\", ($total_energy / $TOTAL_CAPACITY) * 100}")
+
+# Determine charging state
+if [[ "$ac_online" == "1" ]]; then
+    if [[ "$bat0_status" == "Charging" || "$bat1_status" == "Charging" ]]; then
+        charging=true
+        state="Charging"
+    elif [[ "$bat0_status" == "Full" && "$bat1_status" == "Full" ]]; then
+        charging=false
+        state="Full"
+    else
+        charging=false
+        state="Plugged"
+    fi
+else
+    charging=false
+    state="Discharging"
+fi
+
+# Select icon based on combined percentage and charging state
+if [[ "$charging" == true ]]; then
+    if [[ $combined_percent -ge 90 ]]; then icon="󰂅"
+    elif [[ $combined_percent -ge 80 ]]; then icon="󰂋"
+    elif [[ $combined_percent -ge 70 ]]; then icon="󰂊"
+    elif [[ $combined_percent -ge 60 ]]; then icon="󰢞"
+    elif [[ $combined_percent -ge 50 ]]; then icon="󰂉"
+    elif [[ $combined_percent -ge 40 ]]; then icon="󰢝"
+    elif [[ $combined_percent -ge 30 ]]; then icon="󰂈"
+    elif [[ $combined_percent -ge 20 ]]; then icon="󰂇"
+    elif [[ $combined_percent -ge 10 ]]; then icon="󰂆"
+    else icon="󰢜"
+    fi
+elif [[ "$state" == "Full" ]]; then
+    icon="󰂅"
+elif [[ "$state" == "Plugged" ]]; then
+    icon=""
+else
+    if [[ $combined_percent -ge 90 ]]; then icon="󰁹"
+    elif [[ $combined_percent -ge 80 ]]; then icon="󰂂"
+    elif [[ $combined_percent -ge 70 ]]; then icon="󰂁"
+    elif [[ $combined_percent -ge 60 ]]; then icon="󰂀"
+    elif [[ $combined_percent -ge 50 ]]; then icon="󰁿"
+    elif [[ $combined_percent -ge 40 ]]; then icon="󰁾"
+    elif [[ $combined_percent -ge 30 ]]; then icon="󰁽"
+    elif [[ $combined_percent -ge 20 ]]; then icon="󰁼"
+    elif [[ $combined_percent -ge 10 ]]; then icon="󰁻"
+    else icon="󰁺"
+    fi
+fi
+
+# Determine CSS class for styling
+if [[ $combined_percent -le 10 ]]; then
+    class="critical"
+elif [[ $combined_percent -le 20 ]]; then
+    class="warning"
+elif [[ "$charging" == true ]]; then
+    class="charging"
+else
+    class="normal"
+fi
+
+# Build tooltip
+tooltip="Combined: ${combined_percent}% (${total_energy}Wh)\n"
+tooltip+="BAT1 (External): ${bat1_percent}% (${bat1_energy}Wh) - ${bat1_status}\n"
+tooltip+="BAT0 (Internal): ${bat0_percent}% (${bat0_energy}Wh) - ${bat0_status}\n"
+tooltip+="Status: ${state}"
+
+# Return JSON
+echo "{\"text\":\"${icon}\",\"tooltip\":\"${tooltip}\",\"class\":\"${class}\",\"percentage\":${combined_percent}}"
+#+end_src
+
+** Waybar Special Workspace Indicator Script
+#+begin_src bash :tangle packages/matugen/.local/bin/waybar-special :shebang "#!/usr/bin/env bash"
+# Shows indicator when Hyprland special workspace has windows
+# Returns JSON for waybar
+
+set -euo pipefail
+
+# Check if hyprctl is available
+if ! command -v hyprctl &>/dev/null; then
+    echo "{\"text\":\"\",\"tooltip\":\"Hyprland not running\",\"class\":\"hidden\"}"
+    exit 0
+fi
+
+# Count windows in special workspace
+special_count=$(hyprctl clients -j 2>/dev/null | jq '[.[] | select(.workspace.name == "special:special")] | length' 2>/dev/null || echo "0")
+
+# Return result
+if [[ "$special_count" -gt 0 ]]; then
+    echo "{\"text\":\"󱂬\",\"tooltip\":\"Special workspace: ${special_count} window(s)\",\"class\":\"active\"}"
+else
+    echo "{\"text\":\"\",\"tooltip\":\"Special workspace empty\",\"class\":\"empty\"}"
+fi
+#+end_src
+
+** Bitwarden Fuzzel Script
+#+begin_src bash :tangle packages/matugen/.local/bin/bitwarden-fuzzel :shebang "#!/usr/bin/env bash"
+# Simple Bitwarden password manager with fuzzel
+# Requires: bitwarden-cli, jq, wl-clipboard, wtype, fuzzel
+
+set -euo pipefail
+
+# Session and cache files (persistent across script invocations)
+SESSION_FILE="${XDG_RUNTIME_DIR:-/tmp}/bw_session"
+CACHE_FILE="${XDG_RUNTIME_DIR:-/tmp}/bw_cache"
+
+# Don't cleanup session file on exit - keep it for next run
+# Session will be cleared by hypridle on screen lock
+
+# Check if logged in
+if ! bw login --check &>/dev/null; then
+    notify-send "Bitwarden" "Not logged in. Run: bw login in terminal" -u critical
+    exit 1
+fi
+
+# Get or create session
+get_session() {
+    # Try to load existing session from file
+    if [ -f "$SESSION_FILE" ]; then
+        cat "$SESSION_FILE"
+        return 0
+    fi
+
+    # Need to unlock - prompt for password
+    password=$(echo "" | fuzzel --dmenu --password --lines 0 --placeholder "Enter Bitwarden Master Password..." --width 50)
+    [ -z "$password" ] && exit 0
+
+    # Unlock and get session key
+    session=$(echo "$password" | bw unlock --raw 2>/dev/null)
+
+    # Check if unlock was successful
+    if [ -z "$session" ]; then
+        notify-send "Bitwarden" "Failed to unlock vault - invalid password?" -u critical
+        exit 1
+    fi
+
+    # Save session to file
+    echo "$session" > "$SESSION_FILE"
+    chmod 600 "$SESSION_FILE"
+
+    echo "$session"
+}
+
+# Get session
+BW_SESSION=$(get_session)
+export BW_SESSION
+
+# Try to use cached items first (cache persists until lock/suspend)
+use_cache=false
+if [ -f "$CACHE_FILE" ]; then
+    items=$(cat "$CACHE_FILE")
+    use_cache=true
+fi
+
+# If no cache, fetch from vault
+if [ "$use_cache" = false ]; then
+    # Show loading notification
+    notify-send "Bitwarden" "Loading vault..." -t 2000 -u low &
+    NOTIFY_PID=$!
+
+    # Get all items (with error handling for invalid session)
+    items=$(bw list items --session "$BW_SESSION" 2>/dev/null)
+
+    # Close loading notification
+    kill $NOTIFY_PID 2>/dev/null || true
+
+    # If items fetch failed, session is invalid - remove it and retry once
+    if [ -z "$items" ] || [ "$items" = "null" ]; then
+        rm -f "$SESSION_FILE" "$CACHE_FILE"
+        notify-send "Bitwarden" "Session expired, please unlock again" -u normal
+        exec "$0"  # Restart the script
+    fi
+
+    # Save to cache for next time
+    echo "$items" > "$CACHE_FILE"
+    chmod 600 "$CACHE_FILE"
+fi
+
+# Build selection menu with "New Entry" and "Sync Vault" options
+selection="➕ New Entry\n🔄 Sync Vault"
+if [ -n "$items" ] && [ "$items" != "[]" ]; then
+    login_items=$(echo "$items" | jq -r '
+        .[] |
+        select(.login != null) |
+        .name + " | " + (.login.username // "no username")
+    ')
+    [ -n "$login_items" ] && selection="$selection\n$login_items"
+fi
+
+# Select item
+chosen=$(echo -e "$selection" | fuzzel --dmenu --placeholder "Type to search..." --width 70 --lines 15)
+[ -z "$chosen" ] && exit 0
+
+# Handle sync vault
+if [ "$chosen" = "🔄 Sync Vault" ]; then
+    # Sync with server
+    notify-send "Bitwarden" "Syncing with server..." -t 2000 -u low &
+    NOTIFY_PID=$!
+
+    bw sync --session "$BW_SESSION" >/dev/null 2>&1
+    sync_result=$?
+
+    kill $NOTIFY_PID 2>/dev/null || true
+
+    if [ $sync_result -eq 0 ]; then
+        # Clear cache and re-fetch
+        rm -f "$CACHE_FILE"
+
+        notify-send "Bitwarden" "Fetching updated vault..." -t 2000 -u low &
+        NOTIFY_PID=$!
+
+        items=$(bw list items --session "$BW_SESSION" 2>/dev/null)
+
+        kill $NOTIFY_PID 2>/dev/null || true
+
+        if [ -n "$items" ] && [ "$items" != "null" ]; then
+            echo "$items" > "$CACHE_FILE"
+            chmod 600 "$CACHE_FILE"
+            notify-send "Bitwarden" "Vault synced successfully" -t 1500 -u low
+            # Reopen the menu after successful sync
+            exec "$0"
+        else
+            notify-send "Bitwarden" "Failed to fetch updated vault" -u critical
+            exit 1
+        fi
+    else
+        notify-send "Bitwarden" "Sync failed" -u critical
+        exit 1
+    fi
+fi
+
+# Handle new entry creation
+if [ "$chosen" = "➕ New Entry" ]; then
+    # Get entry details
+    name=$(echo "" | fuzzel --dmenu --placeholder "Entry Name..." --width 50)
+    [ -z "$name" ] && exit 0
+
+    username=$(echo "" | fuzzel --dmenu --placeholder "Username..." --width 50)
+    [ -z "$username" ] && exit 0
+
+    password=$(echo "" | fuzzel --dmenu --password --placeholder "Password (leave empty to generate)..." --width 50)
+
+    # Generate password if empty
+    if [ -z "$password" ]; then
+        password=$(bw generate --length 20 --uppercase --lowercase --number --special --session "$BW_SESSION" 2>/dev/null)
+        if [ -n "$password" ]; then
+            echo -n "$password" | wl-copy
+            notify-send "Bitwarden" "Generated password copied to clipboard"
+        else
+            notify-send "Bitwarden" "Failed to generate password" -u critical
+            exit 1
+        fi
+    fi
+
+    uri=$(echo "" | fuzzel --dmenu --placeholder "Website URL (optional)..." --width 50)
+
+    # Build JSON template using jq to properly escape values
+    template=$(jq -n \
+        --arg name "$name" \
+        --arg username "$username" \
+        --arg password "$password" \
+        --arg uri "$uri" \
+        '{
+            organizationId: null,
+            folderId: null,
+            type: 1,
+            name: $name,
+            notes: null,
+            favorite: false,
+            fields: [],
+            login: {
+                uris: (if $uri != "" then [{"match": null, "uri": $uri}] else [] end),
+                username: $username,
+                password: $password,
+                totp: null
+            }
+        }')
+
+    # Create entry
+    encoded=$(echo "$template" | bw encode)
+    result=$(bw create item "$encoded" --session "$BW_SESSION" 2>&1)
+
+    if echo "$result" | jq -e '.id' >/dev/null 2>&1; then
+        notify-send "Bitwarden" "Entry '$name' created successfully"
+        # Sync to server
+        bw sync --session "$BW_SESSION" >/dev/null 2>&1
+        # Clear cache so next run fetches updated vault
+        rm -f "$CACHE_FILE"
+    else
+        # Show the actual error message
+        error_msg=$(echo "$result" | head -1)
+        notify-send "Bitwarden" "Failed: $error_msg" -u critical
+    fi
+    exit 0
+fi
+
+# Get item name from selection
+item_name=$(echo "$chosen" | cut -d'|' -f1 | xargs)
+
+# Get item details
+item=$(echo "$items" | jq -r --arg name "$item_name" '.[] | select(.name == $name)')
+item_id=$(echo "$item" | jq -r '.id')
+username=$(echo "$item" | jq -r '.login.username // ""')
+password=$(echo "$item" | jq -r '.login.password // ""')
+totp=$(echo "$item" | jq -r '.login.totp // ""')
+
+# Build actions menu
+actions=""
+[ -n "$username" ] && actions+="Copy Username\n"
+[ -n "$password" ] && actions+="Copy Password\n"
+[ -n "$username" ] && [ -n "$password" ] && actions+="Type Username + Tab + Password\n"
+[ -n "$username" ] && actions+="Type Username\n"
+[ -n "$password" ] && actions+="Type Password\n"
+[ -n "$totp" ] && actions+="Copy TOTP Code\n"
+actions+="🗑️ Delete Entry\n"
+
+if [ -z "$actions" ]; then
+    notify-send "Bitwarden" "No credentials found" -u normal
+    exit 0
+fi
+
+# Show action menu
+action=$(echo -e "${actions%\\n}" | fuzzel --dmenu --placeholder "Choose an action..." --width 50)
+[ -z "$action" ] && exit 0
+
+# Perform action
+case "$action" in
+    "Copy Username")
+        echo -n "$username" | wl-copy
+        notify-send "Bitwarden" "Username copied"
+        ;;
+    "Copy Password")
+        echo -n "$password" | wl-copy
+        notify-send "Bitwarden" "Password copied (clears in 45s)"
+        (sleep 45 && wl-copy --clear) &
+        ;;
+    "Type Username + Tab + Password")
+        sleep 0.3
+        wtype "$username"
+        wtype -k Tab
+        sleep 0.1
+        wtype "$password"
+        notify-send "Bitwarden" "Credentials typed"
+        ;;
+    "Type Username")
+        sleep 0.3
+        wtype "$username"
+        notify-send "Bitwarden" "Username typed"
+        ;;
+    "Type Password")
+        sleep 0.3
+        wtype "$password"
+        notify-send "Bitwarden" "Password typed"
+        ;;
+    "Copy TOTP Code")
+        totp_code=$(bw get totp "$item_name" --session "$BW_SESSION" 2>/dev/null)
+        if [ -n "$totp_code" ]; then
+            echo -n "$totp_code" | wl-copy
+            notify-send "Bitwarden" "TOTP copied (clears in 30s)"
+            (sleep 30 && wl-copy --clear) &
+        else
+            notify-send "Bitwarden" "Failed to get TOTP" -u normal
+        fi
+        ;;
+    "🗑️ Delete Entry")
+        # Verify we have a valid item ID
+        if [ -z "$item_id" ] || [ "$item_id" = "null" ]; then
+            notify-send "Bitwarden" "Error: Could not find item ID" -u critical
+            exit 1
+        fi
+
+        # Confirm deletion
+        confirm=$(echo -e "Cancel\nDelete" | fuzzel --dmenu --placeholder "Delete '$item_name'?" --width 50)
+        if [ "$confirm" = "Delete" ]; then
+            # Show deleting notification
+            notify-send "Bitwarden" "Deleting '$item_name'..." -t 2000 -u low &
+            NOTIFY_PID=$!
+
+            result=$(bw delete item "$item_id" --session "$BW_SESSION" 2>&1)
+            delete_status=$?
+
+            kill $NOTIFY_PID 2>/dev/null || true
+
+            if [ $delete_status -eq 0 ]; then
+                # Sync to server
+                bw sync --session "$BW_SESSION" >/dev/null 2>&1
+                # Clear cache so next run fetches updated vault
+                rm -f "$CACHE_FILE"
+                # Success notification
+                notify-send "Bitwarden" "✓ Successfully deleted '$item_name'" -u normal
+            else
+                error_msg=$(echo "$result" | head -1)
+                notify-send "Bitwarden" "Failed to delete: $error_msg" -u critical
+            fi
+        else
+            notify-send "Bitwarden" "Deletion cancelled" -u low
+        fi
+        ;;
+esac
 #+end_src
 
 ** Wallpaper Selector Script (Hyprland)
-#+begin_src bash :tangle packages/hyprland/.local/bin/select-wallpaper.sh :shebang "#!/usr/bin/env bash"
+#+begin_src bash :tangle packages/matugen/.local/bin/select-wallpaper.sh :shebang "#!/usr/bin/env bash"
 set -euo pipefail
 
 # Wallpaper directory
@@ -1736,7 +3545,7 @@ if [ -z "$wallpapers" ]; then
 fi
 
 # Select wallpaper using fuzzel
-selected_wallpaper=$(echo "$wallpapers" | fuzzel --dmenu --prompt "Select wallpaper: ")
+selected_wallpaper=$(echo "$wallpapers" | fuzzel --dmenu --placeholder "Select wallpaper...")
 
 # Exit if cancelled
 if [ -z "$selected_wallpaper" ]; then
@@ -1744,7 +3553,7 @@ if [ -z "$selected_wallpaper" ]; then
 fi
 
 # Select theme mode
-mode=$(printf "dark\nlight" | fuzzel --dmenu --prompt "Select theme: ")
+mode=$(printf "dark\nlight" | fuzzel --dmenu --placeholder "Select theme...")
 
 # Exit if cancelled
 if [ -z "$mode" ]; then
@@ -1773,6 +3582,13 @@ if matugen image "$wallpaper_path" -m "$mode"; then
     waybar &
     mako &
 
+    # Reload qutebrowser config (for all running instances)
+    for socket in ~/.local/share/qutebrowser/runtime/ipc-*; do
+        if [ -S "$socket" ]; then
+            qutebrowser --target window --untrusted-args ":config-source" 2>/dev/null || true
+        fi
+    done
+
     notify-send "Theme Applied" "Wallpaper: $selected_wallpaper\nMode: $mode" -u normal
 else
     notify-send "Error" "Failed to generate theme" -u critical
@@ -1781,7 +3597,7 @@ fi
 #+end_src
 
 ** Wallpaper Selector Script (Sway)
-#+begin_src bash :tangle packages/sway/.local/bin/select-wallpaper.sh :shebang "#!/usr/bin/env bash"
+#+begin_src bash :tangle no
 set -euo pipefail
 
 # Wallpaper directory
@@ -1803,7 +3619,7 @@ if [ -z "$wallpapers" ]; then
 fi
 
 # Select wallpaper using fuzzel
-selected_wallpaper=$(echo "$wallpapers" | fuzzel --dmenu --prompt "Select wallpaper: ")
+selected_wallpaper=$(echo "$wallpapers" | fuzzel --dmenu --placeholder "Select wallpaper...")
 
 # Exit if cancelled
 if [ -z "$selected_wallpaper" ]; then
@@ -1811,7 +3627,7 @@ if [ -z "$selected_wallpaper" ]; then
 fi
 
 # Select theme mode
-mode=$(printf "dark\nlight" | fuzzel --dmenu --prompt "Select theme: ")
+mode=$(printf "dark\nlight" | fuzzel --dmenu --placeholder "Select theme...")
 
 # Exit if cancelled
 if [ -z "$mode" ]; then
@@ -1838,6 +3654,13 @@ if matugen image "$wallpaper_path" -m "$mode"; then
     sleep 0.2
     waybar &
     mako &
+
+    # Reload qutebrowser config (for all running instances)
+    for socket in ~/.local/share/qutebrowser/runtime/ipc-*; do
+        if [ -S "$socket" ]; then
+            qutebrowser --target window --untrusted-args ":config-source" 2>/dev/null || true
+        fi
+    done
 
     notify-send "Theme Applied" "Wallpaper: $selected_wallpaper\nMode: $mode" -u normal
 else

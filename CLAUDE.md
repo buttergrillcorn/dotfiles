@@ -76,11 +76,22 @@ Then tangle and stow as usual.
 
 ## Scripts
 
+### System Scripts
 - `scripts/tangle.sh` - Runs Emacs in batch mode to extract code blocks from dotfiles.org
 - `scripts/stow-pkg.sh` - Helper wrapper around stow for deploying packages
 - `scripts/select-wm.sh` - WM launcher for getty auto-login (called from .zshrc)
 
+### User Scripts (in packages/matugen/.local/bin/)
+- `bitwarden-fuzzel` - Custom Bitwarden password manager with fuzzel interface
+- `select-wallpaper.sh` - Interactive wallpaper selector with matugen integration
+- `screenshot.sh` - Screenshot tool with fuzzel menu
+
 ## Target Stack
 
-sway, waybar, mako, fuzzel, foot, yazi, qutebrowser, waylock, swayidle, zsh, matugen
-- Always make sure changes are updated in README.org where necessary.
+**Primary:** hyprland, hyprpaper, hypridle, hyprlock, waybar, mako, fuzzel, foot, yazi, qutebrowser, zsh, matugen
+
+**Alternative:** sway, swaybg, swayidle, waylock, waybar, mako, fuzzel, foot, yazi, qutebrowser, zsh, matugen
+
+**Note:** Both Hyprland and Sway are fully supported. Hyprland is the primary/default WM, with Sway as an alternative. Always make sure changes are updated in README.org where necessary.
+- Don't stow hyprland and sway together! Only stow one, which is hyprland right now since that's what I'm configuring.
+- Escape "* " in codeblocks in ".org" files with ". * " as it'll otherwise be recognised as a org-mode heading.

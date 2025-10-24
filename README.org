@@ -5,17 +5,18 @@
 Minimal Arch Linux dotfiles managed with org-mode and GNU Stow.
 
 * Stack
-- *WM*: sway
+- *WM*: Hyprland (primary) / Sway (alternative)
 - *Bar*: waybar
 - *Notifications*: mako
 - *Launcher*: fuzzel
 - *Terminal*: foot
 - *File Manager*: yazi
 - *Browser*: qutebrowser
-- *Lock*: waylock
-- *Idle*: swayidle
+- *Lock*: hyprlock / waylock
+- *Idle*: hypridle / swayidle
+- *Wallpaper*: hyprpaper / swaybg
 - *Shell*: zsh
-- *Theming*: matugen
+- *Theming*: matugen (Material You)
 
 * Installation
 
@@ -25,8 +26,28 @@ sudo pacman -S emacs stow git
 #+end_src
 
 ** Required Packages
+
+*** For Hyprland (Primary)
 #+begin_src sh
-sudo pacman -S sway swaybg waybar mako fuzzel foot yazi qutebrowser waylock swayidle zsh autotiling
+# Core Hyprland packages
+sudo pacman -S hyprland hyprpaper hypridle hyprlock hyprpolkitagent
+
+# Shared Wayland components
+sudo pacman -S waybar mako fuzzel foot yazi qutebrowser zsh
+
+# Theming
+yay -S matugen-bin  # or cargo install matugen
+#+end_src
+
+*** For Sway (Alternative)
+#+begin_src sh
+# Core Sway packages
+sudo pacman -S sway swaybg swayidle waylock autotiling
+
+# Shared Wayland components (if not already installed)
+sudo pacman -S waybar mako fuzzel foot yazi qutebrowser zsh
+
+# Theming (if not already installed)
 yay -S matugen-bin  # or cargo install matugen
 #+end_src
 
@@ -36,13 +57,15 @@ yay -S matugen-bin  # or cargo install matugen
 sudo pacman -S pamixer
 
 # Screenshot utilities
-sudo pacman -S grim slurp sway-contrib
+sudo pacman -S grim slurp sway-contrib  # For Sway
+yay -S hyprshot  # For Hyprland
 
 # Clipboard management
 sudo pacman -S wl-clipboard cliphist
 
 # Screen color temperature
-sudo pacman -S wlsunset
+sudo pacman -S wlsunset  # For Sway
+yay -S hyprsunset  # For Hyprland
 
 # Brightness control
 sudo pacman -S light
@@ -58,6 +81,12 @@ sudo pacman -S udiskie wluma
 
 # KDE Connect
 sudo pacman -S kdeconnect
+
+# Qutebrowser dependencies
+sudo pacman -S python-adblock  # Required for content blocking (Brave's Rust adblock)
+
+# Qutebrowser userscripts
+sudo pacman -S jq python-requests python-lxml python-readability-lxml yt-dlp
 #+end_src
 
 ** Optional Tools
@@ -67,19 +96,26 @@ sudo pacman -S thunar
 
 # Network management
 sudo pacman -S networkmanager nm-applet networkmanager_dmenu
+
+# Bitwarden CLI (required for password manager script)
+sudo pacman -S bitwarden-cli
 #+end_src
 
 * Features
 
-** Keybindings
+** Keybindings (Sway)
 *** Applications
 - *Mod (Super/Win) + Return*: Terminal
 - *Mod + Shift + Return*: Floating scratchpad terminal
 - *Mod + D*: Application launcher (fuzzel)
 - *Mod + B*: Browser (qutebrowser)
+- *Mod + Shift + B*: Password manager (bitwarden-fuzzel)
 - *Mod + Shift + E*: File manager (yazi in terminal)
 - *Mod + N*: Emacs client
 - *Mod + P*: Wallpaper selector (interactive theme picker)
+
+*** System
+- *Mod + Escape*: Lock screen
 
 *** Window Management
 - *Mod + Q*: Close window
@@ -127,10 +163,78 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 - *Mod + Shift + Q*: Exit sway (with confirmation)
 - *XF86 Keys*: Volume and brightness controls
 
-** Gestures
+** Gestures (Sway)
 - *3-Finger Swipe Right*: Previous workspace
 - *3-Finger Swipe Left*: Next workspace
 - *3-Finger Swipe Down*: Toggle scratchpad
+
+** Keybindings (Hyprland)
+*** Applications
+- *Mod (Super/Win) + Return*: Terminal
+- *Mod + Shift + Return*: Floating scratchpad terminal (special workspace)
+- *Mod + D*: Application launcher (fuzzel)
+- *Mod + B*: Browser (qutebrowser)
+- *Mod + Shift + B*: Password manager (bitwarden-fuzzel)
+- *Mod + Shift + E*: File manager (yazi in terminal)
+- *Mod + N*: Emacs client
+- *Mod + Shift + P*: Wallpaper selector (interactive theme picker)
+
+*** System
+- *Mod + Escape*: Lock screen
+
+*** Window Management
+- *Mod + Q*: Close window
+- *Mod + F*: Toggle floating
+- *Mod + Shift + F*: Maximized fullscreen
+- *Mod + Ctrl + F*: True fullscreen
+- *Mod + Tab*: Focus last window
+- *Mod + Alt + S*: Pin window (sticky across workspaces)
+
+*** Layout Modes (Groups & Pseudo-tiling)
+- *Mod + G*: Toggle group (tabbed/stacked container)
+- *Mod + Shift + G*: Move window out of group
+- *Mod + Ctrl + G*: Lock/unlock group
+- *Mod + S*: Change group active window (cycle forward)
+- *Mod + E*: Toggle split direction
+- *Mod + T*: Cycle focus to next window
+- *Mod + P*: Toggle pseudo-tiling
+
+*** Navigation & Movement
+- *Mod + H/J/K/L* or *Arrows*: Navigate windows (focus)
+- *Mod + Shift + H/J/K/L* or *Arrows*: Move window in direction
+- *Mod + Ctrl + H/J/K/L* or *Arrows*: Move window or group in direction
+- *Mod + Ctrl + Shift + H/J/K/L*: Move window to output (monitor)
+- *Mod + Left-Click Drag*: Move window with mouse
+- *Mod + Right-Click Drag*: Resize window with mouse
+- *Mod + Z + Drag*: Resize window with mouse (alternative)
+
+*** Resizing
+- *Mod + R*: Enter resize mode (use hjkl or arrows, 15px increments)
+
+*** Workspaces
+- *Mod + 1-9*: Switch workspaces
+- *Mod + Shift + 1-9*: Move window to workspace (silent, don't switch)
+- *Mod + Ctrl + 1-9*: Move window to workspace and follow
+- *Mod + W*: Toggle special workspace (scratchpad)
+- *Mod + Shift + W*: Move window to special workspace
+
+*** Utilities
+- *Mod + M*: Notification actions
+- *Mod + Ctrl + M*: Dismiss notification
+- *Mod + Shift + M*: Notification menu (fuzzel)
+- *Mod + Ctrl + Shift + M*: List all notifications
+- *Mod + Shift + V*: Clipboard manager
+- *Print* or *Mod + Shift + S*: Screenshot selector (fuzzel menu)
+- *Shift + Print* or *Mod + Shift + Ctrl + S*: Quick full screenshot
+
+*** System
+- *Mod + Shift + C*: Reload Hyprland, waybar, and mako
+- *Mod + Shift + Q*: Exit Hyprland
+- *Mod + Shift + R*: Tangle dotfiles (regenerate configs)
+- *XF86 Keys*: Volume and brightness controls
+
+** Gestures (Hyprland)
+- *3-Finger Horizontal Swipe*: Navigate workspaces
 
 ** Input Configuration
 - Caps Lock swapped with Ctrl
@@ -141,53 +245,269 @@ sudo pacman -S networkmanager nm-applet networkmanager_dmenu
 - Focus follows mouse
 
 ** Waybar
-- Minimal design with 5px height bar
-- Sway-specific modules:
+- Icon-only minimal design with 30px height bar, 0.9 opacity
+- Module organization:
+  - Left: Idle inhibitor, workspaces, special workspace indicator
+  - Center: Clock, update indicator
+  - Right: Expandable tray, system monitors, battery
+- Hyprland-specific modules:
   - Workspace indicator with persistent workspaces 1-9
-  - Window title display with app_id
-  - Mode indicator (shows when in resize mode, etc.)
-  - Scratchpad indicator (shows count and tooltips)
-- System monitors: volume, brightness, dual battery support, clock
-- Privacy indicator for camera/microphone usage
-- Idle inhibitor toggle
-- System tray integration
-- Pywal color integration for dynamic theming
+  - Special workspace indicator: Shows 󱂬 icon when special workspace has windows
+- System monitors:
+  - CPU: 󰍛 Click to open btop in floating terminal
+  - Memory: 󰘚 Shows RAM usage with tooltip, click for btop
+  - Network: WiFi signal icons (5 levels), bandwidth in tooltip, click for networkmanager_dmenu
+  - Bluetooth: 󰂯/󰂲/ Connection status with battery level icons, click to open blueberry
+  - Audio: 10-level volume icons, click for wiremix (TUI mixer), right-click to mute
+  - Backlight: 10-level brightness icons (󱩎 to 󰛨)
+  - Battery: Smart dual battery (BAT0+BAT1) showing combined percentage (e.g., 73% of 96Wh total)
+    - Tooltip shows individual battery status and energy in Wh
+    - Icon reflects combined charge level and charging state
+- Update checker: Shows 󰚰 when Arch/AUR updates available, click to update with yay
+- Idle inhibitor toggle: 󰅶 active / 󰾪 inactive, prevents screen timeout when active
+- Expandable system tray: 󰮫 icon, smooth 600ms drawer transition
+- Color-based status indicators (no background colors):
+  - Idle inhibitor active: @primary
+  - Active workspace: @primary
+  - Update available: @tertiary
+  - Battery charging: @tertiary
+  - Battery warning: @secondary
+  - Battery critical: @error
+  - Bluetooth connected: @primary-container
+  - Network disconnected: @error
+  - Audio muted: @error
+  - Special workspace active: @primary
+- Matugen Material You color integration for dynamic theming
 - Interactive calendar on clock (click/scroll)
 
 ** Theming
 - Matugen (Material You) integration for dynamic colors
 - Automatic light/dark mode detection from wallpaper
 - Beautiful, cohesive color schemes across all apps:
-  - Sway window manager borders and UI
+  - Hyprland/Sway window manager borders and UI
+  - Hyprlock/Swaylock screen lock
   - Waybar status bar
   - Foot terminal
   - Mako notifications
   - Fuzzel launcher
-- Minimal fallback color scheme
-- 10px gaps between windows
-- 3px borders with minimal title bars showing window names
+  - Qutebrowser (UI colors and preferred color scheme sync)
+  - GTK 3.0/4.0 applications (buttons, menus, selections, etc.)
+  - Qt5/Qt6 applications via qt5ct/qt6ct color schemes
+- GTK & Qt Integration:
+  - Custom matugen templates generate GTK css and Qt color schemes
+  - Unified Material You colors across all toolkits
+  - Consistent widget styling (buttons, entries, menus, scrollbars)
+  - Qt6ct and Qt5ct configured with Fusion style
+  - QT_QPA_PLATFORMTHEME=qt6ct environment variable set
+- Minimal fallback color scheme (Tokyo Night inspired)
+- Consistent gap and border styling:
+  - Hyprland: 5px inner gaps, 10px outer gaps, 3px borders
+  - Sway: 5px inner gaps, 0px outer gaps, 3px borders, minimal title bars
 - Noweb-based shared variables for easy theming
 
-** Window Rules
+** Window Rules (Both WMs)
 - Picture-in-Picture windows: floating, no border, bottom-right corner, sticky
-- Floating scratchpad terminal: centered, 50% width/height, automatically moved to scratchpad
-- Auto-floating apps: bluetooth managers, audio control, kdeconnect, etc.
+- Floating scratchpad terminal: centered, 50% width/height, automatically moved to scratchpad/special workspace
+- Auto-floating apps: bluetooth managers (blueman, blueberry), audio control (pavucontrol, wiremix), kdeconnect, etc.
+- Audio mixers (Wiremix): floating, 50% size, centered
 - Notifications and PiP windows don't steal focus
+- Fullscreen windows inhibit idle (Hyprland)
 
-** Tiling Behavior
+** Tiling Behavior (Sway)
 - Automatic tiling with autotiling: Intelligently switches between horizontal/vertical splits based on window dimensions (Hyprland/Niri-like)
-- Window swapping: Mod+Ctrl+Direction swaps windows with their neighbors, maintaining focus on the moved window
-- Manual split override: Mod+Shift+Minus (horizontal), Mod+Shift+V (vertical) for explicit split control
-- Quick resize: Mod+Shift+Direction for fast resizing (50px increments)
+- Manual split override: Mod+V (vertical), Mod+Minus (horizontal) for explicit split control
 - Precision resize: Mod+R enters resize mode with vim keys or arrows (15px increments)
 - Mouse controls: Mod+Drag to move windows, Mod+Right-Drag to resize
 
-** Power Management
-- Conditional swayidle timeouts:
+** Tiling Behavior (Hyprland)
+- Dwindle layout: Dynamic tiling with automatic split direction
+- Groups: Create tabbed/stacked containers with Mod+G
+- Pseudo-tiling: Mod+P for centered floating-like tiling windows
+- Precision resize: Mod+R enters resize mode with vim keys or arrows (15px increments)
+- Mouse controls: Mod+Left-Drag to move, Mod+Right-Drag to resize, Mod+Z+Drag to resize
+
+** Power Management (Sway)
+- Conditional swayidle timeouts based on power state:
   - Battery: 5min screen off, 10min lock, 30min sleep
   - Plugged in: 10min screen off, 15min lock, 1hr sleep
 - Lid close: screen off, lock, and sleep
 - Lid open: wake screen
+
+** Power Management (Hyprland)
+- Hypridle timeouts:
+  - 5min: Screen off
+  - 10min: Lock screen
+  - 30min: Suspend
+- Before sleep: Lock session
+- After sleep: Turn screen on
+
+** Qutebrowser Configuration
+*** Theming
+- Material You color scheme synced with matugen
+- Dynamic dark/light mode based on wallpaper
+- Minimal design: no alternating tab/completion colors
+- Active tabs match Hyprland active border color
+- Custom offline start page with search box
+
+*** Privacy & Security
+- No 3rd-party cookies
+- Do Not Track header enabled
+- WebGL disabled (fingerprint protection)
+- Advanced content blocking using both methods:
+  - Hosts blocking (StevenBlack's unified hosts)
+  - Brave's Rust adblock engine (requires python-adblock package)
+  - Filter lists: EasyList, EasyPrivacy, Fanboy's Annoyance, Anti-Adblock
+
+*** Search Engines
+- *DEFAULT*: DuckDuckGo
+- *gg*: Google, *am*: Amazon UK, *yt*: YouTube
+- *aur*: AUR packages, *pac*: Arch packages, *ar*: Arch Wiki
+- *rd*: Reddit, *ghr*: GitHub repos, *ghc*: GitHub code
+- *man*: Arch Linux man pages
+- *img*: Google Images
+- *maps*: Google Maps
+- *wiki*: Wikipedia
+- *trans*: Google Translate
+
+*** User-scripts (all in =~/.local/share/qutebrowser/userscripts/=)
+- *zv*: Video download using yt-dlp (saves to ~/Downloads/videos)
+- *zr*: Reading mode - clean article view without distractions
+- *zt*: Translate page via Google Translate
+- *za*: Paywall bypass using archive.is
+
+*** UI/UX Features
+- Status bar: Only shown in command mode
+- Scrollbar: Only visible when searching
+- Completion: 30% height, auto-shrink
+- Smooth scrolling enabled
+- Download prompt enabled
+- Vim-style navigation: Ctrl+j/k in completion and prompts
+
+*** Keybindings
+- *t.*: Reload config
+- *M*: Open link in mpv
+- *td*: Toggle dark mode
+- *gh*: Go home
+- *tt/tp*: Toggle tabs visibility/position
+- *Ctrl+j/k*: Navigate completion/prompts (vim-style)
+
+** Bitwarden Password Manager
+Custom password manager script using Bitwarden CLI with fuzzel interface.
+
+*** Features
+- Fuzzel interface for password selection and actions
+- Create, delete, and manage password entries directly from the interface
+- Sync vault with Bitwarden server (auto-reopens menu after sync)
+- Auto-type username and password with proper delays (0.3s focus delay)
+- Copy username/password to clipboard with auto-clear (45s for passwords, 30s for TOTP)
+- TOTP/2FA code support
+- Automatic password generation for new entries (20-character secure passwords)
+- Delete entries with confirmation prompt
+- Persistent session and cache until screen lock/suspend
+- Automatic vault locking on screen lock/sleep via hypridle integration
+- Loading notifications for better user feedback
+- Direct integration with Bitwarden CLI
+
+*** Keybinding
+- *Mod + Shift + B*: Launch bitwarden-fuzzel (both Sway and Hyprland)
+
+*** Setup
+1. Install Bitwarden CLI:
+   #+begin_src sh
+   sudo pacman -S bitwarden-cli
+   #+end_src
+
+2. Log in to Bitwarden (one-time):
+   #+begin_src sh
+   bw login
+   #+end_src
+
+3. The script is automatically deployed to =~/.local/bin/bitwarden-fuzzel= when you stow the matugen package.
+
+4. Make sure the script is executable:
+   #+begin_src sh
+   chmod +x ~/.local/bin/bitwarden-fuzzel
+   #+end_src
+
+*** Usage
+
+**** Accessing Passwords
+1. Press *Mod + Shift + B* to launch
+2. If vault is locked, enter your master password (once per session)
+3. Select password entry from fuzzel menu
+4. Choose action:
+   - *Copy Username*: Copies username to clipboard
+   - *Copy Password*: Copies password to clipboard (auto-clears after 45s)
+   - *Type Username + Tab + Password*: Auto-types credentials with Tab in between
+   - *Type Username*: Auto-types only username
+   - *Type Password*: Auto-types only password
+   - *Copy TOTP Code*: Copies 2FA code to clipboard (auto-clears after 30s)
+   - *🗑️ Delete Entry*: Permanently delete the entry (requires confirmation)
+
+**** Creating New Entries
+1. Press *Mod + Shift + B* to launch
+2. Select *"➕ New Entry"* from the menu
+3. Enter the following when prompted:
+   - *Entry Name*: Descriptive name for the entry
+   - *Username*: Email or username
+   - *Password*: Leave empty to auto-generate a 20-character secure password (copied to clipboard)
+   - *Website URL*: Optional website URL
+4. Entry is created and synced to Bitwarden server
+5. Local cache is automatically refreshed
+
+**** Deleting Entries
+1. Press *Mod + Shift + B* to launch
+2. Select the entry you want to delete
+3. Choose *"🗑️ Delete Entry"* from the action menu
+4. Confirm deletion by selecting "Delete" (or "Cancel" to abort)
+5. Shows "Deleting '[name]'..." while processing
+6. Entry is deleted and synced to Bitwarden server
+7. Shows "✓ Successfully deleted '[name]'" confirmation
+8. Local cache is automatically refreshed
+
+**** Syncing Vault
+Use this to fetch any changes made on other devices or through the web interface:
+1. Press *Mod + Shift + B* to launch
+2. Select *"🔄 Sync Vault"* from the menu
+3. Shows "Syncing with server..." notification
+4. Script syncs with Bitwarden server and refreshes your local cache
+5. Shows "Vault synced successfully" when complete
+6. *Menu automatically reopens* with updated entries, ready for action
+
+*** Session Management
+- *Default behavior*: Session persists until you lock your screen or the system sleeps
+- *Auto-clear on*:
+  - Screen lock (Mod + Escape or 10-minute idle timeout)
+  - System sleep/suspend (including lid close)
+  - Logout (session file is in XDG_RUNTIME_DIR which clears on logout)
+- *No timeout needed*: You only unlock once per session, then it stays unlocked until screen lock
+- *Session file*: Stored securely at =${XDG_RUNTIME_DIR}/bw_session=
+
+*** Performance & Caching
+- *First load*: Takes 2-3 seconds to fetch vault from Bitwarden (shows "Loading vault..." notification)
+- *Subsequent loads*: Instant (uses cached data from =${XDG_RUNTIME_DIR}/bw_cache=)
+- *Cache duration*: Persists until you manually lock screen, system suspends, or logout (no automatic time limit)
+- *Manual sync*: Select "🔄 Sync Vault" to sync with server and refresh cache (menu auto-reopens after sync)
+- *Auto-refresh after actions*: Cache automatically updates when you create or delete entries
+- *Cache cleared on*:
+  - Manual screen lock (*Mod + Escape*)
+  - Automatic screen lock (10-minute idle timeout)
+  - System sleep/suspend (including lid close)
+  - Logout (XDG_RUNTIME_DIR clears automatically)
+- *Why slow on first load*: Bitwarden CLI is a Node.js app that needs to decrypt all vault items
+- *Performance benefit*: After first load, all subsequent accesses are instant until cache is cleared
+
+*** Lid Close Behavior
+By default, closing the laptop lid will:
+1. Trigger systemd-logind to suspend the system
+2. Hypridle's =before_sleep_cmd= runs, which clears the Bitwarden session file
+3. System suspends
+4. On resume, screen is locked via hyprlock
+5. Next time you use Bitwarden, you'll need to unlock it again
+
+If lid close isn't working, verify:
+- Hypridle is running: =pgrep hypridle=
+- Logind configuration: =grep HandleLidSwitch /etc/systemd/logind.conf= should show =suspend= (default)
 
 * Setup
 
@@ -208,28 +528,46 @@ This extracts all code blocks from =dotfiles.org= into =packages/=.
 
 ** 3. Stow packages
 #+begin_src sh
-# Deploy all packages
+# Deploy all packages for Hyprland
+./scripts/stow-pkg.sh hyprland waybar mako fuzzel foot yazi qutebrowser zsh matugen
+
+# Or deploy all packages for Sway
 ./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh matugen
 
 # Or deploy specific packages
-./scripts/stow-pkg.sh sway waybar mako
+./scripts/stow-pkg.sh hyprland waybar mako
 
-# Make scripts executable
-chmod +x ~/dotfile/packages/zsh/.local/bin/select-wm.sh
-chmod +x ~/dotfile/packages/swayidle/.local/bin/start-swayidle.sh
-chmod +x ~/dotfile/packages/matugen/.local/bin/select-wallpaper.sh
-chmod +x ~/dotfile/packages/sway/.local/bin/screenshot.sh
+# Make scripts executable (shared)
+chmod +x ~/.local/bin/select-wm.sh
+chmod +x ~/.local/bin/select-wallpaper.sh
+
+# Make scripts executable (Sway-specific)
+chmod +x ~/.local/bin/start-swayidle.sh
+chmod +x ~/.local/bin/screenshot.sh  # Sway version
+
+# Make scripts executable (Hyprland-specific - overwrites Sway screenshot.sh)
+chmod +x ~/.local/bin/screenshot.sh  # Hyprland version
+
+# Make qutebrowser userscripts executable
+chmod +x ~/.local/share/qutebrowser/userscripts/*
 #+end_src
 
-#+RESULTS:
-| Stowing: | sway | waybar | mako | fuzzel | foot | yazi | qutebrowser | swaylock | swayidle | zsh | matugen |
-| Stowing: | sway | waybar | mako |        |      |      |             |          |          |     |         |
-
-** 4. Launch sway
+** 4. Import qutebrowser bookmarks (optional)
+If you have existing bookmarks from a previous installation:
 #+begin_src sh
-# From TTY (auto-login configured in zsh)
+# Copy bookmarks (one-time import)
+mkdir -p ~/.config/qutebrowser/bookmarks
+cp ~/stow/qutebrowser/.config/qutebrowser/bookmarks/urls ~/.config/qutebrowser/bookmarks/urls
+
+# Note: Bookmarks are managed directly by qutebrowser after import
+# They are NOT tangled from dotfiles.org to avoid conflicts
+#+end_src
+
+** 5. Launch window manager
+#+begin_src sh
+# From TTY (auto-login configured in zsh, defaults to Hyprland)
 # Or manually:
-sway
+Hyprland  # or: sway
 #+end_src
 
 * Usage
@@ -239,26 +577,46 @@ Edit =dotfiles.org= in Emacs, then re-tangle and re-stow.
 
 ** Unstow packages
 #+begin_src sh
+# Unstow current WM
+stow -d packages -t ~ -D hyprland
+# or
 stow -d packages -t ~ -D sway
 #+end_src
 
 ** Switch window managers
 #+begin_src sh
-stow -d packages -t ~ -D sway
-./scripts/stow-pkg.sh river
+# Switch from Hyprland to Sway
+stow -d packages -t ~ -D hyprland
+./scripts/stow-pkg.sh sway swayidle swaylock
+
+# Switch from Sway to Hyprland
+stow -d packages -t ~ -D sway swayidle swaylock
+./scripts/stow-pkg.sh hyprland
+
+# Update select-wm.sh to launch your preferred WM (edit line 1568 in dotfiles.org)
 #+end_src
 
 ** Change wallpaper and theme
 #+begin_src sh
-# Generate dark theme (default)
+# Interactive mode (recommended - uses fuzzel to select wallpaper and mode)
+# Hyprland: Mod+Shift+P
+# Sway: Mod+P
+~/.local/bin/select-wallpaper.sh
+
+# Manual mode - Generate dark theme (default)
 matugen image ~/dotfile/wallpapers/your-wallpaper.jpg
 
-# Generate light theme for bright wallpapers
+# Manual mode - Generate light theme for bright wallpapers
 matugen image ~/dotfile/wallpapers/your-wallpaper.jpg -m light
 
-# Reload sway to apply changes (also reloads waybar and mako)
-# Use Mod+Shift+C keybinding or run manually:
-swaymsg reload
+# Reload WM to apply changes (also reloads waybar, mako, and qutebrowser)
+# The wallpaper selector script automatically:
+#   - Sets the wallpaper
+#   - Generates Material You colors with matugen
+#   - Reloads all themed applications
+#   - Syncs qutebrowser's dark/light mode preference
+# Hyprland: Mod+Shift+C or: hyprctl reload
+# Sway: Mod+Shift+C or: swaymsg reload
 #+end_src
 
 ** Setup auto-login (optional)
@@ -275,7 +633,7 @@ EOF
 sudo systemctl enable getty@tty1.service
 #+end_src
 
-After auto-login is configured, sway will start automatically on TTY1.
+After auto-login is configured, Hyprland (or your selected WM) will start automatically on TTY1.
 
 * Structure
 - =dotfiles.org= - Main configuration file (edit this)
@@ -289,35 +647,76 @@ After auto-login is configured, sway will start automatically on TTY1.
 - =stow-pkg.sh= - Deploy packages using GNU Stow
 
 ** Runtime Scripts (require =chmod +x=)
+
+*** Shared Scripts
 - =~/.local/bin/select-wm.sh= - Window manager selector (used by zsh auto-login)
   - Package: =packages/zsh/.local/bin/select-wm.sh=
-  - Usage: Automatically runs on login to select WM
-
-- =~/.local/bin/start-swayidle.sh= - Conditional idle management based on power state
-  - Package: =packages/swayidle/.local/bin/start-swayidle.sh=
-  - Usage: Auto-started by sway, manages screen timeout/lock/sleep
+  - Usage: Automatically runs on login to select WM (defaults to Hyprland)
 
 - =~/.local/bin/select-wallpaper.sh= - Interactive wallpaper and theme selector
   - Package: =packages/matugen/.local/bin/select-wallpaper.sh=
-  - Usage: Mod+P keybinding, uses fuzzel to choose wallpaper and light/dark mode
+  - Usage: Hyprland (Mod+Shift+P) or Sway (Mod+P), uses fuzzel to choose wallpaper and light/dark mode
+  - Sets wallpaper and regenerates colors with matugen
 
-- =~/.local/bin/screenshot.sh= - Screenshot utility with fuzzel selector
+*** Qutebrowser User-scripts (in =~/.local/share/qutebrowser/userscripts/=)
+- =video-download= - Download videos using yt-dlp
+  - Keybinding: *zv* in qutebrowser
+  - Saves to ~/Downloads/videos with best quality
+  - Background download with notification on completion
+
+- =reading-mode= - Extract article content for distraction-free reading
+  - Keybinding: *zr* in qutebrowser
+  - Uses python-readability-lxml to extract main content
+  - Opens cleaned article in new tab
+
+- =translate-page= - Translate current page
+  - Keybinding: *zt* in qutebrowser
+  - Opens page in Google Translate (auto-detect → English)
+
+- =paywall-bypass= - Access paywalled articles
+  - Keybinding: *za* in qutebrowser
+  - Opens archived version via archive.is
+
+*** Sway-Specific Scripts
+- =~/.local/bin/start-swayidle.sh= - Conditional idle management based on power state
+  - Package: =packages/swayidle/.local/bin/start-swayidle.sh=
+  - Usage: Auto-started by sway, manages screen timeout/lock/sleep with different timers for battery/AC
+
+- =~/.local/bin/screenshot.sh= - Screenshot utility with fuzzel selector (Sway version)
   - Package: =packages/sway/.local/bin/screenshot.sh=
   - Usage: Print key or Mod+Shift+S, saves to ~/Pictures/Screenshots and copies to clipboard
+  - Uses grimshot for capturing
 
 - =~/.local/bin/get-layout.sh= - Container layout indicator for waybar
   - Package: =packages/waybar/.local/bin/get-layout.sh=
-  - Usage: Auto-called by waybar, shows current container layout mode
+  - Usage: Auto-called by waybar, shows current container layout mode (Sway only)
+
+*** Hyprland-Specific Scripts
+- =~/.local/bin/screenshot.sh= - Screenshot utility with fuzzel selector (Hyprland version)
+  - Package: =packages/hyprland/.local/bin/screenshot.sh=
+  - Usage: Print key or Mod+Shift+S, saves to ~/Pictures/Screenshots and copies to clipboard
+  - Uses hyprshot for capturing
 
 ** Making Scripts Executable
 After deploying packages with stow, run:
 #+begin_src sh
-chmod +x ~/dotfile/packages/zsh/.local/bin/select-wm.sh
-chmod +x ~/dotfile/packages/swayidle/.local/bin/start-swayidle.sh
-chmod +x ~/dotfile/packages/matugen/.local/bin/select-wallpaper.sh
-chmod +x ~/dotfile/packages/sway/.local/bin/screenshot.sh
-chmod +x ~/dotfile/packages/waybar/.local/bin/get-layout.sh
+# Shared scripts
+chmod +x ~/.local/bin/select-wm.sh
+chmod +x ~/.local/bin/select-wallpaper.sh
+
+# Qutebrowser userscripts
+chmod +x ~/.local/share/qutebrowser/userscripts/*
+
+# Sway-specific scripts
+chmod +x ~/.local/bin/start-swayidle.sh
+chmod +x ~/.local/bin/screenshot.sh  # Sway version
+chmod +x ~/.local/bin/get-layout.sh
+
+# Hyprland-specific scripts (overwrites Sway screenshot.sh)
+chmod +x ~/.local/bin/screenshot.sh  # Hyprland version
 #+end_src
+
+Note: Run chmod commands AFTER stowing packages, as the files need to exist in ~/.local/bin first.
 
 * Extending
 Add new configurations to =dotfiles.org= with proper tangle headers, then re-run =./scripts/tangle.sh=.
@@ -330,5 +729,6 @@ Add new configurations to =dotfiles.org= with proper tangle headers, then re-run
 *** TODO Implement a module for showing how many packages need updating on Waybar
 *** DONE Add scratchpad indicator module (show count/window titles of scratchpad windows)
 *** TODO Add network module (WiFi SSID, connection status)
+*** TODO Add a minimal pomodoro timer module
 ** Qutebrowser
 *** TODO Port over my previous config and bookmarks, etc.
