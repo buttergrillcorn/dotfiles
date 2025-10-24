@@ -1225,11 +1225,12 @@ window#waybar {
     opacity: 0.5;
 }
 
-/* Center section */
 #privacy {
     margin: 0 10px;
     color: @error;
 }
+
+/* Center section */
 
 #custom-pomodoro {
     margin: 0 10px;
@@ -1258,7 +1259,7 @@ window#waybar {
 }
 
 #custom-update {
-  margin: 0 5px;
+  margin: 0 10px;
 }
 
 #custom-update.updates {
@@ -2653,44 +2654,251 @@ fi
 
 * Zsh
 
-** Zsh Configuration
+** Performance: Enable Profiling (Optional)
 #+begin_src sh :tangle packages/zsh/.zshrc
-# Zsh configuration
-HISTFILE=~/.histfile
-HISTSIZE=10000
-SAVEHIST=10000
+# Uncomment to profile zsh startup time
+# zmodload zsh/zprof
+#+end_src
 
-# Auto-start WM on TTY1
+** Core Configuration
+#+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# ZSH Core Configuration
+# ============================================================================
+
+# Auto-start WM on TTY1 (before anything else)
 if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
   exec ~/.local/bin/select-wm.sh hyprland
 fi
+
+# History configuration
+HISTFILE=~/.cache/zsh/history
+HISTSIZE=50000
+SAVEHIST=50000
+
+# Create cache directory if it doesn't exist
+[[ -d ~/.cache/zsh ]] || mkdir -p ~/.cache/zsh
 #+end_src
 
-** Fastfetch
+** ZSH Options
 #+begin_src sh :tangle packages/zsh/.zshrc
-# Fastfetch
-if [[ -o interactive ]]; then
-  fastfetch
+# ============================================================================
+# ZSH Options
+# ============================================================================
+
+# History options
+setopt EXTENDED_HISTORY          # Write timestamp to history
+setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first
+setopt HIST_IGNORE_DUPS          # Don't record duplicates
+setopt HIST_IGNORE_SPACE         # Don't record commands starting with space
+setopt HIST_VERIFY               # Show command with history expansion before running
+setopt SHARE_HISTORY             # Share history between sessions
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks
+setopt INC_APPEND_HISTORY        # Write to history immediately
+
+# Directory options
+setopt AUTO_CD                   # cd by typing directory name
+setopt AUTO_PUSHD                # Push directories onto stack
+setopt PUSHD_IGNORE_DUPS         # Don't push duplicates
+setopt PUSHD_SILENT              # Don't print directory stack
+
+# Completion options
+setopt ALWAYS_TO_END             # Move cursor to end after completion
+setopt AUTO_MENU                 # Show completion menu on tab
+setopt COMPLETE_IN_WORD          # Complete from both ends of word
+setopt MENU_COMPLETE             # Autoselect first completion entry
+
+# Correction and expansion
+setopt CORRECT                   # Correct command spelling
+setopt EXTENDED_GLOB             # Extended globbing patterns
+
+# Other options
+setopt INTERACTIVE_COMMENTS      # Allow comments in interactive shell
+setopt MULTIOS                   # Enable multiple redirections
+#+end_src
+
+** Zinit Plugin Manager
+#+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# Zinit Plugin Manager
+# ============================================================================
+
+# Install zinit if not present
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+if [[ ! -d "$ZINIT_HOME" ]]; then
+   mkdir -p "$(dirname $ZINIT_HOME)"
+   git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
+
+# Load zinit
+source "${ZINIT_HOME}/zinit.zsh"
+#+end_src
+
+** Essential Plugins
+#+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# Essential Plugins
+# ============================================================================
+
+# Load completion system first
+autoload -Uz compinit
+compinit -d ~/.cache/zsh/zcompdump-$ZSH_VERSION
+
+# Syntax highlighting (must be loaded before other plugins)
+zinit light zdharma-continuum/fast-syntax-highlighting
+
+# Fish-like autosuggestions
+zinit light zsh-users/zsh-autosuggestions
+
+# Additional completions
+zinit light zsh-users/zsh-completions
+
+# History substring search (bind keys after loading)
+zinit light zsh-users/zsh-history-substring-search
+
+# FZF integration
+zinit ice lucid wait
+zinit snippet OMZP::fzf
+
+# Git aliases and functions
+zinit ice lucid wait
+zinit snippet OMZL::git.zsh
+
+# Docker completions
+zinit ice lucid wait as"completion"
+zinit snippet OMZP::docker/_docker
+
+# npm completions
+zinit ice lucid wait as"completion"
+zinit snippet OMZP::npm
+#+end_src
+
+** Completion System Configuration
+#+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# Enhanced Completion System
+# ============================================================================
+
+# Completion styling
+zstyle ':completion:*' menu select                                    # Interactive menu
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'            # Case insensitive
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"              # Colored completion
+zstyle ':completion:*' group-name ''                                  # Group results
+zstyle ':completion:*:descriptions' format '%F{yellow}%B%d%b%f'      # Group descriptions
+zstyle ':completion:*:warnings' format '%F{red}No matches found%f'   # No match warning
+zstyle ':completion:*' verbose yes                                    # Verbose output
+zstyle ':completion:*' use-cache yes                                  # Use cache
+zstyle ':completion:*' cache-path ~/.cache/zsh/zcompcache            # Cache location
+
+# Partial completion
+zstyle ':completion:*' list-suffixes
+zstyle ':completion:*' expand prefix suffix
+
+# Process completion
+zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm -w -w"
+zstyle ':completion:*:*:kill:*' menu yes select
+zstyle ':completion:*:kill:*' force-list always
+
+# Directory completion
+zstyle ':completion:*:cd:*' ignore-parents parent pwd  # Don't complete pwd or parent
+
+# Completion for custom commands
+compdef _gnu_generic bat
+compdef _gnu_generic eza
+compdef _gnu_generic fd
+compdef _gnu_generic rg
+#+end_src
+
+** Key Bindings
+#+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# Key Bindings
+# ============================================================================
+
+# Use emacs keybindings
+bindkey -e
+
+# History substring search (bind to up/down arrows)
+bindkey '^[[A' history-substring-search-up      # Up arrow
+bindkey '^[[B' history-substring-search-down    # Down arrow
+bindkey '^P' history-substring-search-up        # Ctrl+P
+bindkey '^N' history-substring-search-down      # Ctrl+N
+
+# Enhanced history search
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
+
+# Word movement
+bindkey '^[[1;5C' forward-word      # Ctrl+Right
+bindkey '^[[1;5D' backward-word     # Ctrl+Left
+
+# Line editing
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+bindkey '^K' kill-line
+bindkey '^U' backward-kill-line
+bindkey '^W' backward-kill-word
+bindkey '^Y' yank
+
+# Alt+. to insert last argument
+bindkey '\e.' insert-last-word
+
+# Delete key
+bindkey '^[[3~' delete-char
+
+# Home/End keys
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+
+# Accept autosuggestion
+bindkey '^ ' autosuggest-accept              # Ctrl+Space
+bindkey '^[[Z' autosuggest-accept            # Shift+Tab
 #+end_src
 
 ** PATH Configuration
 #+begin_src sh :tangle packages/zsh/.zshrc
-# Doom Emacs
-export PATH=/home/james/.config/emacs/bin:$PATH
+# ============================================================================
+# PATH Configuration
+# ============================================================================
 
-# NPM
-export PATH=/home/james/.npm/bin:$PATH
+# User binaries
+export PATH="$HOME/.local/bin:$PATH"
+
+# Doom Emacs
+export PATH="$HOME/.config/emacs/bin:$PATH"
+
+# NPM global packages
+export PATH="$HOME/.npm/bin:$PATH"
+
+# Rust cargo
+[[ -d "$HOME/.cargo/bin" ]] && export PATH="$HOME/.cargo/bin:$PATH"
 #+end_src
 
-** Tool Initialisation
+** Tool Initialization
 #+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# Tool Initialization
+# ============================================================================
+
 # Zoxide - smart directory jumping
 eval "$(zoxide init zsh)"
+
+# FZF configuration
+export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+
+# Starship prompt (must be at end)
+eval "$(starship init zsh)"
 #+end_src
 
 ** Functions
 #+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# Custom Functions
+# ============================================================================
+
 # Yazi - cd on quit
 function yy() {
     local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
@@ -2700,35 +2908,289 @@ function yy() {
     fi
     rm -f -- "$tmp"
 }
+
+# Create directory and cd into it
+function mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Extract any archive
+function extract() {
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2)   tar xjf "$1"     ;;
+            *.tar.gz)    tar xzf "$1"     ;;
+            *.bz2)       bunzip2 "$1"     ;;
+            *.rar)       unrar x "$1"     ;;
+            *.gz)        gunzip "$1"      ;;
+            *.tar)       tar xf "$1"      ;;
+            *.tbz2)      tar xjf "$1"     ;;
+            *.tgz)       tar xzf "$1"     ;;
+            *.zip)       unzip "$1"       ;;
+            *.Z)         uncompress "$1"  ;;
+            *.7z)        7z x "$1"        ;;
+            *)           echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# Quick backup of a file
+function bak() {
+    cp "$1" "$1.bak"
+}
+
+# Show directory stack
+function d() {
+    dirs -v | head -n 10
+}
+
+# Jump to directory in stack (e.g., "2" to jump to item 2)
+for index in {1..9}; do
+    alias "$index"="cd +${index}"
+done
 #+end_src
 
 ** Aliases
 #+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# Aliases
+# ============================================================================
+
 # Navigation
 alias cd="z"
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias ~="cd ~"
+alias -- -="cd -"
+
+# ls alternatives
+if command -v eza &> /dev/null; then
+    alias ls="eza --icons --group-directories-first"
+    alias ll="eza --icons --group-directories-first -l"
+    alias la="eza --icons --group-directories-first -la"
+    alias lt="eza --icons --group-directories-first --tree"
+    alias tree="eza --icons --tree"
+else
+    alias ls="ls --color=auto --group-directories-first"
+    alias ll="ls -lh"
+    alias la="ls -lah"
+fi
 
 # Safe file operations
 alias rm="trash -i"
 alias cp="cp -i"
 alias mv="mv -i"
+alias mkdir="mkdir -p"
 
 # Better defaults
 alias cat="bat"
+alias grep="rg"
+alias find="fd"
+alias du="dust"
+alias df="duf"
+alias top="btop"
+alias htop="btop"
 alias neofetch="fastfetch"
 alias fetch="fastfetch"
 
+# Git aliases (in addition to OMZ git plugin)
+alias g="git"
+alias gs="git status"
+alias ga="git add"
+alias gc="git commit"
+alias gp="git push"
+alias gl="git pull"
+alias gd="git diff"
+alias gco="git checkout"
+alias gb="git branch"
+alias glog="git log --oneline --graph --decorate"
+
 # Quick access
 alias zshrc="nvim ~/.zshrc"
+alias zshconfig="nvim ~/dotfile/dotfiles.org"
 alias r="source ~/.zshrc"
+alias reload="source ~/.zshrc"
 
 # Package management
 alias paci="sudo pacman --noconfirm -S"
 alias pacr="sudo pacman -Rns"
+alias pacs="pacman -Ss"
+alias pacu="sudo pacman -Syu"
 alias yayi="yay -S"
+alias yays="yay -Ss"
 alias update="sudo pacman --noconfirm -Syyuu && yay --noconfirm -Syyuua"
+alias clean="yay -Sc && yay -Yc"
 
 # System
 alias shutdown="shutdown now"
+alias reboot="reboot"
+alias suspend="systemctl suspend"
+alias hibernate="systemctl hibernate"
+
+# Development
+alias py="python3"
+alias pip="pip3"
+alias v="nvim"
+alias vim="nvim"
+
+# Misc
+alias c="clear"
+alias h="history"
+alias j="jobs"
+alias ports="netstat -tulanp"
+alias wget="wget -c"
+alias myip="curl ifconfig.me"
+#+end_src
+
+** Fastfetch
+#+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# Fastfetch
+# ============================================================================
+
+# Show fastfetch on new terminal
+if [[ -o interactive ]] && [[ -z "$TMUX" ]]; then
+  fastfetch
+fi
+#+end_src
+
+** Performance: End Profiling
+#+begin_src sh :tangle packages/zsh/.zshrc
+# ============================================================================
+# Performance Profiling (Optional)
+# ============================================================================
+
+# Uncomment to see profiling results
+# zprof
+#+end_src
+
+** Starship Prompt Configuration
+#+begin_src toml :tangle packages/zsh/.config/starship.toml
+# Starship Prompt Configuration
+# Minimal, fast, and informative
+
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Timeout for commands
+command_timeout = 1000
+
+# Format
+format = """
+[┌──](bold blue)$username$hostname$directory$git_branch$git_status$git_state
+[└─](bold blue)$character"""
+
+# Right prompt
+right_format = """$cmd_duration$time"""
+
+# Continuation prompt
+continuation_prompt = "[∙](bright-black) "
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"
+
+[username]
+style_user = "bold blue"
+style_root = "bold red"
+format = "[$user]($style)"
+disabled = false
+show_always = false
+
+[hostname]
+ssh_only = true
+format = "[@$hostname](bold yellow) "
+disabled = false
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+format = " in [$path]($style)[$read_only]($read_only_style) "
+style = "bold cyan"
+read_only = " 󰌾"
+read_only_style = "red"
+home_symbol = "~"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+"Videos" = " "
+".config" = " "
+
+[git_branch]
+symbol = " "
+format = "on [$symbol$branch(:$remote_branch)]($style) "
+style = "bold purple"
+
+[git_status]
+format = "([$all_status$ahead_behind]($style) )"
+style = "bold red"
+conflicted = "="
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+up_to_date = ""
+untracked = "?${count}"
+stashed = "$"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+
+[git_state]
+format = "[$state( $progress_current/$progress_total)]($style) "
+style = "bright-black"
+
+[cmd_duration]
+min_time = 2000
+format = "took [$duration]($style)"
+style = "bold yellow"
+
+[time]
+disabled = false
+format = "[$time]($style)"
+style = "bold white"
+time_format = "%T"
+
+# Language/Tool Specific
+[nodejs]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+
+[python]
+symbol = " "
+format = 'via [${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+
+[rust]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+
+[golang]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+
+[docker_context]
+symbol = " "
+format = "via [$symbol$context]($style) "
+
+[package]
+symbol = "󰏗 "
+format = "is [$symbol$version]($style) "
+
+[memory_usage]
+disabled = true
+threshold = 75
+symbol = "󰍛 "
+format = "via $symbol[${ram_pct}]($style) "
+
+[battery]
+disabled = true
 #+end_src
 
 ** WM Selector Script

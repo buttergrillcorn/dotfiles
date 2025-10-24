@@ -90,6 +90,36 @@ Then tangle and stow as usual.
 - `bitwarden-fuzzel` - Custom Bitwarden password manager with fuzzel interface
 - `select-wallpaper.sh` - Interactive wallpaper selector with matugen integration
 - `screenshot.sh` - Screenshot tool with fuzzel menu
+- `waybar-pomodoro` - Minimal pomodoro timer for waybar
+- `waybar-updates` - Package update checker for waybar
+- `waybar-battery` - Smart dual battery monitor for waybar
+- `mako-actions` - Interactive notification actions menu
+
+## ZSH Configuration
+
+The zsh configuration is comprehensive and feature-rich, built with zinit plugin manager:
+
+### Features
+- **Starship prompt** - Fast, minimal prompt with git integration
+- **zinit** - Plugin manager for fast loading
+- **Enhanced completions** - Case-insensitive, colored, with descriptions
+- **Improved history** - 50k lines, shared across sessions, smart deduplication
+- **Syntax highlighting** - Real-time command validation (fast-syntax-highlighting)
+- **Autosuggestions** - Fish-like suggestions from history
+- **History substring search** - Search history with arrow keys
+- **FZF integration** - Fuzzy finding for files, directories, and history
+- **Smart navigation** - Auto-cd, directory stack, zoxide integration
+- **Key bindings** - Emacs-style with custom enhancements
+- **Developer tools** - Git, Docker, npm completions and aliases
+
+### First Run
+On first run, zinit will automatically install itself and all plugins to `~/.local/share/zinit/`.
+
+### Performance
+Configuration is optimized for fast startup (<100ms target):
+- Lazy loading for heavy plugins
+- Completion caching
+- Optional profiling with `zprof`
 
 ## Target Stack
 
