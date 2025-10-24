@@ -1330,7 +1330,7 @@ group#tray-expander {
 #+begin_src ini :tangle packages/mako/.config/mako/config
 font=<<font>>
 border-size=2
-default-timeout=5000
+default-timeout=10000
 width=450
 
 outer-margin=15
@@ -3302,7 +3302,6 @@ get_notifications() {
             match($0, /Notification ([0-9]+): (.+)/, arr)
             notif_id = arr[1]
             summary = arr[2]
-            getline  # Skip to next line
             getline  # Get "App name: ..." line
             if (/App name:/) {
                 match($0, /App name: (.+)/, arr2)
@@ -3320,7 +3319,6 @@ actions=(
     "󰵅 Invoke default action (latest)"
     "󰎟 Dismiss latest"
     "󰎟 Dismiss all"
-    " List all (terminal)"
     "󰁯 Restore last dismissed"
 )
 
@@ -3364,9 +3362,6 @@ case "$selected" in
         ;;
     "󰎟 Dismiss all")
         makoctl dismiss --all
-        ;;
-    " List all (terminal)")
-        foot --app-id=floating-foot -e sh -c 'makoctl list; echo; echo "Press Enter to close"; read'
         ;;
     "󰁯 Restore last dismissed")
         makoctl restore

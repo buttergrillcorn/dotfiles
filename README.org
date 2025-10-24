@@ -704,7 +704,7 @@ After auto-login is configured, Hyprland (or your selected WM) will start automa
   - Usage: Mod+Shift+M to open menu with quick actions or per-notification action selection
   - Features:
     - Choose specific notification and select from its available actions (reply, mark as read, etc.)
-    - Quick actions: invoke default, dismiss latest, dismiss all, list all, restore dismissed
+    - Quick actions: invoke default, dismiss latest, dismiss all, restore dismissed
   - Requires: mako, fuzzel, foot
 - =~/.local/bin/waybar-battery= - Smart dual battery indicator for waybar
   - Package: =packages/matugen/.local/bin/waybar-battery=
