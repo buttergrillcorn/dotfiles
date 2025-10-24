@@ -1753,7 +1753,7 @@ pad=10x10
 [bell]
 urgent=yes
 notify=yes
-visual=yes
+# visual=yes
 
 [scrollback]
 lines=10000
@@ -2771,6 +2771,15 @@ zinit snippet OMZP::docker
 # npm completions
 zinit ice lucid wait as"completion"
 zinit snippet OMZP::npm
+
+# Auto-pair brackets/quotes
+zinit light hlissner/zsh-autopair
+
+# Better cd with interactive menu
+zinit light skywind3000/z.lua
+
+# Colorize man pages
+zinit light ael-code/zsh-colored-man-pages
 #+end_src
 
 ** Completion System Configuration

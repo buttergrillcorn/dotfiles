@@ -74,7 +74,10 @@ sudo pacman -S light
 sudo pacman -S fcitx5 fcitx5-configtool
 
 # Shell enhancements
-sudo pacman -S zoxide bat trash-cli fastfetch
+sudo pacman -S zoxide bat trash-cli fastfetch starship
+
+# Modern CLI tools (optional but recommended for zsh aliases)
+sudo pacman -S eza ripgrep fd dust duf btop fzf
 
 # System utilities
 sudo pacman -S udiskie wluma
@@ -248,8 +251,8 @@ sudo pacman -S bitwarden-cli
 ** Waybar
 - Icon-only minimal design with 30px height bar, 0.9 opacity
 - Module organization:
-  - Left: Idle inhibitor, workspaces, special workspace indicator
-  - Center: Clock, update indicator
+  - Left: Idle inhibitor, workspaces, privacy monitors
+  - Center: Pomodoro timer, clock, update indicator
   - Right: Expandable tray, system monitors, battery
 - Hyprland-specific modules:
   - Workspace indicator with persistent workspaces 1-9
@@ -264,8 +267,16 @@ sudo pacman -S bitwarden-cli
   - Battery: Smart dual battery (BAT0+BAT1) showing combined percentage (e.g., 73% of 96Wh total)
     - Tooltip shows individual battery status and energy in Wh
     - Icon reflects combined charge level and charging state
+- Pomodoro timer: Minimal productivity timer with visual states
+  - 󱫐 Idle (click to start 25-minute work session)
+  - 󰔟 24:59 Working (shows countdown, click to pause, right-click to reset)
+  - 󰾩 05:00 Break time (5-minute break, auto-starts after work session)
+  - 󰏤 Paused (click to resume)
+  - Sends desktop notifications when sessions complete
+  - Colors: work=@primary, break=@secondary, paused/idle=dimmed
 - Update checker: Shows 󰚰 when Arch/AUR updates available, click to update with yay
 - Idle inhibitor toggle: 󰅶 active / 󰾪 inactive, prevents screen timeout when active
+- Privacy monitors: Shows when screenshare/mic/audio-out is active
 - Expandable system tray: 󰮫 icon, smooth 600ms drawer transition
 - Color-based status indicators (no background colors):
   - Idle inhibitor active: @primary
@@ -571,6 +582,90 @@ cp ~/stow/qutebrowser/.config/qutebrowser/bookmarks/urls ~/.config/qutebrowser/b
 Hyprland  # or: sway
 #+end_src
 
+** ZSH Configuration
+Comprehensive, modern shell configuration with zinit plugin manager and Starship prompt.
+
+*** Features
+- *Starship prompt*: Fast, minimal two-line prompt with git integration
+  - Shows: directory, git branch/status, command duration, time
+  - Language indicators: Node, Python, Rust, Go, Docker
+- *zinit*: Fast plugin manager with lazy loading
+- *fast-syntax-highlighting*: Real-time command syntax validation
+- *zsh-autosuggestions*: Fish-like command suggestions from history
+  - Accept: Ctrl+Space or Shift+Tab
+- *zsh-completions*: Additional completion definitions
+- *zsh-history-substring-search*: Search history with arrow keys
+- *FZF integration*:
+  - Ctrl+R: Fuzzy search command history
+  - Ctrl+T: Find files
+  - Alt+C: cd to directory
+- *Enhanced completions*:
+  - Case-insensitive matching
+  - Colored listings
+  - Interactive menu selection
+  - Partial completion (/u/lo/b → /usr/local/bin)
+- *Improved history*:
+  - 50,000 lines with timestamps
+  - Shared across all sessions
+  - Smart deduplication
+  - Commands starting with space excluded
+- *Smart navigation*:
+  - Auto-cd (type directory name to cd)
+  - Auto-pushd with directory stack (use 'd' to show, '1-9' to jump)
+  - Extended globbing (**/*.js)
+- *Key bindings*:
+  - Emacs-style base
+  - Ctrl+Space/Shift+Tab: Accept suggestion
+  - Up/Down: Substring history search
+  - Ctrl+R/S: Incremental search
+  - Ctrl+Right/Left: Word movement
+  - Alt+.: Insert last argument
+
+*** Aliases & Functions
+*Navigation*:
+- =..= / =...= / =....=: Navigate up directories
+- =~= / =-=: Home / previous directory
+
+*Modern CLI tools* (requires optional packages):
+- =ls=: eza with icons
+- =ll= / =la=: Long format / show all
+- =tree=: eza tree view
+- =cat=: bat (syntax highlighting)
+- =grep=: ripgrep
+- =find=: fd
+- =top=: btop
+
+*Git shortcuts*:
+- =g=, =gs=, =ga=, =gc=, =gp=, =gl=, =gd=, =gco=, =gb=, =glog=
+
+*Utility functions*:
+- =mkcd dir=: Create and cd into directory
+- =extract file.zip=: Extract any archive type
+- =bak file.txt=: Quick backup (creates file.txt.bak)
+- =yy=: Yazi with cd-on-quit
+
+*Package management*:
+- =update=: Full system update (pacman + yay)
+- =clean=: Clean package cache
+- =paci=, =pacr=, =pacs=: pacman shortcuts
+- =yayi=, =yays=: yay shortcuts
+
+*** First Run
+On first zsh launch:
+1. zinit auto-installs to =~/.local/share/zinit/=
+2. All plugins are cloned from GitHub
+3. Plugins are compiled for performance
+4. Completions are initialized
+
+First launch: ~10-15 seconds
+Subsequent launches: <100ms
+
+*** Performance
+- Lazy loading for heavy plugins
+- Completion caching in =~/.cache/zsh/=
+- Optional profiling with =zprof= (uncomment in config)
+- Target startup time: <100ms
+
 * Usage
 
 ** Edit configuration
@@ -757,13 +852,33 @@ Add new configurations to =dotfiles.org= with proper tangle headers, then re-run
 ** Sway/WM
 *** TODO Implement a helper pop-up function to show common shortcut or useful features, for anyone using the computer or in case I forget.
 ** Misc
-*** TODO Add zsh plugins (syntax highlighting, autosuggestions, completions)
+*** DONE Add zsh plugins (syntax highlighting, autosuggestions, completions)
+CLOSED: [2025-10-24]
+Comprehensive zsh configuration with:
+- zinit plugin manager
+- Starship prompt
+- fast-syntax-highlighting
+- zsh-autosuggestions
+- zsh-completions
+- zsh-history-substring-search
+- FZF integration
+- Enhanced completions system
+- 50k line history with smart features
+- Custom key bindings
+- Git/Docker/npm completions
 *** TODO Fix GTK theming
 *** TODO Fix QT theming
 ** Waybar
 *** DONE Implement a module for showing how many packages need updating on Waybar
 *** DONE Add scratchpad indicator module (show count/window titles of scratchpad windows)
 *** DONE Add network module (WiFi SSID, connection status)
-*** TODO Add a minimal pomodoro timer module
+*** DONE Add a minimal pomodoro timer module
+CLOSED: [2025-10-24]
+Minimal pomodoro timer with:
+- 25-minute work sessions / 5-minute breaks
+- Visual states with icons and colors
+- Interactive controls (left click: toggle, right click: reset)
+- Desktop notifications
+- Auto-transition between work/break/idle
 ** Qutebrowser
 *** DONE Port over my previous config and bookmarks, etc.
