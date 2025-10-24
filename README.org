@@ -221,7 +221,7 @@ sudo pacman -S bitwarden-cli
 *** Utilities
 - *Mod + M*: Restore last dismissed notification
 - *Mod + Ctrl + M*: Dismiss latest notification
-- *Mod + Shift + M*: Notification actions menu (invoke, dismiss, dismiss all, list, restore)
+- *Mod + Shift + M*: Notification actions menu (choose specific notification with actions, or quick actions)
 - *Mod + Ctrl + Shift + M*: List all notifications in terminal
 - *Mod + I*: Network manager (networkmanager_dmenu)
 - *Mod + Shift + V*: Clipboard manager
@@ -701,7 +701,10 @@ After auto-login is configured, Hyprland (or your selected WM) will start automa
 *** Utility Scripts
 - =~/.local/bin/mako-actions= - Interactive fuzzel menu for mako notification actions
   - Package: =packages/matugen/.local/bin/mako-actions=
-  - Usage: Mod+Shift+M to open menu with options to invoke, dismiss, dismiss all, list, or restore notifications
+  - Usage: Mod+Shift+M to open menu with quick actions or per-notification action selection
+  - Features:
+    - Choose specific notification and select from its available actions (reply, mark as read, etc.)
+    - Quick actions: invoke default, dismiss latest, dismiss all, list all, restore dismissed
   - Requires: mako, fuzzel, foot
 - =~/.local/bin/waybar-battery= - Smart dual battery indicator for waybar
   - Package: =packages/matugen/.local/bin/waybar-battery=

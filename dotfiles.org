@@ -437,6 +437,7 @@ exec-once = wl-paste --type image --watch cliphist store
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Environment variables
 env = XCURSOR_SIZE,24
+env = XCURSOR_THEME,human
 env = HYPRCURSOR_SIZE,24
 #+end_src
 
@@ -771,7 +772,7 @@ bind = $mainMod, Escape, exec, rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_R
 # Notifications
 bind = $mainMod, M, exec, makoctl restore
 bind = $mainMod CTRL, M, exec, makoctl dismiss
-bind = $mainMod SHIFT, M, exec, mako-actions
+bind = $mainMod SHIFT, M, exec, ./.local/bin/mako-actions
 bind = $mainMod CTRL SHIFT, M, exec, makoctl list
 
 # Network manager
@@ -3275,6 +3276,7 @@ fi
 ** Mako Actions Fuzzel Menu
 #+begin_src bash :tangle packages/matugen/.local/bin/mako-actions :shebang "#!/usr/bin/env bash"
 # Interactive fuzzel menu for mako notification actions
+# Supports both quick actions and per-notification action selection
 
 set -euo pipefail
 
@@ -3284,34 +3286,86 @@ if ! pgrep -x mako >/dev/null; then
     exit 1
 fi
 
-# Define actions
+# Function to get list of notifications with IDs and summaries
+get_notifications() {
+    local list_output
+    list_output=$(makoctl list 2>/dev/null)
+
+    if [[ -z "$list_output" ]]; then
+        return 1
+    fi
+
+    # Parse output: "Notification 123: Summary text"
+    # Format for display: "123: Summary text (App name)"
+    echo "$list_output" | awk '
+        /^Notification [0-9]+:/ {
+            match($0, /Notification ([0-9]+): (.+)/, arr)
+            notif_id = arr[1]
+            summary = arr[2]
+            getline  # Skip to next line
+            getline  # Get "App name: ..." line
+            if (/App name:/) {
+                match($0, /App name: (.+)/, arr2)
+                app = arr2[1]
+                printf "%s: %s (%s)\n", notif_id, summary, app
+            }
+        }
+    '
+}
+
+# Define main menu actions
 actions=(
-    "󰵅 Invoke latest notification"
-    "󰎟 Dismiss latest notification"
-    "󰎟 Dismiss all notifications"
-    " List all notifications"
+    " Choose notification and action"
+    "───────────────────────"
+    "󰵅 Invoke default action (latest)"
+    "󰎟 Dismiss latest"
+    "󰎟 Dismiss all"
+    " List all (terminal)"
     "󰁯 Restore last dismissed"
 )
 
-# Show menu and get selection
-selected=$(printf '%s\n' "${actions[@]}" | fuzzel --dmenu --width 40 --placeholder "Notification Actions")
+# Show main menu
+selected=$(printf '%s\n' "${actions[@]}" | fuzzel --dmenu --width 50 --placeholder "Notification Actions")
 
-# Exit if nothing selected
+# Exit if nothing selected or separator selected
 [[ -z "$selected" ]] && exit 0
+[[ "$selected" == "───────────────────────" ]] && exit 0
 
-# Execute action based on selection
+# Handle selection
 case "$selected" in
-    "󰵅 Invoke latest notification")
+    " Choose notification and action")
+        # Get list of notifications
+        notif_list=$(get_notifications)
+
+        if [[ -z "$notif_list" ]]; then
+            notify-send "Mako" "No notifications available"
+            exit 0
+        fi
+
+        # Show notification picker
+        selected_notif=$(echo "$notif_list" | fuzzel --dmenu --width 60 --placeholder "Select Notification")
+
+        [[ -z "$selected_notif" ]] && exit 0
+
+        # Extract notification ID (first field before colon)
+        notif_id=$(echo "$selected_notif" | cut -d: -f1)
+
+        # Use makoctl menu to let user select and invoke action
+        if ! makoctl menu -n "$notif_id" -- fuzzel --dmenu --width 50 --placeholder "Choose Action"; then
+            # If no action was selected or notification has no actions
+            notify-send "Mako" "No action selected or notification has no actions"
+        fi
+        ;;
+    "󰵅 Invoke default action (latest)")
         makoctl invoke
         ;;
-    "󰎟 Dismiss latest notification")
+    "󰎟 Dismiss latest")
         makoctl dismiss
         ;;
-    "󰎟 Dismiss all notifications")
+    "󰎟 Dismiss all")
         makoctl dismiss --all
         ;;
-    " List all notifications")
-        # List notifications in a terminal window
+    " List all (terminal)")
         foot --app-id=floating-foot -e sh -c 'makoctl list; echo; echo "Press Enter to close"; read'
         ;;
     "󰁯 Restore last dismissed")
