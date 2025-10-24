@@ -3312,8 +3312,56 @@ get_notifications() {
     '
 }
 
-# Define main menu actions
-actions=(
+# Get latest notification ID and summary
+latest_notif_info=$(makoctl list 2>/dev/null | head -2)
+latest_notif_id=""
+latest_notif_summary=""
+
+if [[ -n "$latest_notif_info" ]]; then
+    latest_notif_id=$(echo "$latest_notif_info" | head -1 | grep -oP 'Notification \K\d+')
+    latest_notif_summary=$(echo "$latest_notif_info" | head -1 | sed -E 's/^Notification [0-9]+: //')
+fi
+
+# Build menu dynamically
+actions=()
+
+# If there's a latest notification, get its actions and add to menu
+if [[ -n "$latest_notif_id" ]]; then
+    # Get actions for latest notification
+    latest_actions=$(makoctl list 2>/dev/null | awk -v id="$latest_notif_id" '
+        /^Notification [0-9]+:/ {
+            match($0, /Notification ([0-9]+)/, arr)
+            if (arr[1] == id) {
+                in_notif = 1
+            } else {
+                in_notif = 0
+            }
+            next
+        }
+        in_notif && /^  Actions:/ {
+            in_actions = 1
+            next
+        }
+        in_notif && in_actions && /^    [a-zA-Z0-9_-]+:/ {
+            match($0, /^    ([^:]+): (.+)/, arr)
+            print arr[1] "|" arr[2]
+        }
+        in_notif && in_actions && /^[^ ]/ {
+            exit
+        }
+    ')
+
+    if [[ -n "$latest_actions" ]]; then
+        actions+=("Latest: $latest_notif_summary")
+        while IFS='|' read -r action_id action_label; do
+            actions+=("  󰜎 $action_label")
+        done <<< "$latest_actions"
+        actions+=("───────────────────────")
+    fi
+fi
+
+# Add standard menu options
+actions+=(
     " Choose notification and action"
     "───────────────────────"
     "󰵅 Invoke default action (latest)"
@@ -3328,8 +3376,21 @@ selected=$(printf '%s\n' "${actions[@]}" | fuzzel --dmenu --width 50 --placehold
 # Exit if nothing selected or separator selected
 [[ -z "$selected" ]] && exit 0
 [[ "$selected" == "───────────────────────" ]] && exit 0
+[[ "$selected" =~ ^Latest: ]] && exit 0  # Header, not selectable
 
-# Handle selection
+# Check if it's a latest notification action
+if [[ "$selected" =~ ^"  󰜎 " ]]; then
+    # Extract action label and find corresponding action ID
+    action_label=$(echo "$selected" | sed 's/^  󰜎 //')
+    action_id=$(echo "$latest_actions" | grep -F "|$action_label" | cut -d'|' -f1)
+
+    if [[ -n "$action_id" ]]; then
+        makoctl invoke -n "$latest_notif_id" "$action_id"
+    fi
+    exit 0
+fi
+
+# Handle other selections
 case "$selected" in
     " Choose notification and action")
         # Get list of notifications

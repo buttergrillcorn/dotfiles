@@ -703,9 +703,10 @@ After auto-login is configured, Hyprland (or your selected WM) will start automa
   - Package: =packages/matugen/.local/bin/mako-actions=
   - Usage: Mod+Shift+M to open menu with quick actions or per-notification action selection
   - Features:
+    - Latest notification's actions shown at top of menu for instant access
     - Choose specific notification and select from its available actions (reply, mark as read, etc.)
     - Quick actions: invoke default, dismiss latest, dismiss all, restore dismissed
-  - Requires: mako, fuzzel, foot
+  - Requires: mako, fuzzel
 - =~/.local/bin/waybar-battery= - Smart dual battery indicator for waybar
   - Package: =packages/matugen/.local/bin/waybar-battery=
   - Shows combined percentage from BAT0 (24Wh) + BAT1 (72Wh) = 96Wh total
