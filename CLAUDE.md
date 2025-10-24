@@ -30,26 +30,31 @@ The `packages/` directory is gitignored - only the org source is tracked.
 ./scripts/tangle.sh
 ```
 
-### Deploy all packages to home directory
+### Deploy all packages to home directory (Hyprland)
 ```sh
-./scripts/stow-pkg.sh sway waybar mako fuzzel foot yazi qutebrowser swaylock swayidle zsh matugen
+./scripts/stow-pkg.sh hyprland mako fuzzel foot yazi qutebrowser zsh matugen
+```
+
+### Deploy all packages to home directory (Sway)
+```sh
+./scripts/stow-pkg.sh sway mako fuzzel foot yazi qutebrowser swaylock swayidle zsh matugen
 ```
 
 ### Deploy specific package
 ```sh
-./scripts/stow-pkg.sh sway
+./scripts/stow-pkg.sh hyprland
 ```
 
 ### Remove/unstow package
 ```sh
-stow -d packages -t ~ -D sway
+stow -d packages -t ~ -D hyprland
 ```
 
 ### Switch window managers
 ```sh
-# Unstow current WM, stow new one
-stow -d packages -t ~ -D sway
-stow -d packages -t ~ river
+# Unstow current WM, stow new one (waybar is bundled in each WM package)
+stow -d packages -t ~ -D hyprland
+stow -d packages -t ~ sway
 ```
 
 ## Key Design Principles
@@ -88,10 +93,15 @@ Then tangle and stow as usual.
 
 ## Target Stack
 
-**Primary:** hyprland, hyprpaper, hypridle, hyprlock, waybar, mako, fuzzel, foot, yazi, qutebrowser, zsh, matugen
+**Primary:** hyprland (includes waybar), hyprpaper, hypridle, hyprlock, mako, fuzzel, foot, yazi, qutebrowser, zsh, matugen
 
-**Alternative:** sway, swaybg, swayidle, waylock, waybar, mako, fuzzel, foot, yazi, qutebrowser, zsh, matugen
+**Alternative:** sway (includes waybar), swaybg, swayidle, swaylock, mako, fuzzel, foot, yazi, qutebrowser, zsh, matugen
 
-**Note:** Both Hyprland and Sway are fully supported. Hyprland is the primary/default WM, with Sway as an alternative. Always make sure changes are updated in README.org where necessary.
-- Don't stow hyprland and sway together! Only stow one, which is hyprland right now since that's what I'm configuring.
+**Note:** Both Hyprland and Sway are fully supported. Hyprland is the primary/default WM, with Sway as an alternative.
+
+### Important Notes
+- **Waybar is WM-specific**: Each WM package includes its own waybar configuration (hyprland/workspaces vs sway/workspaces module)
+- Don't stow hyprland and sway together! Only stow one at a time.
+- Hyprland is currently the primary/configured WM
+- Always make sure changes are updated in README.org where necessary
 - Escape "* " in codeblocks in ".org" files with ". * " as it'll otherwise be recognised as a org-mode heading.

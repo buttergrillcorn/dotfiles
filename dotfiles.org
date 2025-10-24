@@ -772,7 +772,7 @@ bind = $mainMod, Escape, exec, rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_R
 # Notifications
 bind = $mainMod, M, exec, makoctl restore
 bind = $mainMod CTRL, M, exec, makoctl dismiss
-bind = $mainMod SHIFT, M, exec, ./.local/bin/mako-actions
+bind = $mainMod SHIFT, M, exec, ~/.local/bin/mako-actions
 bind = $mainMod CTRL SHIFT, M, exec, makoctl list
 
 # Network manager
@@ -965,10 +965,10 @@ label {
 }
 #+end_src
 
-* Waybar
+* Waybar (Hyprland)
 
 ** Configuration
-#+begin_src json :tangle packages/waybar/.config/waybar/config
+#+begin_src json :tangle packages/hyprland/.config/waybar/config
 {
   "reload_style_on_change": true,
   "layer": "top",
@@ -982,8 +982,7 @@ label {
 
   "modules-left": [
     "idle_inhibitor",
-    "hyprland/workspaces",
-    "custom/special"
+    "hyprland/workspaces"
   ],
 
   "modules-center": [
@@ -1042,13 +1041,6 @@ label {
       "8": [],
       "9": []
     }
-  },
-
-  "custom/special": {
-    "format": "{}",
-    "exec": "~/.local/bin/waybar-special",
-    "return-type": "json",
-    "interval": 2
   },
 
   "clock": {
@@ -1171,7 +1163,7 @@ label {
 #+end_src
 
 ** Styling
-#+begin_src css :tangle packages/waybar/.config/waybar/style.css
+#+begin_src css :tangle packages/hyprland/.config/waybar/style.css
 . * {
   border: none;
   font-family: <<font>>;
@@ -1242,14 +1234,6 @@ window#waybar {
 
 #workspaces button.empty {
     opacity: 0.5;
-}
-
-#custom-special {
-    margin: 0 10px;
-}
-
-#custom-special.active {
-    color: @primary;
 }
 
 /* Center section - clock and update */
@@ -1332,6 +1316,291 @@ group#tray-expander {
   color: @error;
 }
 #+end_src
+
+* Waybar (Sway)
+
+** Configuration
+#+begin_src json :tangle packages/sway/.config/waybar/config
+{
+  "reload_style_on_change": true,
+  "layer": "top",
+  "position": "top",
+    "height": 30,
+  "spacing": 0,
+  "margin-top": 0,
+  "margin-bottom": 0,
+  "margin-left": 0,
+  "margin-right": 0,
+
+  "modules-left": [
+    "idle_inhibitor",
+    "sway/workspaces"
+  ],
+
+  "modules-center": [
+    "clock",
+    "custom/update"
+  ],
+
+  "modules-right": [
+    "group/tray-expander",
+    "cpu",
+    "memory",
+    "bluetooth",
+    "network",
+    "pulseaudio",
+    "backlight",
+    "custom/battery"
+  ],
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "󰅶",
+      "deactivated": "󰾪"
+    },
+    "tooltip-format-activated": "Idle Inhibitor: Active",
+    "tooltip-format-deactivated": "Idle Inhibitor: Inactive"
+  },
+
+  "sway/workspaces": {
+    "format": "{icon}",
+    "format-icons": {
+      "default": "",
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8",
+      "9": "9",
+      "urgent": ""
+    },
+    "persistent_workspaces": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": []
+    }
+  },
+
+  "clock": {
+    "format": "{:L%A %H:%M}",
+    "format-alt": "{:L%d %B W%V %Y}",
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 3,
+      "weeks-pos": "left",
+      "on-scroll": 1,
+      "on-click-right": "mode",
+      // "format": {
+      //   "months": "<span color='#f7768e'><b>{}</b></span>",
+      //   "days": "<span color='#c0caf5'><b>{}</b></span>",
+      //   "weeks": "<span color='#9ece6a'>W{}</span>",
+      //   "weekdays": "<span color='#7aa2f7'>{}</span>",
+      //   "today": "<span color='#ff9e64'><b><u>{}</u></b></span>"
+      // }
+    },
+    "actions": {
+      "on-click-right": "mode",
+      "on-scroll-up": "shift_up",
+      "on-scroll-down": "shift_down"
+    }
+  },
+
+  "custom/update": {
+    "format": "{}",
+    "exec": "~/.local/bin/waybar-updates",
+    "on-click": "foot --app-id=floating-foot -e sh -c 'yay -Syu && echo && echo Done! Press Enter to close && read'",
+    "return-type": "json",
+    "interval": 3600,
+    "signal": 7
+  },
+
+  "cpu": {
+    "interval": 5,
+    "format": "󰍛",
+    "tooltip-format": "CPU: {usage}%",
+    "on-click": "foot --app-id=floating-foot -e btop"
+  },
+
+  "memory": {
+    "interval": 5,
+    "format": "󰘚",
+    "tooltip-format": "RAM: {used:0.1f}G / {total:0.1f}G ({percentage}%)",
+    "on-click": "foot --app-id=floating-foot -e btop"
+  },
+
+  "network": {
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format": "{icon}",
+    "format-wifi": "{icon}",
+    "format-ethernet": "󰀂",
+    "format-disconnected": "󰤮",
+    "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-ethernet": "Wired\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-disconnected": "Disconnected",
+    "interval": 3,
+    "on-click": "networkmanager_dmenu"
+  },
+
+  "bluetooth": {
+    "format": "",
+    "format-disabled": "󰂲",
+    "format-connected": "",
+      // "format-connected-battery": "{icon}",
+      // "format-icons": {
+      //     "connected-battery": ["󰤾", "󰤿", "󰥀", "󰥁", "󰥂", "󰥃", "󰥄", "󰥅", "󰥆", "󰥈" ]
+      // },
+    "tooltip-format": "Bluetooth: {num_connections} connected",
+    "on-click": "blueman-manager"
+  },
+
+  "pulseaudio": {
+    "format": "{icon}",
+    "format-muted": "",
+    "format-icons": {
+      "default": ["", "", "", "", "", "", "", "", "", ""],
+    },
+    "tooltip-format": "Volume: {volume}%",
+    "scroll-step": 5,
+    "on-click": "foot --class=Wiremix -e wiremix",
+    "on-click-right": "pamixer -t"
+  },
+
+  "backlight": {
+    "format": "{icon}",
+    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "tooltip-format": "Brightness: {percent}%"
+  },
+
+  "custom/battery": {
+    "format": "{}",
+    "exec": "~/.local/bin/waybar-battery",
+    "return-type": "json",
+    "interval": 10
+  },
+
+  "group/tray-expander": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 600,
+      "children-class": "tray-group-item"
+    },
+    "modules": ["custom/expand-icon", "tray"]
+  },
+
+  "custom/expand-icon": {
+    "format": "󰇙",
+    "tooltip": false
+  },
+
+  "tray": {
+    "icon-size": 12,
+    "spacing": 30
+  }
+}
+#+end_src
+
+** Styling
+#+begin_src css :tangle packages/sway/.config/waybar/style.css
+. * {
+  border: none;
+  font-family: <<font>>;
+  font-weight: bold;
+  font-size: 13px;
+  min-height: 0;
+}
+
+window#waybar {
+  background-color: @background;
+}
+
+tooltip {
+  background-color: @background;
+  border: 2px solid @primary;
+  border-radius: 10px;
+  opacity: 0.9;
+}
+
+tooltip * {
+  color: @foreground;
+}
+
+/* Left section - idle inhibitor, workspaces */
+#idle_inhibitor {
+  margin: 0 10px;
+}
+
+#workspaces button {
+    all: unset;
+  padding: 0 10px;
+  color: @foreground;
+}
+
+#workspaces button:hover {
+  color: @primary;
+}
+
+#workspaces button.empty {
+    opacity: 0.5;
+}
+
+/* Center section - clock and update */
+#clock {
+  margin: 0 10px;
+}
+
+#custom-update {
+  margin: 0 5px;
+}
+
+#custom-update.pending {
+  color: @primary;
+}
+
+/* Right section - tray and system stats */
+#tray {
+  margin: 0 10px;
+}
+
+#custom-expand-icon {
+    margin: 0 10px;
+}
+
+#cpu,
+#memory,
+#network,
+#pulseaudio,
+#bluetooth,
+#backlight,
+#custom-battery {
+  margin: 0 10px;
+}
+
+/* Hardware status colors */
+#bluetooth.disabled {
+  opacity: 0.5;
+}
+
+#network.disconnected {
+  color: @error;
+}
+
+/* Audio muted state */
+#pulseaudio.muted {
+  color: @error;
+}
+#+end_src
+
 * Mako
 #+begin_src ini :tangle packages/mako/.config/mako/config
 font=<<font>>
@@ -3253,30 +3522,6 @@ tooltip+="Status: ${state}"
 
 # Return JSON
 echo "{\"text\":\"${icon}\",\"tooltip\":\"${tooltip}\",\"class\":\"${class}\",\"percentage\":${combined_percent}}"
-#+end_src
-
-** Waybar Special Workspace Indicator Script
-#+begin_src bash :tangle packages/matugen/.local/bin/waybar-special :shebang "#!/usr/bin/env bash"
-# Shows indicator when Hyprland special workspace has windows
-# Returns JSON for waybar
-
-set -euo pipefail
-
-# Check if hyprctl is available
-if ! command -v hyprctl &>/dev/null; then
-    echo "{\"text\":\"\",\"tooltip\":\"Hyprland not running\",\"class\":\"hidden\"}"
-    exit 0
-fi
-
-# Count windows in special workspace
-special_count=$(hyprctl clients -j 2>/dev/null | jq '[.[] | select(.workspace.name == "special:special")] | length' 2>/dev/null || echo "0")
-
-# Return result
-if [[ "$special_count" -gt 0 ]]; then
-    echo "{\"text\":\"󱂬\",\"tooltip\":\"Special workspace: ${special_count} window(s)\",\"class\":\"active\"}"
-else
-    echo "{\"text\":\"\",\"tooltip\":\"Special workspace empty\",\"class\":\"empty\"}"
-fi
 #+end_src
 
 ** Mako Actions Fuzzel Menu
