@@ -219,10 +219,11 @@ sudo pacman -S bitwarden-cli
 - *Mod + Shift + W*: Move window to special workspace
 
 *** Utilities
-- *Mod + M*: Notification actions
-- *Mod + Ctrl + M*: Dismiss notification
-- *Mod + Shift + M*: Notification menu (fuzzel)
-- *Mod + Ctrl + Shift + M*: List all notifications
+- *Mod + M*: Restore last dismissed notification
+- *Mod + Ctrl + M*: Dismiss latest notification
+- *Mod + Shift + M*: Notification actions menu (invoke, dismiss, dismiss all, list, restore)
+- *Mod + Ctrl + Shift + M*: List all notifications in terminal
+- *Mod + I*: Network manager (networkmanager_dmenu)
 - *Mod + Shift + V*: Clipboard manager
 - *Print* or *Mod + Shift + S*: Screenshot selector (fuzzel menu)
 - *Shift + Print* or *Mod + Shift + Ctrl + S*: Quick full screenshot
@@ -697,6 +698,28 @@ After auto-login is configured, Hyprland (or your selected WM) will start automa
   - Usage: Print key or Mod+Shift+S, saves to ~/Pictures/Screenshots and copies to clipboard
   - Uses hyprshot for capturing
 
+*** Utility Scripts
+- =~/.local/bin/mako-actions= - Interactive fuzzel menu for mako notification actions
+  - Package: =packages/matugen/.local/bin/mako-actions=
+  - Usage: Mod+Shift+M to open menu with options to invoke, dismiss, dismiss all, list, or restore notifications
+  - Requires: mako, fuzzel, foot
+- =~/.local/bin/waybar-battery= - Smart dual battery indicator for waybar
+  - Package: =packages/matugen/.local/bin/waybar-battery=
+  - Shows combined percentage from BAT0 (24Wh) + BAT1 (72Wh) = 96Wh total
+  - Tooltip displays individual battery status
+- =~/.local/bin/waybar-special= - Special workspace indicator for waybar
+  - Package: =packages/matugen/.local/bin/waybar-special=
+  - Shows 󱂬 icon when Hyprland special workspace contains windows
+- =~/.local/bin/waybar-updates= - System update checker for waybar
+  - Package: =packages/matugen/.local/bin/waybar-updates=
+  - Shows 󰚰 icon when Arch/AUR updates are available
+
+*** Network Management
+- =networkmanager_dmenu= - Network manager interface using fuzzel
+  - Package: =packages/networkmanager_dmenu/.config/networkmanager_dmenu/config.ini=
+  - Usage: Mod+I to open network manager
+  - Integrated with matugen Material You theming
+
 ** Making Scripts Executable
 After deploying packages with stow, run:
 #+begin_src sh
@@ -714,6 +737,12 @@ chmod +x ~/.local/bin/get-layout.sh
 
 # Hyprland-specific scripts (overwrites Sway screenshot.sh)
 chmod +x ~/.local/bin/screenshot.sh  # Hyprland version
+
+# Utility scripts (matugen package)
+chmod +x ~/.local/bin/mako-actions
+chmod +x ~/.local/bin/waybar-battery
+chmod +x ~/.local/bin/waybar-special
+chmod +x ~/.local/bin/waybar-updates
 #+end_src
 
 Note: Run chmod commands AFTER stowing packages, as the files need to exist in ~/.local/bin first.
