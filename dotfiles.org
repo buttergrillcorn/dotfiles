@@ -945,7 +945,7 @@ input-field {
 
     "modules-left": ["idle_inhibitor", "hyprland/workspaces", "privacy"],
 
-    "modules-center": ["clock", "custom/update"],
+    "modules-center": ["custom/pomodoro", "clock", "custom/update"],
 
     "modules-right": [
         "group/tray-expander",
@@ -1021,6 +1021,15 @@ input-field {
                 "tooltip-icon-size": 18
             }
         ]
+    },
+
+    "custom/pomodoro": {
+        "format": "{alt} {text}",
+        "exec": "~/.local/bin/waybar-pomodoro",
+        "return-type": "json",
+        "interval": 1,
+        "on-click": "~/.local/bin/waybar-pomodoro toggle",
+        "on-click-right": "~/.local/bin/waybar-pomodoro reset"
     },
 
     "clock": {
@@ -1222,6 +1231,28 @@ window#waybar {
     color: @error;
 }
 
+#custom-pomodoro {
+    margin: 0 10px;
+    color: @on_surface;
+}
+
+#custom-pomodoro.work {
+    color: @primary;
+}
+
+#custom-pomodoro.break {
+    color: @secondary;
+}
+
+#custom-pomodoro.paused {
+    color: @on_surface_variant;
+    opacity: 0.7;
+}
+
+#custom-pomodoro.idle {
+    opacity: 0.5;
+}
+
 #clock {
   margin: 0 10px;
 }
@@ -1323,6 +1354,7 @@ group#tray-expander {
   ],
 
   "modules-center": [
+    "custom/pomodoro",
     "clock",
     "custom/update"
   ],
@@ -1374,6 +1406,15 @@ group#tray-expander {
       "8": [],
       "9": []
     }
+  },
+
+  "custom/pomodoro": {
+    "format": "{alt} {text}",
+    "exec": "~/.local/bin/waybar-pomodoro",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.local/bin/waybar-pomodoro toggle",
+    "on-click-right": "~/.local/bin/waybar-pomodoro reset"
   },
 
   "clock": {
@@ -1539,7 +1580,28 @@ tooltip * {
     opacity: 0.5;
 }
 
-/* Center section - clock and update */
+/* Center section - pomodoro, clock and update */
+#custom-pomodoro {
+  margin: 0 10px;
+  color: @foreground;
+}
+
+#custom-pomodoro.work {
+  color: @primary;
+}
+
+#custom-pomodoro.break {
+  color: @secondary;
+}
+
+#custom-pomodoro.paused {
+  opacity: 0.7;
+}
+
+#custom-pomodoro.idle {
+  opacity: 0.5;
+}
+
 #clock {
   margin: 0 10px;
 }
@@ -3523,6 +3585,136 @@ tooltip+="Status: ${state}"
 
 # Return JSON
 echo "{\"text\":\"${icon}\",\"tooltip\":\"${tooltip}\",\"class\":\"${class}\",\"percentage\":${combined_percent}}"
+#+end_src
+
+** Waybar Pomodoro Timer Script
+#+begin_src bash :tangle packages/matugen/.local/bin/waybar-pomodoro :shebang "#!/usr/bin/env bash"
+# Minimal pomodoro timer for waybar
+# Left click: toggle (start/pause), Right click: reset
+
+set -euo pipefail
+
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/waybar-pomodoro-state"
+WORK_TIME=1500    # 25 minutes in seconds
+BREAK_TIME=300    # 5 minutes in seconds
+
+# Initialize state file if it doesn't exist
+if [[ ! -f "$STATE_FILE" ]]; then
+    echo "idle" > "$STATE_FILE"
+    echo "0" >> "$STATE_FILE"
+    echo "$WORK_TIME" >> "$STATE_FILE"
+fi
+
+# Read current state
+{
+    read -r state
+    read -r start_time
+    read -r remaining
+} < "$STATE_FILE"
+
+# Handle commands
+case "${1:-}" in
+    toggle)
+        if [[ "$state" == "idle" ]]; then
+            # Start work session
+            echo "work" > "$STATE_FILE"
+            echo "$(date +%s)" >> "$STATE_FILE"
+            echo "$WORK_TIME" >> "$STATE_FILE"
+        elif [[ "$state" == "work" ]] || [[ "$state" == "break" ]]; then
+            # Pause
+            now=$(date +%s)
+            elapsed=$((now - start_time))
+            remaining=$((remaining - elapsed))
+            if [[ $remaining -lt 0 ]]; then
+                remaining=0
+            fi
+            echo "paused" > "$STATE_FILE"
+            echo "$now" >> "$STATE_FILE"
+            echo "$remaining" >> "$STATE_FILE"
+        elif [[ "$state" == "paused" ]]; then
+            # Resume
+            mode="work"
+            if [[ $remaining -le 0 ]]; then
+                mode="break"
+                remaining=$BREAK_TIME
+            fi
+            echo "$mode" > "$STATE_FILE"
+            echo "$(date +%s)" >> "$STATE_FILE"
+            echo "$remaining" >> "$STATE_FILE"
+        fi
+        exit 0
+        ;;
+    reset)
+        echo "idle" > "$STATE_FILE"
+        echo "0" >> "$STATE_FILE"
+        echo "$WORK_TIME" >> "$STATE_FILE"
+        exit 0
+        ;;
+esac
+
+# Calculate remaining time
+if [[ "$state" == "work" ]] || [[ "$state" == "break" ]]; then
+    now=$(date +%s)
+    elapsed=$((now - start_time))
+    remaining=$((remaining - elapsed))
+
+    # Check if timer finished
+    if [[ $remaining -le 0 ]]; then
+        # Auto-switch to break or work
+        if [[ "$state" == "work" ]]; then
+            # Send notification
+            notify-send "Pomodoro" "Work session complete! Take a break." -u normal
+            echo "break" > "$STATE_FILE"
+            echo "$(date +%s)" >> "$STATE_FILE"
+            echo "$BREAK_TIME" >> "$STATE_FILE"
+            remaining=$BREAK_TIME
+            state="break"
+        else
+            notify-send "Pomodoro" "Break over! Ready for work?" -u normal
+            echo "idle" > "$STATE_FILE"
+            echo "0" >> "$STATE_FILE"
+            echo "$WORK_TIME" >> "$STATE_FILE"
+            remaining=0
+            state="idle"
+        fi
+    fi
+fi
+
+# Format time display
+minutes=$((remaining / 60))
+seconds=$((remaining % 60))
+time_str=$(printf "%02d:%02d" $minutes $seconds)
+
+# Determine icon and class
+case "$state" in
+    work)
+        icon="󰔟"  # Focus icon
+        class="work"
+        tooltip="Work session: $time_str"
+        text="$time_str"
+        ;;
+    break)
+        icon="󰾩"  # Coffee icon
+        class="break"
+        tooltip="Break time: $time_str"
+        text="$time_str"
+        ;;
+    paused)
+        icon="󰏤"  # Pause icon
+        class="paused"
+        tooltip="Paused: $time_str"
+        text="$time_str"
+        ;;
+    idle|*)
+        icon="󱫐"  # Timer icon
+        class="idle"
+        tooltip="Pomodoro (click to start)"
+        text=""
+        ;;
+esac
+
+# Output JSON for waybar
+echo "{\"text\":\"$text\",\"tooltip\":\"$tooltip\",\"class\":\"$class\",\"alt\":\"$icon\"}"
 #+end_src
 
 ** Mako Actions Fuzzel Menu

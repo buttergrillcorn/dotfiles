@@ -758,10 +758,12 @@ Add new configurations to =dotfiles.org= with proper tangle headers, then re-run
 *** TODO Implement a helper pop-up function to show common shortcut or useful features, for anyone using the computer or in case I forget.
 ** Misc
 *** TODO Add zsh plugins (syntax highlighting, autosuggestions, completions)
+*** TODO Fix GTK theming
+*** TODO Fix QT theming
 ** Waybar
-*** TODO Implement a module for showing how many packages need updating on Waybar
+*** DONE Implement a module for showing how many packages need updating on Waybar
 *** DONE Add scratchpad indicator module (show count/window titles of scratchpad windows)
-*** TODO Add network module (WiFi SSID, connection status)
+*** DONE Add network module (WiFi SSID, connection status)
 *** TODO Add a minimal pomodoro timer module
 ** Qutebrowser
-*** TODO Port over my previous config and bookmarks, etc.
+*** DONE Port over my previous config and bookmarks, etc.
