@@ -1014,9 +1014,10 @@ label {
 
   "hyprland/workspaces": {
     "on-click": "activate",
+      "show-special": true,
     "format": "{icon}",
     "format-icons": {
-      "default": "",
+      "default": "",
       "1": "1",
       "2": "2",
       "3": "3",
@@ -1026,8 +1027,9 @@ label {
       "7": "7",
       "8": "8",
       "9": "9",
-      "active": "󱓻",
-      "urgent": "󱓻"
+      "active": "",
+      "urgent": "",
+        "special": ""
     },
     "persistent-workspaces": {
       "1": [],
@@ -1224,6 +1226,10 @@ window#waybar {
 
 #workspaces button.active {
   color: @primary;
+}
+
+#workspaces button.special {
+  color: @secondary;
 }
 
 #workspaces button.urgent {
