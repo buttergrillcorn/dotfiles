@@ -37,6 +37,13 @@ sudo pacman -S waybar mako fuzzel foot yazi qutebrowser zsh
 
 # Theming
 yay -S matugen-bin  # or cargo install matugen
+sudo pacman -S adw-gtk-theme qt6ct qt5ct  # GTK and Qt theming
+sudo pacman -S papirus-icon-theme  # Icon theme
+yay -S papirus-folders-git  # Dynamic folder recoloring
+
+# Configure passwordless sudo for automatic folder recoloring
+echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/papirus-folders" | sudo tee /etc/sudoers.d/papirus-folders
+sudo chmod 440 /etc/sudoers.d/papirus-folders
 #+end_src
 
 *** For Sway (Alternative)
@@ -49,6 +56,13 @@ sudo pacman -S waybar mako fuzzel foot yazi qutebrowser zsh
 
 # Theming (if not already installed)
 yay -S matugen-bin  # or cargo install matugen
+sudo pacman -S adw-gtk-theme qt6ct qt5ct  # GTK and Qt theming
+sudo pacman -S papirus-icon-theme  # Icon theme
+yay -S papirus-folders-git  # Dynamic folder recoloring
+
+# Configure passwordless sudo for automatic folder recoloring
+echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/papirus-folders" | sudo tee /etc/sudoers.d/papirus-folders
+sudo chmod 440 /etc/sudoers.d/papirus-folders
 #+end_src
 
 ** Additional Dependencies
@@ -295,6 +309,7 @@ sudo pacman -S bitwarden-cli
 ** Theming
 - Matugen (Material You) integration for dynamic colors
 - Automatic light/dark mode detection from wallpaper
+- Wallpaper persistence across reboots (default.jpg symlink auto-updates on selection)
 - Beautiful, cohesive color schemes across all apps:
   - Hyprland/Sway window manager borders and UI
   - Hyprlock/Swaylock screen lock
@@ -305,12 +320,20 @@ sudo pacman -S bitwarden-cli
   - Qutebrowser (UI colors and preferred color scheme sync)
   - GTK 3.0/4.0 applications (buttons, menus, selections, etc.)
   - Qt5/Qt6 applications via qt5ct/qt6ct color schemes
-- GTK & Qt Integration:
-  - Custom matugen templates generate GTK css and Qt color schemes
-  - Unified Material You colors across all toolkits
-  - Consistent widget styling (buttons, entries, menus, scrollbars)
-  - Qt6ct and Qt5ct configured with Fusion style
+- GTK Integration:
+  - Base theme: adw-gtk3-dark (clean, modern Material Design aesthetic)
+  - Custom matugen template overrides adw-gtk3 color variables with Material You colors
+  - Minimal color-only overrides - adw-gtk3 provides all widget styling, borders, shadows
+  - Eliminates border and color inconsistencies compared to generic themes
+  - Icon theme: Papirus-Dark (Material Design icon theme)
+  - Dynamic folder recoloring with papirus-folders (automatically matches wallpaper colors)
+  - Cursor theme: human
+- Qt Integration:
+  - Qt6ct and Qt5ct configured with Fusion style for clean, minimal widgets
+  - Custom matugen templates generate Qt color schemes (active, disabled, inactive states)
+  - Unified Material You colors across all Qt applications
   - QT_QPA_PLATFORMTHEME=qt6ct environment variable set
+  - Icon theme: Papirus-Dark (consistent with GTK)
 - Minimal fallback color scheme (Tokyo Night inspired)
 - Consistent gap and border styling:
   - Hyprland: 5px inner gaps, 10px outer gaps, 3px borders
@@ -866,8 +889,21 @@ Comprehensive zsh configuration with:
 - 50k line history with smart features
 - Custom key bindings
 - Git/Docker/npm completions
-*** TODO Fix GTK theming
-*** TODO Fix QT theming
+*** DONE Fix GTK theming
+CLOSED: [2025-10-25]
+Implemented adw-gtk3-dark base theme with Material You color overrides:
+- Clean, modern Material Design aesthetic
+- MoreWaita icon theme and human cursor theme
+- Minimal color-only CSS overrides eliminate border/color inconsistencies
+- Matugen template properly maps Material You colors to adw-gtk3 variables
+*** DONE Fix QT theming
+CLOSED: [2025-10-25]
+Configured qt6ct/qt5ct for Qt theming:
+- Switched from hyprqt6engine to qt6ct for better compatibility
+- Fusion widget style with Material You color schemes
+- Matugen templates generate proper Qt color palettes (active/disabled/inactive states)
+- MoreWaita icons for consistency with GTK
+- QT_QPA_PLATFORMTHEME=qt6ct environment variable
 ** Waybar
 *** DONE Implement a module for showing how many packages need updating on Waybar
 *** DONE Add scratchpad indicator module (show count/window titles of scratchpad windows)
