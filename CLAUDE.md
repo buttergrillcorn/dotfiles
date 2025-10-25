@@ -109,7 +109,7 @@ The zsh configuration is comprehensive and feature-rich, built with zinit plugin
 - **History substring search** - Search history with arrow keys
 - **FZF integration** - Fuzzy finding for files, directories, and history
 - **Smart navigation** - Auto-cd, directory stack, zoxide integration
-- **Key bindings** - Emacs-style with custom enhancements
+- **Key bindings** - VIM-style with custom enhancements
 - **Developer tools** - Git, Docker, npm completions and aliases
 
 ### First Run

@@ -1760,7 +1760,6 @@ lines=10000
 multiplier=2
 
 [cursor]
-style=beam
 unfocused-style=hollow
 blink=yes
 blink-rate=750
@@ -2706,7 +2705,7 @@ setopt PUSHD_SILENT              # Don't print directory stack
 setopt ALWAYS_TO_END             # Move cursor to end after completion
 setopt AUTO_MENU                 # Show completion menu on tab
 setopt COMPLETE_IN_WORD          # Complete from both ends of word
-setopt MENU_COMPLETE             # Autoselect first completion entry
+# setopt MENU_COMPLETE             # Autoselect first completion entry (DISABLED: conflicts with cd)
 
 # Correction and expansion
 setopt CORRECT                   # Correct command spelling
@@ -2740,18 +2739,18 @@ source "${ZINIT_HOME}/zinit.zsh"
 # Essential Plugins
 # ============================================================================
 
-# Load completion system first
-autoload -Uz compinit
-compinit -d ~/.cache/zsh/zcompdump-$ZSH_VERSION
-
 # Syntax highlighting (must be loaded before other plugins)
 zinit light zdharma-continuum/fast-syntax-highlighting
 
 # Fish-like autosuggestions
 zinit light zsh-users/zsh-autosuggestions
 
-# Additional completions
+# Additional completions (load before compinit)
 zinit light zsh-users/zsh-completions
+
+# Initialize completion system AFTER loading completion plugins
+autoload -Uz compinit
+compinit -d ~/.cache/zsh/zcompdump-$ZSH_VERSION
 
 # History substring search (bind keys after loading)
 zinit light zsh-users/zsh-history-substring-search
@@ -2776,7 +2775,8 @@ zinit snippet OMZP::npm
 zinit light hlissner/zsh-autopair
 
 # Better cd with interactive menu
-zinit light skywind3000/z.lua
+# DISABLED: Conflicts with cd completion
+# zinit light skywind3000/z.lua
 
 # Colorize man pages
 zinit light ael-code/zsh-colored-man-pages
@@ -2808,9 +2808,6 @@ zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm -w 
 zstyle ':completion:*:*:kill:*' menu yes select
 zstyle ':completion:*:kill:*' force-list always
 
-# Directory completion
-zstyle ':completion:*:cd:*' ignore-parents parent pwd  # Don't complete pwd or parent
-
 # Completion for custom commands
 compdef _gnu_generic bat
 compdef _gnu_generic eza
@@ -2824,8 +2821,8 @@ compdef _gnu_generic rg
 # Key Bindings
 # ============================================================================
 
-# Use emacs keybindings
-bindkey -e
+# Use VIM keybindings
+bindkey -v
 
 # History substring search (bind to up/down arrows)
 bindkey '^[[A' history-substring-search-up      # Up arrow

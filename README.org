@@ -614,7 +614,7 @@ Comprehensive, modern shell configuration with zinit plugin manager and Starship
   - Auto-pushd with directory stack (use 'd' to show, '1-9' to jump)
   - Extended globbing (**/*.js)
 - *Key bindings*:
-  - Emacs-style base
+  - VIM-style base (ESC for normal mode, i/a for insert)
   - Ctrl+Space/Shift+Tab: Accept suggestion
   - Up/Down: Substring history search
   - Ctrl+R/S: Incremental search
