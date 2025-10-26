@@ -170,6 +170,7 @@ sudo pacman -S bitwarden-cli
 - *Mod + Shift + Grave*: Move window to scratchpad
 
 *** Utilities
+- *Mod + /*: Help menu (interactive keybinding reference)
 - *Mod + M*: Notification actions
 - *Mod + Shift + V*: Clipboard manager
 - *Print* or *Mod + Shift + S*: Screenshot selector (fuzzel menu)
@@ -236,6 +237,7 @@ sudo pacman -S bitwarden-cli
 - *Mod + Shift + W*: Move window to special workspace
 
 *** Utilities
+- *Mod + /*: Help menu (interactive keybinding reference)
 - *Mod + M*: Restore last dismissed notification
 - *Mod + Ctrl + M*: Dismiss latest notification
 - *Mod + Shift + M*: Notification actions menu (choose specific notification with actions, or quick actions)
@@ -831,6 +833,16 @@ After auto-login is configured, Hyprland (or your selected WM) will start automa
   - Uses hyprshot for capturing
 
 *** Utility Scripts
+- =~/.local/bin/help-menu= - Interactive help menu with keybindings and system information
+  - Package: =packages/matugen/.local/bin/help-menu=
+  - Usage: Mod+/ to open interactive help menu
+  - Features:
+    - Auto-detects window manager (Hyprland/Sway) and shows appropriate keybindings
+    - Organized categories: Applications, Window Management, Navigation, Workspaces, Hardware, Utilities, etc.
+    - System information with dotfiles structure and quick commands
+    - Quick reference with most commonly used keybindings
+    - Column-aligned keybindings for easy reading
+  - Requires: fuzzel
 - =~/.local/bin/mako-actions= - Interactive fuzzel menu for mako notification actions
   - Package: =packages/matugen/.local/bin/mako-actions=
   - Usage: Mod+Shift+M to open menu with quick actions or per-notification action selection
@@ -875,6 +887,7 @@ chmod +x ~/.local/bin/get-layout.sh
 chmod +x ~/.local/bin/screenshot.sh  # Hyprland version
 
 # Utility scripts (matugen package)
+chmod +x ~/.local/bin/help-menu
 chmod +x ~/.local/bin/mako-actions
 chmod +x ~/.local/bin/waybar-battery
 chmod +x ~/.local/bin/waybar-special
@@ -887,7 +900,13 @@ Note: Run chmod commands AFTER stowing packages, as the files need to exist in ~
 Add new configurations to =dotfiles.org= with proper tangle headers, then re-run =./scripts/tangle.sh=.
 * TO-DO's
 ** Sway/WM
-*** TODO Implement a helper pop-up function to show common shortcut or useful features, for anyone using the computer or in case I forget.
+*** DONE Implement a helper pop-up function to show common shortcut or useful features, for anyone using the computer or in case I forget.
+CLOSED: [2025-10-26]
+Interactive help menu accessible via Mod+/:
+- Auto-detects window manager (Hyprland/Sway)
+- Organized keybinding categories with fuzzel interface
+- System information and quick reference sections
+- Column-aligned keybindings for easy reading
 ** Misc
 *** DONE Add zsh plugins (syntax highlighting, autosuggestions, completions)
 CLOSED: [2025-10-24]

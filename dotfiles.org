@@ -340,6 +340,9 @@ bindsym $mod+Escape exec rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME
 
 # Clipboard history
 bindsym $mod+Shift+v exec cliphist list | fuzzel --dmenu | cliphist decode | wl-copy
+
+# Help menu
+bindsym $mod+slash exec ~/.local/bin/help-menu
 #+end_src
 
 ** Keybindings - Resizing
@@ -817,6 +820,9 @@ bind = $mainMod, I, exec, networkmanager_dmenu
 # Clipboard manager
 bind = $mainMod SHIFT, V, exec, cliphist list | fuzzel --dmenu --width 50 --placeholder "Search in clipboard" | cliphist decode | wl-copy
 bind = $mainMod CTRL SHIFT, V, exec, cliphist wipe | notify-send "Cliboard" "Clipboard history has been cleared."
+
+# Help menu
+bind = $mainMod, slash, exec, ~/.local/bin/help-menu
 #+end_src
 
 ** Keybindings - Resizing
@@ -1912,173 +1918,6 @@ geometry=@ByteArray()
 # Qt theming configuration
 # NOTE: QT_QPA_PLATFORMTHEME is set in Hyprland config to use hyprqt6engine
 # Do not set it here to avoid conflicts
-#+end_src
-
-* Screenshot Selector Script (Sway)
-#+begin_src bash :tangle packages/sway/.local/bin/screenshot.sh :shebang "#!/usr/bin/env bash"
-set -euo pipefail
-
-# Screenshot directory
-SCREENSHOT_DIR="$HOME/Pictures/Screenshots"
-mkdir -p "$SCREENSHOT_DIR"
-
-# Screenshot filename with timestamp
-FILENAME="$SCREENSHOT_DIR/screenshot_$(date +%Y%m%d_%H%M%S).png"
-
-# Function to take screenshot, copy, and save
-take_screenshot() {
-    local mode=$1
-
-    # Take screenshot based on mode
-    if grimshot save "$mode" "$FILENAME"; then
-        # Copy to clipboard
-        wl-copy < "$FILENAME"
-
-        # Show notification with preview
-        notify-send "Screenshot Saved" \
-            "Mode: $mode\nFile: $(basename "$FILENAME")\nCopied to clipboard" \
-            -i "$FILENAME" \
-            -u normal
-    else
-        notify-send "Screenshot Failed" \
-            "Failed to capture $mode" \
-            -u critical
-    fi
-}
-
-# If argument provided, take screenshot directly
-if [ $# -gt 0 ]; then
-    take_screenshot "$1"
-    exit 0
-fi
-
-# Show fuzzel menu to select mode
-MODE=$(printf "Screen (full)\nArea (selection)\nWindow (active)\nOutput (monitor)" | \
-    fuzzel --dmenu --placeholder "What to screenshot...")
-
-# Exit if cancelled
-if [ -z "$MODE" ]; then
-    exit 0
-fi
-
-# Map selection to grimshot mode
-case "$MODE" in
-    "Screen (full)")
-        take_screenshot "screen"
-        ;;
-    "Area (selection)")
-        take_screenshot "area"
-        ;;
-    "Window (active)")
-        take_screenshot "active"
-        ;;
-    "Output (monitor)")
-        take_screenshot "output"
-        ;;
-esac
-#+end_src
-
-* Screenshot Selector Script (Hyprland)
-#+begin_src bash :tangle packages/hyprland/.local/bin/screenshot.sh :shebang "#!/usr/bin/env bash"
-set -euo pipefail
-
-# Screenshot directory
-SCREENSHOT_DIR="$HOME/Pictures/Screenshots"
-mkdir -p "$SCREENSHOT_DIR"
-
-# Screenshot filename with timestamp
-FILENAME="$SCREENSHOT_DIR/screenshot_$(date +%Y%m%d_%H%M%S).png"
-
-# Function to take screenshot, copy, and save
-take_screenshot() {
-    local mode=$1
-
-    # Take screenshot based on mode using hyprshot
-    case "$mode" in
-        "screen")
-            hyprshot -m output -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
-            ;;
-        "area")
-            hyprshot -m region -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
-            ;;
-        "window")
-            hyprshot -m window -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
-            ;;
-    esac
-
-    # Check if screenshot was created
-    if [ -f "$FILENAME" ]; then
-        notify-send "Screenshot Saved" \
-            "Mode: $mode\nFile: $(basename "$FILENAME")\nCopied to clipboard" \
-            -i "$FILENAME" \
-            -u normal
-    else
-        notify-send "Screenshot Failed" \
-            "Failed to capture $mode" \
-            -u critical
-    fi
-}
-
-# If argument provided, take screenshot directly
-if [ $# -gt 0 ]; then
-    take_screenshot "$1"
-    exit 0
-fi
-
-# Show fuzzel menu to select mode
-MODE=$(printf "Screen (full)\nArea (selection)\nWindow (active)" | \
-    fuzzel --dmenu --placeholder "Screenshot...")
-
-# Exit if cancelled
-if [ -z "$MODE" ]; then
-    exit 0
-fi
-
-# Map selection to screenshot mode
-case "$MODE" in
-    "Screen (full)")
-        take_screenshot "screen"
-        ;;
-    "Area (selection)")
-        take_screenshot "area"
-        ;;
-    "Window (active)")
-        take_screenshot "window"
-        ;;
-esac
-#+end_src
-
-* Layout Indicator Script
-#+begin_src bash :tangle packages/waybar/.local/bin/get-layout.sh :shebang "#!/usr/bin/env bash"
-# Get the layout of the parent container of the focused window
-# Focused windows themselves have layout "none", so we need to check the parent
-
-TREE=$(swaymsg -t get_tree)
-
-# Find the focused window and get its ID
-FOCUSED_ID=$(echo "$TREE" | jq -r '.. | select(.focused? == true) | .id')
-
-# Find the parent container of the focused window
-PARENT_LAYOUT=$(echo "$TREE" | jq -r --arg id "$FOCUSED_ID" '
-  .. |
-  objects |
-  select(.nodes[]?.id == ($id | tonumber) or .floating_nodes[]?.id == ($id | tonumber)) |
-  .layout
-' | grep -v "^null$" | head -1)
-
-# If no parent found, try getting workspace layout
-if [ -z "$PARENT_LAYOUT" ] || [ "$PARENT_LAYOUT" = "none" ]; then
-    PARENT_LAYOUT=$(echo "$TREE" | jq -r '.. | select(.type? == "workspace" and .focused? == true) | .layout' | head -1)
-fi
-
-# Map layout names to symbols
-case "$PARENT_LAYOUT" in
-    splith) echo "⬌" ;;
-    splitv) echo "⬍" ;;
-    tabbed) echo "☰" ;;
-    stacked) echo "☷" ;;
-    *) echo "▪" ;;  # Default symbol for unknown/single window
-esac
 #+end_src
 
 * Qutebrowser
@@ -4682,4 +4521,498 @@ else
     notify-send "Error" "Failed to generate theme" -u critical
     exit 1
 fi
+#+end_src
+
+** Screenshot Selector Script (Sway)
+#+begin_src bash :tangle packages/sway/.local/bin/screenshot.sh :shebang "#!/usr/bin/env bash"
+set -euo pipefail
+
+# Screenshot directory
+SCREENSHOT_DIR="$HOME/Pictures/Screenshots"
+mkdir -p "$SCREENSHOT_DIR"
+
+# Screenshot filename with timestamp
+FILENAME="$SCREENSHOT_DIR/screenshot_$(date +%Y%m%d_%H%M%S).png"
+
+# Function to take screenshot, copy, and save
+take_screenshot() {
+    local mode=$1
+
+    # Take screenshot based on mode
+    if grimshot save "$mode" "$FILENAME"; then
+        # Copy to clipboard
+        wl-copy < "$FILENAME"
+
+        # Show notification with preview
+        notify-send "Screenshot Saved" \
+            "Mode: $mode\nFile: $(basename "$FILENAME")\nCopied to clipboard" \
+            -i "$FILENAME" \
+            -u normal
+    else
+        notify-send "Screenshot Failed" \
+            "Failed to capture $mode" \
+            -u critical
+    fi
+}
+
+# If argument provided, take screenshot directly
+if [ $# -gt 0 ]; then
+    take_screenshot "$1"
+    exit 0
+fi
+
+# Show fuzzel menu to select mode
+MODE=$(printf "Screen (full)\nArea (selection)\nWindow (active)\nOutput (monitor)" | \
+    fuzzel --dmenu --placeholder "What to screenshot...")
+
+# Exit if cancelled
+if [ -z "$MODE" ]; then
+    exit 0
+fi
+
+# Map selection to grimshot mode
+case "$MODE" in
+    "Screen (full)")
+        take_screenshot "screen"
+        ;;
+    "Area (selection)")
+        take_screenshot "area"
+        ;;
+    "Window (active)")
+        take_screenshot "active"
+        ;;
+    "Output (monitor)")
+        take_screenshot "output"
+        ;;
+esac
+#+end_src
+
+** Screenshot Selector Script (Hyprland)
+#+begin_src bash :tangle packages/hyprland/.local/bin/screenshot.sh :shebang "#!/usr/bin/env bash"
+set -euo pipefail
+
+# Screenshot directory
+SCREENSHOT_DIR="$HOME/Pictures/Screenshots"
+mkdir -p "$SCREENSHOT_DIR"
+
+# Screenshot filename with timestamp
+FILENAME="$SCREENSHOT_DIR/screenshot_$(date +%Y%m%d_%H%M%S).png"
+
+# Function to take screenshot, copy, and save
+take_screenshot() {
+    local mode=$1
+
+    # Take screenshot based on mode using hyprshot
+    case "$mode" in
+        "screen")
+            hyprshot -m output -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
+            ;;
+        "area")
+            hyprshot -m region -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
+            ;;
+        "window")
+            hyprshot -m window -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
+            ;;
+    esac
+
+    # Check if screenshot was created
+    if [ -f "$FILENAME" ]; then
+        notify-send "Screenshot Saved" \
+            "Mode: $mode\nFile: $(basename "$FILENAME")\nCopied to clipboard" \
+            -i "$FILENAME" \
+            -u normal
+    else
+        notify-send "Screenshot Failed" \
+            "Failed to capture $mode" \
+            -u critical
+    fi
+}
+
+# If argument provided, take screenshot directly
+if [ $# -gt 0 ]; then
+    take_screenshot "$1"
+    exit 0
+fi
+
+# Show fuzzel menu to select mode
+MODE=$(printf "Screen (full)\nArea (selection)\nWindow (active)" | \
+    fuzzel --dmenu --placeholder "Screenshot...")
+
+# Exit if cancelled
+if [ -z "$MODE" ]; then
+    exit 0
+fi
+
+# Map selection to screenshot mode
+case "$MODE" in
+    "Screen (full)")
+        take_screenshot "screen"
+        ;;
+    "Area (selection)")
+        take_screenshot "area"
+        ;;
+    "Window (active)")
+        take_screenshot "window"
+        ;;
+esac
+#+end_src
+
+** Layout Indicator Script
+#+begin_src bash :tangle packages/sway/.local/bin/get-layout.sh :shebang "#!/usr/bin/env bash"
+# Get the layout of the parent container of the focused window
+# Focused windows themselves have layout "none", so we need to check the parent
+
+TREE=$(swaymsg -t get_tree)
+
+# Find the focused window and get its ID
+FOCUSED_ID=$(echo "$TREE" | jq -r '.. | select(.focused? == true) | .id')
+
+# Find the parent container of the focused window
+PARENT_LAYOUT=$(echo "$TREE" | jq -r --arg id "$FOCUSED_ID" '
+  .. |
+  objects |
+  select(.nodes[]?.id == ($id | tonumber) or .floating_nodes[]?.id == ($id | tonumber)) |
+  .layout
+' | grep -v "^null$" | head -1)
+
+# If no parent found, try getting workspace layout
+if [ -z "$PARENT_LAYOUT" ] || [ "$PARENT_LAYOUT" = "none" ]; then
+    PARENT_LAYOUT=$(echo "$TREE" | jq -r '.. | select(.type? == "workspace" and .focused? == true) | .layout' | head -1)
+fi
+
+# Map layout names to symbols
+case "$PARENT_LAYOUT" in
+    splith) echo "⬌" ;;
+    splitv) echo "⬍" ;;
+    tabbed) echo "☰" ;;
+    stacked) echo "☷" ;;
+    *) echo "▪" ;;  # Default symbol for unknown/single window
+esac
+#+end_src
+
+** Help Menu Script
+#+begin_src bash :tangle packages/matugen/.local/bin/help-menu :shebang "#!/usr/bin/env bash"
+# Interactive help menu for dotfiles configuration
+# Shows keybindings and system information using fuzzel
+
+set -euo pipefail
+
+# Detect which WM is running
+detect_wm() {
+    if pgrep -x Hyprland >/dev/null; then
+        echo "hyprland"
+    elif pgrep -x sway >/dev/null; then
+        echo "sway"
+    else
+        echo "unknown"
+    fi
+}
+
+WM=$(detect_wm)
+
+# Show keybindings for a category
+show_keybindings() {
+    local category="$1"
+    local bindings=""
+
+    case "$category" in
+        "Applications")
+            if [ "$WM" = "hyprland" ]; then
+                bindings="SUPER + Return → Terminal
+SUPER + SHIFT + Return → Floating terminal (scratchpad)
+SUPER + CTRL + Return → Floating terminal
+SUPER + D → Application launcher (fuzzel)
+SUPER + B → Browser (qutebrowser)
+SUPER + SHIFT + B → Bitwarden password manager
+SUPER + E → File manager (yazi)
+SUPER + N → Emacs (client)
+SUPER + SHIFT + N → Emacs (new instance)
+SUPER + SHIFT + P → Wallpaper selector"
+            else # sway
+                bindings="SUPER + Return → Terminal
+SUPER + SHIFT + Return → Floating terminal
+SUPER + D → Application launcher (fuzzel)
+SUPER + B → Browser (qutebrowser)
+SUPER + SHIFT + B → Bitwarden password manager
+SUPER + Y → File manager (yazi)
+SUPER + N → Emacs (client)
+SUPER + SHIFT + N → Emacs (new instance)
+SUPER + P → Wallpaper selector"
+            fi
+            ;;
+        "Window Management")
+            if [ "$WM" = "hyprland" ]; then
+                bindings="SUPER + Q → Close window
+SUPER + CTRL + F → Fullscreen
+SUPER + SHIFT + F → Maximize (fullscreen mode 1)
+SUPER + F → Toggle floating
+SUPER + Tab → Focus last window
+SUPER + ALT + S → Pin window
+SUPER + G → Toggle group/tabs
+SUPER + SHIFT + G → Move out of group
+SUPER + CTRL + G → Lock group
+SUPER + S → Change group tab (forward)
+SUPER + T → Cycle through windows
+SUPER + P → Pseudo-tiling mode"
+            else # sway
+                bindings="SUPER + Q → Close window
+SUPER + SHIFT + CTRL + F → Fullscreen toggle
+SUPER + SHIFT + F → Global fullscreen
+SUPER + F → Toggle floating
+SUPER + Tab → Focus mode toggle
+SUPER + ALT + S → Sticky toggle
+SUPER + W → Tabbed layout
+SUPER + S → Stacking layout
+SUPER + E → Toggle split layout
+SUPER + T → Toggle all layouts
+SUPER + V → Vertical split
+SUPER + - → Horizontal split"
+            fi
+            ;;
+        "Navigation")
+            bindings="SUPER + H/J/K/L → Focus left/down/up/right
+SUPER + Arrow keys → Focus in direction
+(VIM-style navigation)"
+            ;;
+        "Moving Windows")
+            if [ "$WM" = "hyprland" ]; then
+                bindings="SUPER + SHIFT + H/J/K/L → Move window
+SUPER + SHIFT + Arrows → Move window
+SUPER + CTRL + H/J/K/L → Move window or group
+SUPER + CTRL + SHIFT + H/J/K/L → Move to monitor"
+            else # sway
+                bindings="SUPER + SHIFT + H/J/K/L → Move window
+SUPER + SHIFT + Arrows → Move window
+SUPER + CTRL + SHIFT + H/J/K/L → Move to output"
+            fi
+            ;;
+        "Workspaces")
+            if [ "$WM" = "hyprland" ]; then
+                bindings="SUPER + 1-9 → Switch to workspace
+SUPER + SHIFT + 1-9 → Move window (silent)
+SUPER + CTRL + 1-9 → Move window and switch
+SUPER + W → Toggle scratchpad
+SUPER + SHIFT + W → Move to scratchpad"
+            else # sway
+                bindings="SUPER + 1-9 → Switch to workspace
+SUPER + SHIFT + 1-9 → Move window to workspace
+SUPER + CTRL + 1-9 → Move and switch
+SUPER + \` → Show scratchpad
+SUPER + SHIFT + \` → Move to scratchpad"
+            fi
+            ;;
+        "Hardware Controls")
+            bindings="XF86AudioRaiseVolume → Volume up (+5%)
+XF86AudioLowerVolume → Volume down (-5%)
+XF86AudioMute → Toggle mute
+XF86AudioMicMute → Toggle mic mute
+XF86MonBrightnessUp → Brightness up (+5%)
+XF86MonBrightnessDown → Brightness down (-5%)
+Print → Screenshot menu
+SUPER + SHIFT + S → Screenshot menu
+SHIFT + Print → Full screen screenshot
+SUPER + SHIFT + CTRL + S → Full screen screenshot"
+            ;;
+        "Utilities")
+            if [ "$WM" = "hyprland" ]; then
+                bindings="SUPER + Escape → Lock screen
+SUPER + M → Restore notification
+SUPER + CTRL + M → Dismiss notification
+SUPER + SHIFT + M → Notification actions menu
+SUPER + CTRL + SHIFT + M → List all notifications
+SUPER + I → Network manager
+SUPER + SHIFT + V → Clipboard history
+SUPER + CTRL + SHIFT + V → Clear clipboard"
+            else # sway
+                bindings="SUPER + Escape → Lock screen
+SUPER + M → Invoke notification action
+SUPER + CTRL + M → Dismiss notification
+SUPER + SHIFT + M → Notification menu
+SUPER + SHIFT + V → Clipboard history"
+            fi
+            ;;
+        "Resizing Windows")
+            bindings="SUPER + R → Enter resize mode
+Then use:
+  H/J/K/L → Resize window
+  Arrow keys → Resize window
+  Return/Escape → Exit resize mode"
+            ;;
+        "System Controls")
+            if [ "$WM" = "hyprland" ]; then
+                bindings="SUPER + SHIFT + C → Reload config
+SUPER + SHIFT + Q → Exit Hyprland
+SUPER + SHIFT + R → Re-tangle dotfiles"
+            else # sway
+                bindings="SUPER + SHIFT + C → Reload config
+SUPER + SHIFT + Q → Exit Sway
+SUPER + SHIFT + R → Re-tangle dotfiles"
+            fi
+            ;;
+        "Mouse & Gestures")
+            if [ "$WM" = "hyprland" ]; then
+                bindings="SUPER + Left click → Move window
+SUPER + Right click → Resize window
+SUPER + Z → Resize window (keyboard)
+3-finger swipe horizontal → Switch workspace"
+            else # sway
+                bindings="SUPER + Left click → Move window
+SUPER + Right click → Resize window
+3-finger swipe right/left → Workspace prev/next
+3-finger swipe down → Show scratchpad"
+            fi
+            ;;
+    esac
+
+    echo "$bindings"
+}
+
+# Show system information
+show_system_info() {
+    local info=""
+
+    info="═══ System Information ═══
+
+Window Manager: ${WM^}
+Shell: zsh with zinit
+Terminal: foot
+Launcher: fuzzel
+Browser: qutebrowser
+File Manager: yazi
+Editor: emacs/emacsclient
+Notifications: mako
+Wallpaper: $([ "$WM" = "hyprland" ] && echo "hyprpaper" || echo "swaybg")
+Theme: matugen (Material You)
+Bar: waybar
+
+═══ Dotfiles Structure ═══
+
+. * All configs in: ~/dotfile/dotfiles.org
+. * Generate configs: ./scripts/tangle.sh
+. * Deploy configs: ./scripts/stow-pkg.sh [packages]
+. * Packages dir: ~/dotfile/packages/
+
+═══ Quick Commands ═══
+
+Tangle dotfiles:
+  ./scripts/tangle.sh
+
+Deploy all (Hyprland):
+  ./scripts/stow-pkg.sh hyprland mako fuzzel foot yazi qutebrowser zsh matugen
+
+Deploy all (Sway):
+  ./scripts/stow-pkg.sh sway mako fuzzel foot yazi qutebrowser swaylock swayidle zsh matugen
+
+Remove package:
+  stow -d packages -t ~ -D [package]
+
+═══ User Scripts ═══
+
+~/.local/bin/bitwarden-fuzzel → Password manager
+~/.local/bin/select-wallpaper.sh → Wallpaper selector
+~/.local/bin/screenshot.sh → Screenshot tool
+~/.local/bin/mako-actions → Notification actions
+~/.local/bin/waybar-pomodoro → Pomodoro timer
+~/.local/bin/waybar-updates → Update checker
+~/.local/bin/waybar-battery → Battery monitor
+~/.local/bin/help-menu → This help menu"
+
+    echo "$info"
+}
+
+# Main menu
+show_main_menu() {
+    local menu="󰌌  Applications
+󱂬  Window Management
+󰹹  Navigation
+󰜬  Moving Windows
+󰍹  Workspaces
+󱤓  Hardware Controls
+󰒓  Utilities
+󰩨  Resizing Windows
+󱂵  Mouse & Gestures
+󰒲  System Controls
+───────────────────────
+  System Information
+  Quick Reference
+───────────────────────
+󰩈  Exit"
+
+    echo "$menu"
+}
+
+# Quick reference showing most common keybindings
+show_quick_reference() {
+    local ref=""
+
+    if [ "$WM" = "hyprland" ]; then
+        ref="═══ Most Used Keybindings ═══
+
+SUPER + Return → Terminal
+SUPER + D → Launcher
+SUPER + B → Browser
+SUPER + Q → Close window
+SUPER + F → Toggle floating
+SUPER + H/J/K/L → Navigate windows
+SUPER + SHIFT + H/J/K/L → Move window
+SUPER + 1-9 → Switch workspace
+SUPER + R → Resize mode
+SUPER + M → Notifications
+SUPER + Escape → Lock screen
+SUPER + SHIFT + P → Wallpaper selector
+SUPER + SHIFT + B → Bitwarden
+SUPER + SHIFT + C → Reload config"
+    else # sway
+        ref="═══ Most Used Keybindings ═══
+
+SUPER + Return → Terminal
+SUPER + D → Launcher
+SUPER + B → Browser
+SUPER + Q → Close window
+SUPER + F → Toggle floating
+SUPER + H/J/K/L → Navigate windows
+SUPER + SHIFT + H/J/K/L → Move window
+SUPER + 1-9 → Switch workspace
+SUPER + R → Resize mode
+SUPER + M → Notifications
+SUPER + Escape → Lock screen
+SUPER + P → Wallpaper selector
+SUPER + SHIFT + B → Bitwarden
+SUPER + SHIFT + C → Reload config"
+    fi
+
+    echo "$ref"
+}
+
+# Check WM detection
+if [ "$WM" = "unknown" ]; then
+    notify-send "Help Menu" "Could not detect window manager (Hyprland/Sway)" -u critical
+    exit 1
+fi
+
+# Show main menu
+selected=$(show_main_menu | fuzzel --dmenu --width 22 --placeholder "Help Menu - ${WM^}" --lines 20)
+
+# Exit if nothing selected or separator selected
+[[ -z "$selected" ]] && exit 0
+[[ "$selected" == "───────────────────────" ]] && exit 0
+
+# Handle selection
+case "$selected" in
+    "󰩈  Exit")
+        exit 0
+        ;;
+    "  System Information")
+        show_system_info | fuzzel --dmenu --width 80 --placeholder "System Information" --lines 30
+        ;;
+    "  Quick Reference")
+        show_quick_reference | column -t -s '→' | fuzzel --dmenu --width 60 --placeholder "Quick Reference" --lines 20
+        ;;
+    ,*)
+        # Extract category name (remove icon and extra spaces)
+        category=$(echo "$selected" | sed 's/^[^ ]*  //')
+        keybindings=$(show_keybindings "$category" | column -t -s '→')
+        echo "$keybindings" | fuzzel --dmenu --width 70 --placeholder "$category - ${WM^}" --lines 20
+        ;;
+esac
 #+end_src
