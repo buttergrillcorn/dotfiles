@@ -254,7 +254,8 @@ sudo pacman -S bitwarden-cli
 - *XF86 Keys*: Volume and brightness controls
 
 ** Gestures (Hyprland)
-- *3-Finger Horizontal Swipe*: Navigate workspaces
+- *3-Finger Swipe Left/Right*: Navigate workspaces
+- *3-Finger Swipe Down*: Toggle special workspace (scratchpad)
 
 ** Input Configuration
 - Caps Lock swapped with Ctrl

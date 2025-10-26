@@ -34,6 +34,11 @@ set $on_error #1a1b26
 foot
 #+end_src
 
+#+name: terminal-float
+#+begin_src text
+foot --app-id foot-float
+#+end_src
+
 #+name: font
 #+begin_src text
 JetBrainsMono Nerd Font
@@ -399,8 +404,8 @@ bindswitch --reload --locked lid:off exec 'swaymsg "output * dpms on"'
 # See https://wiki.hypr.land/ for more
 
 $mainMod = SUPER
-$terminal = foot
-$terminal-float = foot --app-id foot-float
+$terminal = <<terminal>>
+$terminal-float = <<terminal-float>>
 $terminal-float-id = foot-float
 $menu = fuzzel
 $browser = qutebrowser
@@ -494,15 +499,15 @@ decoration {
     inactive_opacity = 0.75
 
     dim_modal = false
-    dim_special = 0.3
+    dim_special = 0.2
 
     blur {
         enabled = true
         special = true
         popups = true
-        size = 6
+        size = 5
         passes = 1
-        noise = 0.05
+        noise = 0.03
     }
 
     shadow {
@@ -549,19 +554,33 @@ group {
     }
 }
 #+end_src
-** Animations (Minimal/Fast)
+** Animations (Smooth & Efficient)
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 animations {
     enabled = true
 
-    # Fast bezier curve for minimal animations
-    bezier = fastCurve, 0.4, 0.0, 0.2, 1.0
+    # Smooth bezier curves (Material Design inspired)
+    bezier = smoothOut, 0.36, 0, 0.66, -0.56
+    bezier = smoothIn, 0.25, 1, 0.5, 1
+    bezier = overshot, 0.05, 0.9, 0.1, 1.1
+    bezier = linear, 0, 0, 1, 1
 
-    animation = windows, 1, 3, fastCurve
-    animation = windowsOut, 1, 3, fastCurve, popin 90%
-    animation = border, 1, 5, default
-    animation = fade, 1, 3, default
-    animation = workspaces, 1, 3, fastCurve, slide
+    # Window animations
+    animation = windows, 1, 4, smoothIn, slide
+    animation = windowsOut, 1, 4, smoothOut, slide
+    animation = windowsMove, 1, 4, smoothIn, slide
+
+    # Border and fade
+    animation = border, 1, 10, default
+    animation = borderangle, 1, 100, linear, loop
+    animation = fade, 1, 4, smoothIn
+    animation = fadeOut, 1, 4, smoothOut
+
+    # Workspace animations with slide
+    animation = workspaces, 1, 5, overshot, slide
+
+    # Special workspace animations (slide from bottom)
+    animation = specialWorkspace, 1, 5, smoothIn, slidevert
 }
 #+end_src
 
@@ -590,7 +609,14 @@ misc {
     disable_splash_rendering = true
     mouse_move_enables_dpms = true
     key_press_enables_dpms = true
+    # Keep special workspace open when empty (prevents returning to normal workspace without waybar)
+    close_special_on_empty = false
     vrr = 0
+}
+
+cursor {
+    # Warp cursor when toggling special workspace for better UX
+    warp_on_toggle_special = 1
 }
 
 ecosystem {
@@ -638,8 +664,8 @@ windowrule = noinitialfocus, title:^(Picture-in-Picture)$
 
 ** Workspace/Layer Rules
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
-# Gaps for special workspace
-workspace = s[true], gapsin:10, gapsout:30
+# Gaps for special workspace (all special workspaces)
+workspace = s[yes], gapsin:10, gapsout:30
 
 # Waybar
 # layerrule = blur, waybar
@@ -668,7 +694,8 @@ theme {
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Applications
 bind = $mainMod, Return, exec, $terminal
-bind = $mainMod SHIFT, Return, exec, [workspace special:scratchpad] $terminal
+# Disabled: Spawning directly to special workspace bypasses waybar toggle, causing inconsistent visibility
+# bind = $mainMod SHIFT, Return, exec, [workspace special silent] $terminal
 bind = $mainMod CTRL, Return, exec, $terminal-float
 bind = $mainMod, D, exec, $menu
 bind = $mainMod, B, exec, $browser
@@ -777,8 +804,12 @@ bind = $mainMod CTRL, 8, movetoworkspace, 8
 bind = $mainMod CTRL, 9, movetoworkspace, 9
 
 # Special workspace (scratchpad replacement)
-bind = $mainMod, w, togglespecialworkspace, scratchpad
-bind = $mainMod SHIFT, w, movetoworkspace, special:scratchpad
+# Toggle special workspace and hide/show waybar (SIGUSR1 signal)
+bind = $mainMod, w, togglespecialworkspace
+bind = $mainMod, w, exec, pkill -SIGUSR1 waybar
+# Move window to special and toggle waybar
+bind = $mainMod SHIFT, w, movetoworkspace, special
+bind = $mainMod SHIFT, w, exec, pkill -SIGUSR1 waybar
 #+end_src
 
 ** Keybindings - Hardware
@@ -848,13 +879,18 @@ submap = reset
 
 ** Keybindings - Gestures
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
-gesture = 3, horizontal, workspace
+# Horizontal swipe for workspace navigation
+gesture = 3, right, workspace, e-1
+gesture = 3, left, workspace, e+1
+
+# Vertical swipe for special workspace
+gesture = 3, down, dispatcher, exec, hyprctl dispatch togglespecialworkspace && pkill -SIGUSR1 waybar
 #+end_src
 
 ** Keybindings - System
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # System controls
-bind = $mainMod SHIFT, C, exec, hyprctl reload && pkill waybar && pkill mako && sleep 0.2 && waybar & mako & notify-send "Hyprland" "Configuration reloaded successfully" -u low
+bind = $mainMod SHIFT, C, exec, ~/.local/bin/hyprland-reload
 bind = $mainMod SHIFT, Q, exit
 bind = $mainMod SHIFT, R, exec, ~/dotfile/scripts/tangle.sh & notify-send "Dotfiles" "Dotfiles tangled successfully!"
 #+end_src
@@ -1152,7 +1188,7 @@ input-field {
         },
         "tooltip-format": "Volume: {volume}%",
         "scroll-step": 5,
-        "on-click": "foot --class=Wiremix -e wiremix",
+        "on-click": "<<terminal-float>> wiremix",
         "on-click-right": "pamixer -t"
     },
 
@@ -1745,7 +1781,7 @@ prev-with-wrap=Control+k
 #+end_src
 
 * Network Manager Menu
-#+begin_src conf :tangle packages/networkmanager_dmenu/.config/networkmanager_dmenu/config.ini
+#+begin_src conf :tangle packages/networkmanager_dmenu/.config/networkmanager-dmenu/config.ini
 [dmenu]
 dmenu_command = fuzzel --width 35
 active_chars = ->
@@ -1754,21 +1790,22 @@ highlight_fg =
 highlight_bg =
 highlight_bold = True
 compact = False
-pinentry = None
-# wifi_icons = 󰤯󰤟󰤢󰤥󰤨
-wifi_icons = 󰢿󰢼󰢽󰢾
+pinentry =
+wifi_icons = 󰤯󰤟󰤢󰤥󰤨
+# wifi_icons = 󰢿󰢼󰢽󰢾
 format = {name:<{max_len_name}s}  {sec:<{max_len_sec}s} {icon:>2}
-list_saved = False
+list_saved = True
 prompt = Networks:
 
 [dmenu_passphrase]
 obscure = True
 # Color managed by matugen template
 include = ~/.cache/matugen/networkmanager_dmenu.ini
+show_pass = nmcli device wifi show-password
 
 [pinentry]
 description = Get network password
-prompt = Password:
+prompt =
 
 [editor]
 terminal = foot
@@ -1776,7 +1813,7 @@ gui_if_available = True
 gui = nm-connection-editor
 
 [nmdm]
-rescan_delay = 3
+rescan_delay = 5
 #+end_src
 
 * Foot
@@ -4854,7 +4891,8 @@ SUPER + SHIFT + R → Re-tangle dotfiles"
                 bindings="SUPER + Left click → Move window
 SUPER + Right click → Resize window
 SUPER + Z → Resize window (keyboard)
-3-finger swipe horizontal → Switch workspace"
+3-finger swipe left/right → Navigate workspaces
+3-finger swipe down → Toggle special workspace"
             else # sway
                 bindings="SUPER + Left click → Move window
 SUPER + Right click → Resize window
@@ -5015,4 +5053,29 @@ case "$selected" in
         echo "$keybindings" | fuzzel --dmenu --width 70 --placeholder "$category - ${WM^}" --lines 20
         ;;
 esac
+#+end_src
+
+** Hyprland Reload Script
+#+begin_src bash :tangle packages/matugen/.local/bin/hyprland-reload :shebang "#!/usr/bin/env bash"
+# Reload Hyprland and restart all services properly
+
+# Kill old services
+pkill waybar
+pkill mako
+
+# Wait for processes to terminate
+sleep 0.5
+
+# Reload Hyprland configuration
+hyprctl reload
+
+# Start services
+waybar &
+mako &
+
+# Wait a moment for services to start
+sleep 0.3
+
+# Send success notification
+notify-send "Hyprland" "Configuration reloaded successfully" -u low
 #+end_src
