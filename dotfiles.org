@@ -397,6 +397,8 @@ bindswitch --reload --locked lid:off exec 'swaymsg "output * dpms on"'
 
 $mainMod = SUPER
 $terminal = foot
+$terminal-float = foot --app-id foot-float
+$terminal-float-id = foot-float
 $menu = fuzzel
 $browser = qutebrowser
 $fileManager = foot -e yazi
@@ -437,7 +439,7 @@ exec-once = wl-paste --type image --watch cliphist store
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Environment variables
 env = XCURSOR_SIZE,24
-env = XCURSOR_THEME,human
+env = XCURSOR_THEME,Human
 env = HYPRCURSOR_SIZE,24
 env = QT_QPA_PLATFORMTHEME,qt6ct
 #+end_src
@@ -485,8 +487,8 @@ general {
 decoration {
     rounding = 0
 
-    active_opacity = 0.98
-    inactive_opacity = 0.8
+    active_opacity = 1
+    inactive_opacity = 0.75
 
     dim_modal = false
     dim_special = 0.3
@@ -497,7 +499,7 @@ decoration {
         popups = true
         size = 6
         passes = 1
-        noise = 0.1
+        noise = 0.05
     }
 
     shadow {
@@ -596,39 +598,50 @@ ecosystem {
 ** Window Rules
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Floating terminal
-windowrulev2 = float, class:(floating-foot)
-windowrulev2 = size 50% 50%, class:(floating-foot)
-windowrulev2 = center, class:(floating-foot)
+windowrule = float, class:($terminal-float-id)
+windowrule = size 50% 50%, class:($terminal-float-id)
+windowrule = center, class:($terminal-float-id)
+
+# # Terminal blur
+# windowrulev2 = opacity 0.75 override 0.75 override 1.0 override, class:$terminal # Set opacity to 0.75 active, 0.75 inactive and 1.0 fullscreen for terminal
+# windowrule = opacity 0.75 override 0.75 override 1.0 override, class:$terminal-float-id
 
 # Picture-in-Picture
-windowrulev2 = float, title:^(Picture-in-Picture)$
-windowrulev2 = pin, title:^(Picture-in-Picture)$
-windowrulev2 = move 100%-w-20 100%-h-20, title:^(Picture-in-Picture)$
-windowrulev2 = size 25% 25%, title:^(Picture-in-Picture)$
-windowrulev2 = noborder, title:^(Picture-in-Picture)$
+windowrule = float, title:^(Picture-in-Picture)$
+windowrule = pin, title:^(Picture-in-Picture)$
+windowrule = move 100%-w-20 100%-h-20, title:^(Picture-in-Picture)$
+windowrule = size 25% 25%, title:^(Picture-in-Picture)$
+windowrule = noborder, title:^(Picture-in-Picture)$
 
 # Floating windows
-windowrulev2 = float, class:(blueman-manager)
-windowrulev2 = float, class:(pavucontrol)
-windowrulev2 = float, class:(Wiremix)
-windowrulev2 = size 50% 50%, class:(Wiremix)
-windowrulev2 = center, class:(Wiremix)
-windowrulev2 = float, class:(nm-connection-editor)
-windowrulev2 = float, class:(kdeconnect.*)
-windowrulev2 = float, title:(Volume Control)
-windowrulev2 = float, class:(blueberry.py)
+windowrule = float, class:(blueman-manager)
+windowrule = float, class:(pavucontrol)
+windowrule = float, class:(Wiremix)
+windowrule = size 50% 50%, class:(Wiremix)
+windowrule = center, class:(Wiremix)
+windowrule = float, class:(nm-connection-editor)
+windowrule = float, class:(kdeconnect.*)
+windowrule = float, title:(Volume Control)
+windowrule = float, class:(blueberry.py)
 
 # Inhibit idle for fullscreen
-windowrulev2 = idleinhibit fullscreen, class:.*
+windowrule = idleinhibit fullscreen, class:.*
 
 # No focus stealing
-windowrulev2 = noinitialfocus, class:(mako)
-windowrulev2 = noinitialfocus, title:^(Picture-in-Picture)$
+windowrule = noinitialfocus, class:(mako)
+windowrule = noinitialfocus, title:^(Picture-in-Picture)$
+
 #+end_src
 
-** Workspace Rules
+** Workspace/Layer Rules
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+# Gaps for special workspace
 workspace = s[true], gapsin:10, gapsout:30
+
+# Waybar
+# layerrule = blur, waybar
+# layerrule = blurpopups, waybar
+# layerrule = ignorealpha, 1, waybar
 #+end_src
 ** QT Support
 #+begin_src conf :tangle packages/hyprland/.config/hypr/application-style.conf
@@ -640,7 +653,7 @@ reduce_motion = false
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprqt6engine.conf
 theme {
   color_scheme = /home/james/.config/qt6ct/colors/matugen.conf
-  icon_theme = Papirus-Dark
+  icon_theme = Papirus
   style = Fusion
   font_fixed = <<font>>
   font_fixed_size = 12
@@ -653,6 +666,7 @@ theme {
 # Applications
 bind = $mainMod, Return, exec, $terminal
 bind = $mainMod SHIFT, Return, exec, [workspace special:scratchpad] $terminal
+bind = $mainMod CTRL, Return, exec, $terminal-float
 bind = $mainMod, D, exec, $menu
 bind = $mainMod, B, exec, $browser
 bind = $mainMod SHIFT, B, exec, ~/.local/bin/bitwarden-fuzzel
@@ -1184,8 +1198,7 @@ input-field {
 @import url("/home/james/.cache/matugen/colors-waybar.css");
 
 window#waybar {
-  background: @background;
-  opacity: 0.9;
+  background: alpha(@background, 0.8);
   color: @foreground;
 }
 
@@ -1567,7 +1580,7 @@ group#tray-expander {
 }
 
 window#waybar {
-  background-color: @background;
+  background-color: alpha(@background, 0.85);
 }
 
 tooltip {
@@ -1797,9 +1810,9 @@ ratio = [1, 4, 3]
 [Settings]
 gtk-application-prefer-dark-theme=true
 gtk-theme-name=adw-gtk3-dark
-gtk-icon-theme-name=Papirus-Dark
+gtk-icon-theme-name=Papirus
 gtk-font-name=Sans 10
-gtk-cursor-theme-name=human
+gtk-cursor-theme-name=Human
 gtk-cursor-theme-size=24
 gtk-toolbar-style=GTK_TOOLBAR_BOTH_HORIZ
 gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
@@ -1818,9 +1831,9 @@ gtk-xft-rgba=rgb
 [Settings]
 gtk-application-prefer-dark-theme=true
 gtk-theme-name=adw-gtk3-dark
-gtk-icon-theme-name=Papirus-Dark
+gtk-icon-theme-name=Papirus
 gtk-font-name=Sans 10
-gtk-cursor-theme-name=human
+gtk-cursor-theme-name=Human
 gtk-cursor-theme-size=24
 gtk-xft-antialias=1
 gtk-xft-hinting=1
@@ -1835,7 +1848,7 @@ gtk-xft-rgba=rgb
 [Appearance]
 color_scheme_path=/home/james/.config/qt6ct/colors/matugen.conf
 custom_palette=true
-icon_theme=Papirus-Dark
+icon_theme=Papirus
 standard_dialogs=default
 style=Fusion
 
@@ -1867,7 +1880,7 @@ geometry=@ByteArray()
 [Appearance]
 color_scheme_path=/home/james/.config/qt5ct/colors/matugen.conf
 custom_palette=true
-icon_theme=Papirus-Dark
+icon_theme=Papirus
 standard_dialogs=default
 style=Fusion
 
@@ -3175,7 +3188,7 @@ esac
 reload_apps = true
 reload_apps_list = ["hyprland", "waybar"]
 # Use scheme-content for better color generation
-# scheme_type = "content"
+scheme_type = "content"
 
 [templates.hyprland]
 input_path = "~/.config/matugen/templates/hyprland.conf"
@@ -4519,13 +4532,21 @@ if [ -z "$mode" ]; then
     exit 0
 fi
 
+# Select color scheme type
+scheme=$(printf "scheme-tonal-spot\nscheme-content\nscheme-monochrome\nscheme-expressive\nscheme-fidelity\nscheme-neutral\nscheme-fruit-salad\nscheme-rainbow" | fuzzel --dmenu --placeholder "Select color scheme...")
+
+# Exit if cancelled (default to scheme-tonal-spot if cancelled)
+if [ -z "$scheme" ]; then
+    scheme="scheme-tonal-spot"
+fi
+
 # Full path to selected wallpaper
 wallpaper_path="$WALLPAPER_DIR/$selected_wallpaper"
 
 # Generate colors with matugen
-notify-send "Matugen" "Generating $mode theme from $selected_wallpaper..." -u low
+notify-send "Matugen" "Generating $mode theme ($scheme) from $selected_wallpaper..." -u low
 
-if matugen image "$wallpaper_path" -m "$mode"; then
+if matugen image "$wallpaper_path" -m "$mode" -t "$scheme"; then
     # Update default.jpg symlink to persist wallpaper selection across reboots
     ln -sf "$selected_wallpaper" "$WALLPAPER_DIR/default.jpg"
 
@@ -4583,7 +4604,7 @@ if matugen image "$wallpaper_path" -m "$mode"; then
         fi
     done
 
-    notify-send "Theme Applied" "Wallpaper: $selected_wallpaper\nMode: $mode" -u normal
+    notify-send "Theme Applied" "Wallpaper: $selected_wallpaper\nMode: $mode\nScheme: $scheme" -u normal
 else
     notify-send "Error" "Failed to generate theme" -u critical
     exit 1
@@ -4656,7 +4677,7 @@ if matugen image "$wallpaper_path" -m "$mode"; then
         fi
     done
 
-    notify-send "Theme Applied" "Wallpaper: $selected_wallpaper\nMode: $mode" -u normal
+    notify-send "Theme Applied" "Wallpaper: $selected_wallpaper\nMode: $mode\nScheme: $scheme" -u normal
 else
     notify-send "Error" "Failed to generate theme" -u critical
     exit 1

@@ -263,7 +263,8 @@ sudo pacman -S bitwarden-cli
 - Focus follows mouse
 
 ** Waybar
-- Icon-only minimal design with 30px height bar, 0.9 opacity
+- Icon-only minimal design with 30px height bar
+- Semi-transparent background using Material You colors (85% opacity)
 - Module organization:
   - Left: Idle inhibitor, workspaces, privacy monitors
   - Center: Pomodoro timer, clock, update indicator
@@ -717,21 +718,34 @@ stow -d packages -t ~ -D sway swayidle swaylock
 
 ** Change wallpaper and theme
 #+begin_src sh
-# Interactive mode (recommended - uses fuzzel to select wallpaper and mode)
+# Interactive mode (recommended - uses fuzzel to select wallpaper, mode, and color scheme)
 # Hyprland: Mod+Shift+P
 # Sway: Mod+P
 ~/.local/bin/select-wallpaper.sh
 
-# Manual mode - Generate dark theme (default)
+# The selector provides three menus:
+#   1. Wallpaper selection (from ~/dotfile/wallpapers/)
+#   2. Theme mode (dark/light)
+#   3. Color scheme type:
+#      - scheme-tonal-spot (default) - Balanced, harmonious colors
+#      - scheme-content - Colors directly from the image
+#      - scheme-monochrome - Single hue variations
+#      - scheme-expressive - Bold, vibrant colors
+#      - scheme-fidelity - Most faithful to source image
+#      - scheme-neutral - Subtle, muted tones
+#      - scheme-fruit-salad - Colorful, playful palette
+#      - scheme-rainbow - Full spectrum colors
+
+# Manual mode - Generate dark theme with tonal-spot (default)
 matugen image ~/dotfile/wallpapers/your-wallpaper.jpg
 
-# Manual mode - Generate light theme for bright wallpapers
-matugen image ~/dotfile/wallpapers/your-wallpaper.jpg -m light
+# Manual mode - Generate light theme with content scheme
+matugen image ~/dotfile/wallpapers/your-wallpaper.jpg -m light -t scheme-content
 
 # Reload WM to apply changes (also reloads waybar, mako, and qutebrowser)
 # The wallpaper selector script automatically:
 #   - Sets the wallpaper
-#   - Generates Material You colors with matugen
+#   - Generates Material You colors with matugen using selected scheme
 #   - Reloads all themed applications
 #   - Syncs qutebrowser's dark/light mode preference
 # Hyprland: Mod+Shift+C or: hyprctl reload
@@ -774,8 +788,8 @@ After auto-login is configured, Hyprland (or your selected WM) will start automa
 
 - =~/.local/bin/select-wallpaper.sh= - Interactive wallpaper and theme selector
   - Package: =packages/matugen/.local/bin/select-wallpaper.sh=
-  - Usage: Hyprland (Mod+Shift+P) or Sway (Mod+P), uses fuzzel to choose wallpaper and light/dark mode
-  - Sets wallpaper and regenerates colors with matugen
+  - Usage: Hyprland (Mod+Shift+P) or Sway (Mod+P), uses fuzzel to choose wallpaper, light/dark mode, and color scheme type
+  - Sets wallpaper and regenerates colors with matugen using selected scheme (tonal-spot, content, monochrome, etc.)
 
 *** Qutebrowser User-scripts (in =~/.local/share/qutebrowser/userscripts/=)
 - =video-download= - Download videos using yt-dlp
