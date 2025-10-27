@@ -103,6 +103,7 @@ exec-once = udiskie
 exec-once = wluma
 exec-once = kdeconnectd
 exec-once = kdeconnect-indicator
+exec-once = emacs --daemon &
 exec-once = systemctl --user start hyprpolkitagent
 exec-once = wl-paste --type text --watch cliphist store
 exec-once = wl-paste --type image --watch cliphist store
@@ -339,6 +340,7 @@ bind = $mainMod SHIFT, B, exec, ~/.local/bin/bitwarden-fuzzel
 bind = $mainMod, E, exec, $fileManager
 bind = $mainMod, N, exec, emacsclient -c
 bind = $mainMod SHIFT, N, exec, emacs
+bind = $mainMod CTRL SHIFT, N, exec, killall emacs && emacs --daemon && notify-send "Emacs" "Emacs reloaded successfully."
 bind = $mainMod SHIFT, P, exec, ~/.local/bin/select-wallpaper.sh
 #+end_src
 
@@ -5401,10 +5403,10 @@ sleep 0.3
 # Send success notification
 notify-send "Hyprland" "Configuration reloaded successfully" -u low
 #+end_src
-** Doom Emacs
+* Doom Emacs
 Extensible text editor and integrated development environment built on Emacs.
 
-*** init.el
+** init.el
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/init.el
 ;;; init.el -*- lexical-binding: t; -*-
 
@@ -5635,7 +5637,7 @@ Extensible text editor and integrated development environment built on Emacs.
        (default +bindings +smartparens))
 #+end_src
 
-*** packages.el
+** packages.el
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/packages.el
 ;; -*- no-byte-compile: t; -*-
 ;;; $DOOMDIR/packages.el
@@ -5659,8 +5661,8 @@ Extensible text editor and integrated development environment built on Emacs.
 (package! denote-journal)
 #+end_src
 
-*** config.el
-**** Header
+** config.el
+*** Header
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
@@ -5672,54 +5674,54 @@ Extensible text editor and integrated development environment built on Emacs.
 ;; sync' after modifying this file!
 #+end_src
 
-**** User Information
+*** User Information
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (setq user-full-name "James"
       user-mail-address "jamesyuli@outlook.com")
 #+end_src
 
-**** UI
-***** Font
+*** UI
+**** Font
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (setq doom-font (font-spec :family "Sarasa Term SC Nerd" :size 16 :weight 'Semibold)
       doom-variable-pitch-font (font-spec :family "Noto Sans CJK SC" :size 16)
       doom-unicode-font (font-spec :family "Symbols Nerd Font Mono" :size 16))
 #+end_src
 
-***** Theme
+**** Theme
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (setq doom-theme 'doom-dark+)
 #+end_src
 
-***** Line Numbers
+**** Line Numbers
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (setq display-line-numbers-type 'relative)
 #+end_src
 
-**** Key Binds
+*** Key Binds
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 ;; (map! "C-h" 'switch-to-prev-buffer)
 ;; (map! "C-l" 'switch-to-next-buffer)
 ;; (map! "C-S-l" 'recenter-top-bottom)
 #+end_src
 
-**** Which Key
+*** Which Key
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 ;; (setq which-key-idle-delay 0.2)
 (setq auto-save-visited-interval 15)
 (auto-save-visited-mode +1)
 #+end_src
 
-**** Org Mode
+*** Org Mode
 
-***** Basic
+**** Basic
 
-****** Directory
+***** Directory
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (setq org-directory "~/denote")
 #+end_src
 
-****** Capture Template
+***** Capture Template
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (setq org-capture-templates
@@ -5734,7 +5736,7 @@ Extensible text editor and integrated development environment built on Emacs.
           )))
 #+end_src
 
-****** Babel
+***** Babel
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (org-babel-do-load-languages
@@ -5747,47 +5749,47 @@ Extensible text editor and integrated development environment built on Emacs.
      )))
 #+end_src
 
-****** Appearance
+***** Appearance
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (setq org-hide-emphasis-markers t)
   (setq org-pretty-entities t))
 #+end_src
 
-****** Pomodoro
+***** Pomodoro
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (setq org-pomodoro-length 30)
 #+end_src
 
-***** Agenda
+**** Agenda
 
-****** Directory
+***** Directory
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (setq org-agenda-files '("~/denote" "~/denote/journal")))
 #+end_src
 
-***** Extension Packages
+**** Extension Packages
 
-****** Auto List
+***** Auto List
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (add-hook 'org-mode-hook
           (lambda () (org-autolist-mode)))
 #+end_src
 
-****** Org Appear
+***** Org Appear
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (add-hook 'org-mode-hook 'org-appear-mode))
 #+end_src
 
-****** Org Auto Tangle
+***** Org Auto Tangle
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (add-hook 'org-mode-hook 'org-auto-tangle-mode))
 #+end_src
 
-****** Safe List
+***** Safe List
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (setq org-auto-tangle-babel-safelist '(
                                        "~/example.org"
@@ -5795,11 +5797,11 @@ Extensible text editor and integrated development environment built on Emacs.
                                        ))
 #+end_src
 
-**** Denote
+*** Denote
 
-***** Core
+**** Core
 
-****** Configuration
+***** Configuration
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (use-package! denote
   :hook
@@ -5813,7 +5815,7 @@ Extensible text editor and integrated development environment built on Emacs.
   (setq denote-date-prompt-use-org-read-date t))
 #+end_src
 
-****** Key Binds
+***** Key Binds
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (map! :leader
       (:prefix-map ("d" . "denote")
@@ -5846,9 +5848,9 @@ Extensible text editor and integrated development environment built on Emacs.
         :desc "rename title" "t" #'denote-rename-file-title)))
 #+end_src
 
-***** Org
+**** Org
 
-****** Key Binds
+***** Key Binds
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (map! :leader
       (:prefix-map ("d" . "denote")
@@ -5862,9 +5864,9 @@ Extensible text editor and integrated development environment built on Emacs.
          :desc "missing links" "m" #'denote-org-dblock-insert-missing-links))))
 #+end_src
 
-***** Explore
+**** Explore
 
-****** Configuration
+***** Configuration
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (use-package! denote-explore
   :after denote
@@ -5872,7 +5874,7 @@ Extensible text editor and integrated development environment built on Emacs.
   (require 'denote))
 #+end_src
 
-****** Key Binds
+***** Key Binds
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (after! denote-explore
   (map! :leader
@@ -5909,7 +5911,7 @@ Extensible text editor and integrated development environment built on Emacs.
                    :desc "isolated files" "i" #'denote-explore-isolated-files)))))
 #+end_src
 
-****** Temporary Solution
+***** Temporary Solution
 Temporary solution for "denote-id-regexp" being obsolete in the new version of Denote.
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (after! denote
@@ -5920,16 +5922,16 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
               "[0-9]\\{8\\}T[0-9]\\{6\\}"))))  ; fallback pattern
 #+end_src
 
-***** Consult
+**** Consult
 
-****** Configuration
+***** Configuration
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (use-package! consult-denote
   :config
   (consult-denote-mode 1))
 #+end_src
 
-****** Key Binds
+***** Key Binds
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (map! :leader
       (:prefix-map ("d" . "denote")
@@ -5938,9 +5940,9 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
        #'consult-denote-grep))
 #+end_src
 
-***** Journal
+**** Journal
 
-****** Configuration
+***** Configuration
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (use-package! denote-journal
   :after denote
@@ -5948,7 +5950,7 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
   (setq denote-journal-title-format "%Y-%m-%e"))
 #+end_src
 
-****** Key Binds
+***** Key Binds
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (map! :leader
       (:prefix-map ("d" . "denote")
@@ -5965,7 +5967,187 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
                                                      (call-interactively #'denote-journal-link-or-create-entry))))))
 #+end_src
 
-***** Completion Formatting
+**** Git Sync
+Automatic git sync for denote notes directory. Commits and pushes changes on save with smart commit messages and conflict handling.
+
+***** Configuration
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+;; Denote Git Sync Configuration
+(defvar denote-git-auto-sync-enabled t
+  "Enable automatic git sync on save for denote files.")
+
+(defvar denote-git-directory (expand-file-name "~/denote")
+  "Path to the denote notes directory.")
+
+(defvar denote-git-remote-name "origin"
+  "Git remote name to sync with.")
+
+(defvar denote-git-branch "main"
+  "Git branch name to sync with.")
+
+(defvar denote-git-sync-in-progress nil
+  "Lock to prevent concurrent sync operations.")
+#+end_src
+
+***** Helper Functions
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+;; Helper: Check if file is in denote directory
+(defun denote-in-denote-directory-p ()
+  "Return t if current buffer file is in denote directory."
+  (when buffer-file-name
+    (string-prefix-p (expand-file-name denote-git-directory)
+                     (expand-file-name buffer-file-name))))
+
+;; Helper: Check if git repository exists
+(defun denote-git-check-repo ()
+  "Check if denote directory is a git repository."
+  (let ((default-directory denote-git-directory))
+    (= 0 (call-process "git" nil nil nil "rev-parse" "--git-dir"))))
+
+;; Helper: Generate smart commit message
+(defun denote-git-format-commit-message ()
+  "Generate a commit message based on changed files and timestamp."
+  (let* ((default-directory denote-git-directory)
+         (timestamp (format-time-string "%Y-%m-%d %H:%M:%S"))
+         (status-output (shell-command-to-string "git status --short"))
+         (lines (split-string status-output "\n" t))
+         (changed-files (mapcar (lambda (line)
+                                  (if (string-match "^[AMD?]+ +\\(.+\\)$" line)
+                                      (file-name-nondirectory (match-string 1 line))
+                                    nil))
+                                lines))
+         (changed-files (delq nil changed-files))
+         (file-count (length changed-files)))
+    (cond
+     ((= file-count 0)
+      (format "Update notes: %s" timestamp))
+     ((= file-count 1)
+      (format "Update %s\n\n%s" (car changed-files) timestamp))
+     ((<= file-count 3)
+      (format "Update %s\n\n%s"
+              (mapconcat 'identity changed-files ", ")
+              timestamp))
+     (t
+      (format "Update %d notes\n\n%s" file-count timestamp)))))
+#+end_src
+
+***** Core Sync Function
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+;; Core sync function
+(defun denote-git-sync ()
+  "Safely sync denote directory with git: pull, commit, and push.
+Handles conflicts by aborting and notifying the user."
+  (interactive)
+  (if denote-git-sync-in-progress
+      (message "Denote sync already in progress, skipping...")
+    (setq denote-git-sync-in-progress t)
+    (let ((default-directory denote-git-directory))
+      (unless (denote-git-check-repo)
+        (setq denote-git-sync-in-progress nil)
+        (error "Denote directory is not a git repository: %s" denote-git-directory))
+
+      ;; Run sync asynchronously
+      (make-process
+       :name "denote-git-sync"
+       :buffer "*denote-git-sync*"
+       :command (list "sh" "-c"
+                      (format "cd '%s' && \
+git fetch %s %s 2>&1 && \
+if ! git diff --quiet HEAD..%s/%s 2>&1; then \
+  if ! git merge --no-edit %s/%s 2>&1; then \
+    git merge --abort 2>&1; \
+    echo 'CONFLICT_DETECTED'; \
+    exit 1; \
+  fi; \
+fi && \
+if git diff --quiet && git diff --cached --quiet && [ -z \"$(git ls-files --others --exclude-standard)\" ]; then \
+  if git log %s/%s..HEAD 2>&1 | grep -q 'commit'; then \
+    git push %s %s 2>&1 && echo 'PUSH_ONLY_SUCCESS'; \
+  else \
+    echo 'NO_CHANGES'; \
+  fi; \
+else \
+  git add -A 2>&1 && \
+  git commit -m \"$(cat <<'COMMIT_MSG_EOF'\n%s\nCOMMIT_MSG_EOF\n)\" 2>&1 && \
+  git push %s %s 2>&1 && echo 'SYNC_SUCCESS'; \
+fi"
+                              denote-git-directory
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              (denote-git-format-commit-message)
+                              denote-git-remote-name
+                              denote-git-branch))
+       :sentinel
+       (lambda (process event)
+         (setq denote-git-sync-in-progress nil)
+         (let ((output (with-current-buffer (process-buffer process)
+                         (buffer-string))))
+           (cond
+            ((string-match-p "CONFLICT_DETECTED" output)
+             (message "⚠ Denote sync: Merge conflict detected! Please resolve manually in %s"
+                      denote-git-directory)
+             (when (fboundp 'alert)
+               (alert (format "Merge conflict in denote notes!\n\nPlease open %s and resolve conflicts manually."
+                              denote-git-directory)
+                      :title "Denote Git Sync - Conflict"
+                      :severity 'high)))
+            ((string-match-p "SYNC_SUCCESS" output)
+             (message "✓ Denote notes synced successfully"))
+            ((string-match-p "PUSH_ONLY_SUCCESS" output)
+             (message "✓ Denote notes pushed successfully"))
+            ((string-match-p "NO_CHANGES" output)
+             (message "✓ Denote notes already in sync"))
+            ((string-match-p "fatal\\|error" output)
+             (message "✗ Denote sync failed: %s"
+                      (car (split-string output "\n" t)))
+             (when (fboundp 'alert)
+               (alert (format "Git sync failed!\n\n%s" output)
+                      :title "Denote Git Sync - Error"
+                      :severity 'high)))
+            (t
+             (message "✗ Denote sync completed with unknown status")))))))))
+#+end_src
+
+***** Auto-Save Hook
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+;; Auto-sync on save hook
+(defun denote-git-auto-sync-on-save ()
+  "Automatically sync denote notes after saving if enabled."
+  (when (and denote-git-auto-sync-enabled
+             (denote-in-denote-directory-p))
+    (denote-git-sync)))
+
+;; Add to after-save-hook
+(add-hook 'after-save-hook #'denote-git-auto-sync-on-save)
+#+end_src
+
+***** Keybindings and Toggle
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+;; Toggle auto-sync
+(defun denote-git-toggle-auto-sync ()
+  "Toggle automatic git sync for denote notes."
+  (interactive)
+  (setq denote-git-auto-sync-enabled (not denote-git-auto-sync-enabled))
+  (message "Denote auto-sync %s"
+           (if denote-git-auto-sync-enabled "enabled" "disabled")))
+
+;; Keybindings
+(map! :leader
+      (:prefix-map ("d" . "denote")
+       (:prefix ("g" . "git")
+        :desc "Sync notes" "s" #'denote-git-sync
+        :desc "Toggle auto-sync" "t" #'denote-git-toggle-auto-sync)))
+#+end_src
+
+**** Completion Formatting
 Custom functions to make the formatting of calling =denote-open-or-create= to be cleaner.
 It would show up something like this instead:
 |-----------------------------------------------------------------------------|
@@ -6026,8 +6208,7 @@ It would show up something like this instead:
 (advice-add 'denote-file-prompt :override #'my-denote-file-prompt)
 #+end_src
 
-**** Projectile
-
+*** Projectile
 **** Add Projects
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 ;; (projectile-add-known-project "~/org")

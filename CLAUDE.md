@@ -137,3 +137,4 @@ Configuration is optimized for fast startup (<100ms target):
 - Escape "* " in codeblocks in ".org" files with ". * " as it'll otherwise be recognised as a org-mode heading.
 - Always make sure to update documentation (README).
 - When a change is made relating to hyprland or any window manager/compositor, make sure to update the help menu script to reflect the changes.
+- Never edit anything in ./packages/ since it's all auto-generated.
