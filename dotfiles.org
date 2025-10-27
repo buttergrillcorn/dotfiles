@@ -431,6 +431,7 @@ exec-once = waybar
 exec-once = mako
 exec-once = hyprpaper
 exec-once = hypridle
+exec-once = hyprlock
 exec-once = fcitx5
 exec-once = light -N 5
 exec-once = hyprsunset
@@ -450,6 +451,12 @@ env = XCURSOR_SIZE,24
 env = XCURSOR_THEME,Human
 env = HYPRCURSOR_SIZE,24
 env = QT_QPA_PLATFORMTHEME,qt6ct
+env = QT_QPA_PLATFORM,wayland
+
+# Fcitx5
+# env = GTK_IM_MODULE,fcitx
+env = QT_IM_MODULE,fcitx
+env = XMODIFIERS,@im=fcitx
 #+end_src
 
 ** Input Configuration
@@ -652,6 +659,7 @@ windowrule = float, class:(nm-connection-editor)
 windowrule = float, class:(kdeconnect.*)
 windowrule = float, title:(Volume Control)
 windowrule = float, class:(blueberry.py)
+windowrule = float, class:(org.kde.kdeconnect.daemon)
 
 # Inhibit idle for fullscreen
 windowrule = idleinhibit fullscreen, class:.*
@@ -674,21 +682,21 @@ workspace = s[yes], gapsin:10, gapsout:30
 #+end_src
 ** QT Support
 #+begin_src conf :tangle packages/hyprland/.config/hypr/application-style.conf
-roundness = 0
-border_width = 2
-reduce_motion = false
+# roundness = 0
+# border_width = 2
+# reduce_motion = false
 #+end_src
 ** HyprQT6Engine
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprqt6engine.conf
-theme {
-  color_scheme = /home/james/.config/qt6ct/colors/matugen.conf
-  icon_theme = Papirus
-  style = Fusion
-  font_fixed = <<font>>
-  font_fixed_size = 12
-  font = <<font-sans>>
-  font_size = 12
-}
+# theme {
+#   color_scheme = /home/james/.config/qt6ct/colors/matugen.conf
+#   icon_theme = Papirus
+#   style = Fusion
+#   font_fixed = <<font>>
+#   font_fixed_size = 12
+#   font = <<font-sans>>
+#   font_size = 12
+# }
 #+end_src
 ** Keybindings - Applications
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
@@ -831,7 +839,7 @@ bind = SHIFT, Print, exec, ~/.local/bin/screenshot.sh screen
 bind = $mainMod SHIFT CTRL, S, exec, ~/.local/bin/screenshot.sh screen
 
 # Laptop Lid
-bindl = , switch:on:[Lid Switch], exec, hyprlock && systemctl suspend
+bindl = , switch:on:[Lid Switch], exec, systemctl suspend
 #+end_src
 
 ** Keybindings - Utilities
@@ -846,7 +854,13 @@ bind = $mainMod SHIFT, M, exec, ~/.local/bin/mako-actions
 bind = $mainMod CTRL SHIFT, M, exec, makoctl list
 
 # Network manager
-bind = $mainMod, I, exec, networkmanager_dmenu
+bind = $mainMod SHIFT, I, exec, networkmanager_dmenu
+
+# Colour picker
+bind = $mainMod, C, exec, hyprpicker -a
+
+# Color temperature
+bind = $mainMod SHIFT, T, exec, ~/.local/bin/hyprsunset-menu
 
 # Clipboard manager
 bind = $mainMod SHIFT, V, exec, cliphist list | fuzzel --dmenu --width 50 --placeholder "Search in clipboard" | cliphist decode | wl-copy
@@ -880,8 +894,7 @@ submap = reset
 ** Keybindings - Gestures
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Horizontal swipe for workspace navigation
-gesture = 3, right, workspace, e-1
-gesture = 3, left, workspace, e+1
+gesture = 3, horizontal, workspace
 
 # Vertical swipe for special workspace
 gesture = 3, down, dispatcher, exec, hyprctl dispatch togglespecialworkspace && pkill -SIGUSR1 waybar
@@ -956,53 +969,75 @@ listener {
 source = ~/.cache/matugen/colors-hyprlock.conf
 
 general {
-    disable_loading_bar = false
     hide_cursor = true
+    disable_loading_bar = false
     grace = 0
-    no_fade_in = false
-    no_fade_out = false
-    ignore_empty_input = false
-    immediate_render = false
 }
 
 background {
     monitor =
-    path = screenshot
-    blur_passes = 3
-    blur_size = 6
-    noise = 0.0117
-    contrast = 0.8916
-    brightness = 0.8172
-    vibrancy = 0.1696
-    vibrancy_darkness = 0.0
+    path = <<wallpaper>>
+    zindex = -1
 }
 
 input-field {
     monitor =
-    size = 100, 35
-    dots_size = 0.35
-    dots_spacing = 0.5
+    size = 150, 50
+    outline_thickness = 3
+
+    dots_size = 0.25
+    dots_spacing = 0.75
     dots_rounding = 0
 
     outer_color = $primary
     inner_color = $surface
     font_color = $on_surface
+    font_family = <<font>>
 
     fade_on_empty = false
 
-    placeholder_text =
-    hide_input = false
+    placeholder_text = ENTER PIN
 
     rounding = 0
+
     check_color = $tertiary
     fail_color = $error
     fail_text = Authentication Failed
 
+    position = 0, 0
     halign = center
     valign = center
+
+    zindex = 1
 }
 #+end_src
+* Hyprsunset
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprsunset.conf
+profile {
+    time = 7:30
+    identity = true
+}
 
+profile {
+    time = 14:00
+    temperature = 5500
+}
+
+profile {
+    time = 16:00
+    temperature = 4500
+}
+
+profile {
+    time = 18:00
+    temperature = 3500
+}
+
+profile {
+    time = 20:00
+    temperature = 2500
+}
+#+end_src
 * Waybar (Hyprland)
 
 ** Configuration
@@ -1029,7 +1064,7 @@ input-field {
         "bluetooth",
         "network",
         "pulseaudio",
-        "backlight",
+        "custom/backlight",
         "custom/battery"
     ],
 
@@ -1192,10 +1227,12 @@ input-field {
         "on-click-right": "pamixer -t"
     },
 
-    "backlight": {
-        "format": "{icon}",
-        "format-icons": ["󰃞", "󰃟", "󰃠"],
-        "tooltip-format": "Brightness: {percent}%"
+    "custom/backlight": {
+        "format": "{alt}",
+        "exec": "~/.local/bin/waybar-backlight",
+        "return-type": "json",
+        "interval": 2,
+        "on-click": "~/.local/bin/hyprsunset-menu"
     },
 
     "custom/battery": {
@@ -1351,6 +1388,7 @@ window#waybar {
 #bluetooth,
 #pulseaudio,
 #backlight,
+#custom-backlight,
 #custom-battery {
     margin: 0 15px;
 }
@@ -1441,7 +1479,7 @@ group#tray-expander {
     "bluetooth",
     "network",
     "pulseaudio",
-    "backlight",
+    "custom/backlight",
     "custom/battery"
   ],
 
@@ -1577,10 +1615,12 @@ group#tray-expander {
     "on-click-right": "pamixer -t"
   },
 
-  "backlight": {
-    "format": "{icon}",
-    "format-icons": ["󰃞", "󰃟", "󰃠"],
-    "tooltip-format": "Brightness: {percent}%"
+  "custom/backlight": {
+    "format": "{alt}",
+    "exec": "~/.local/bin/waybar-backlight",
+    "return-type": "json",
+    "interval": 2,
+    "on-click": "~/.local/bin/hyprsunset-menu"
   },
 
   "custom/battery": {
@@ -1704,6 +1744,7 @@ tooltip * {
 #pulseaudio,
 #bluetooth,
 #backlight,
+#custom-backlight,
 #custom-battery {
   margin: 0 10px;
 }
@@ -1729,6 +1770,7 @@ font=<<font>>
 border-size=2
 default-timeout=10000
 width=450
+height=800
 
 outer-margin=15
 padding=10
@@ -3054,7 +3096,7 @@ case "$WM" in
 esac
 #+end_src
 
-* Matugen
+** Matugen
 
 ** Configuration
 #+begin_src toml :tangle packages/matugen/.config/matugen/config.toml
@@ -3184,17 +3226,17 @@ $on_error = rgb({{colors.on_error.default.hex_stripped}})
 #+begin_src conf :tangle packages/matugen/.config/matugen/templates/hyprlock.conf
 # Generated by matugen - Hyprlock colors
 
-$background = {{colors.background.default.hex_stripped}}
-$foreground = {{colors.on_background.default.hex_stripped}}
-$primary = {{colors.primary.default.hex_stripped}}
-$on_primary = {{colors.on_primary.default.hex_stripped}}
-$surface = {{colors.surface.default.hex_stripped}}
-$on_surface = {{colors.on_surface.default.hex_stripped}}
-$surface_variant = {{colors.surface_variant.default.hex_stripped}}
-$on_surface_variant = {{colors.on_surface_variant.default.hex_stripped}}
-$tertiary = {{colors.tertiary.default.hex_stripped}}
-$error = {{colors.error.default.hex_stripped}}
-$on_error = {{colors.on_error.default.hex_stripped}}
+$background = rgb({{colors.background.default.hex_stripped}})
+$foreground = rgb({{colors.on_background.default.hex_stripped}})
+$primary = rgb({{colors.primary.default.hex_stripped}})
+$on_primary = rgb({{colors.on_primary.default.hex_stripped}})
+$surface = rgb({{colors.surface.default.hex_stripped}})
+$on_surface = rgb({{colors.on_surface.default.hex_stripped}})
+$surface_variant = rgb({{colors.surface_variant.default.hex_stripped}})
+$on_surface_variant = rgb({{colors.on_surface_variant.default.hex_stripped}})
+$tertiary = rgb({{colors.tertiary.default.hex_stripped}})
+$error = rgb({{colors.error.default.hex_stripped}})
+$on_error = rgb({{colors.on_error.default.hex_stripped}})
 #+end_src
 
 ** Waybar Template
@@ -3708,6 +3750,12 @@ total_energy=$(awk "BEGIN {printf \"%.1f\", $bat0_energy + $bat1_energy}")
 # Calculate combined percentage
 combined_percent=$(awk "BEGIN {printf \"%d\", ($total_energy / $TOTAL_CAPACITY) * 100}")
 
+# Read power consumption (in µW)
+bat0_power=$(cat "$BAT0_PATH/power_now" 2>/dev/null || echo "0")
+bat1_power=$(cat "$BAT1_PATH/power_now" 2>/dev/null || echo "0")
+total_power_uw=$((bat0_power + bat1_power))
+total_power_w=$(awk "BEGIN {printf \"%.2f\", $total_power_uw / 1000000}")  # Convert to W
+
 # Determine charging state
 if [[ "$ac_online" == "1" ]]; then
     if [[ "$bat0_status" == "Charging" || "$bat1_status" == "Charging" ]]; then
@@ -3767,8 +3815,26 @@ else
     class="normal"
 fi
 
+# Calculate time remaining
+if [[ "$state" == "Discharging" ]] && (( $(echo "$total_power_w > 0.5" | awk '{print ($1 > 0.5)}') )); then
+    time_hours=$(awk "BEGIN {printf \"%.2f\", $total_energy / $total_power_w}")
+    hours=$(awk "BEGIN {printf \"%d\", int($time_hours)}")
+    minutes=$(awk "BEGIN {printf \"%d\", int(($time_hours - $hours) * 60)}")
+    time_remaining="${hours}h ${minutes}m remaining"
+elif [[ "$state" == "Charging" ]] && (( $(echo "$total_power_w > 0.5" | awk '{print ($1 > 0.5)}') )); then
+    energy_to_full=$(awk "BEGIN {printf \"%.2f\", $TOTAL_CAPACITY - $total_energy}")
+    time_hours=$(awk "BEGIN {printf \"%.2f\", $energy_to_full / $total_power_w}")
+    hours=$(awk "BEGIN {printf \"%d\", int($time_hours)}")
+    minutes=$(awk "BEGIN {printf \"%d\", int(($time_hours - $hours) * 60)}")
+    time_remaining="${hours}h ${minutes}m until full"
+else
+    time_remaining=""
+fi
+
 # Build tooltip
-tooltip="Combined: ${combined_percent}% (${total_energy}Wh)\n"
+tooltip="Combined: ${combined_percent}% (${total_energy}Wh)"
+[[ -n "$time_remaining" ]] && tooltip+="\n${time_remaining}"
+tooltip+="\nPower: ${total_power_w}W\n"
 tooltip+="BAT1 (External): ${bat1_percent}% (${bat1_energy}Wh) - ${bat1_status}\n"
 tooltip+="BAT0 (Internal): ${bat0_percent}% (${bat0_energy}Wh) - ${bat0_status}\n"
 tooltip+="Status: ${state}"
@@ -3905,6 +3971,241 @@ esac
 
 # Output JSON for waybar
 echo "{\"text\":\"$text\",\"tooltip\":\"$tooltip\",\"class\":\"$class\",\"alt\":\"$icon\"}"
+#+end_src
+
+** Waybar Hyprsunset Monitor Script
+#+begin_src bash :tangle packages/matugen/.local/bin/waybar-hyprsunset :shebang "#!/usr/bin/env bash"
+# Monitor hyprsunset temperature for waybar
+# Click to open temperature selector menu
+
+set -euo pipefail
+
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/hyprsunset-temp"
+
+# Handle click to open menu
+if [[ "${1:-}" == "menu" ]]; then
+    ~/.local/bin/hyprsunset-menu
+    exit 0
+fi
+
+# Function to calculate temperature based on time and profiles
+calculate_temp_from_time() {
+    local current_time=$(date +%H:%M)
+    local current_minutes=$((10#$(date +%H) * 60 + 10#$(date +%M)))
+
+    # Profile times in minutes since midnight
+    declare -A profiles=(
+        [450]=6500    # 7:30 - identity (6500K)
+        [840]=5500    # 14:00
+        [960]=4500    # 16:00
+        [1080]=3500   # 18:00
+        [1200]=2500   # 20:00
+    )
+
+    # Sort times and find the active profile
+    local active_temp=6500
+    for time_min in $(echo "${!profiles[@]}" | tr ' ' '\n' | sort -n); do
+        if (( current_minutes >= time_min )); then
+            active_temp=${profiles[$time_min]}
+        fi
+    done
+
+    echo "$active_temp"
+}
+
+# Get current temperature (check manual override first, then calculate from time)
+if [[ -f "$STATE_FILE" ]]; then
+    temp=$(cat "$STATE_FILE")
+    manual_override=true
+else
+    temp=$(calculate_temp_from_time)
+    manual_override=false
+fi
+
+# Determine icon and class based on temperature
+if [[ $temp -ge 6000 ]]; then
+    icon="󰛨"  # Sun icon (daylight)
+    class="day"
+    mode="Day"
+elif [[ $temp -ge 4500 ]]; then
+    icon="󰖚"  # Sunset icon (evening)
+    class="evening"
+    mode="Evening"
+else
+    icon="󰖔"  # Moon icon (night)
+    class="night"
+    mode="Night"
+fi
+
+# Format temperature display
+temp_k="${temp}K"
+if [[ "$manual_override" == "true" ]]; then
+    tooltip="Color Temperature: $temp_k ($mode) [Manual]\nClick to change"
+else
+    tooltip="Color Temperature: $temp_k ($mode) [Auto]\nClick to change"
+fi
+
+# Output JSON for waybar
+echo "{\"text\":\"$temp_k\",\"tooltip\":\"$tooltip\",\"class\":\"$class\",\"alt\":\"$icon\"}"
+#+end_src
+
+** Waybar Backlight with Temperature Script
+#+begin_src bash :tangle packages/matugen/.local/bin/waybar-backlight :shebang "#!/usr/bin/env bash"
+# Monitor backlight and hyprsunset temperature for waybar
+# Click to open temperature selector menu
+
+set -euo pipefail
+
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/hyprsunset-temp"
+
+# Handle click to open menu
+if [[ "${1:-}" == "menu" ]]; then
+    ~/.local/bin/hyprsunset-menu
+    exit 0
+fi
+
+# Get current brightness
+if [[ -f /sys/class/backlight/intel_backlight/brightness ]]; then
+    current=$(cat /sys/class/backlight/intel_backlight/brightness)
+    max=$(cat /sys/class/backlight/intel_backlight/max_brightness)
+    percent=$((current * 100 / max))
+else
+    # Fallback if brightness file doesn't exist
+    percent=100
+fi
+
+# Determine brightness icon
+if [[ $percent -le 33 ]]; then
+    icon="󰃞"
+elif [[ $percent -le 66 ]]; then
+    icon="󰃟"
+else
+    icon="󰃠"
+fi
+
+# Function to calculate temperature based on time and profiles
+calculate_temp_from_time() {
+    local current_time=$(date +%H:%M)
+    local current_minutes=$((10#$(date +%H) * 60 + 10#$(date +%M)))
+
+    # Profile times in minutes since midnight
+    declare -A profiles=(
+        [450]=6500    # 7:30 - identity (6500K)
+        [840]=5500    # 14:00
+        [960]=4500    # 16:00
+        [1080]=3500   # 18:00
+        [1200]=2500   # 20:00
+    )
+
+    # Sort times and find the active profile
+    local active_temp=6500
+    for time_min in $(echo "${!profiles[@]}" | tr ' ' '\n' | sort -n); do
+        if (( current_minutes >= time_min )); then
+            active_temp=${profiles[$time_min]}
+        fi
+    done
+
+    echo "$active_temp"
+}
+
+# Get current temperature (check manual override first, then calculate from time)
+if [[ -f "$STATE_FILE" ]]; then
+    temp=$(cat "$STATE_FILE")
+    manual_override=true
+else
+    temp=$(calculate_temp_from_time)
+    manual_override=false
+fi
+
+# Determine temperature mode
+if [[ $temp -ge 6000 ]]; then
+    temp_icon="󰛨"
+    mode="Day"
+elif [[ $temp -ge 4500 ]]; then
+    temp_icon="󰖚"
+    mode="Evening"
+else
+    temp_icon="󰖔"
+    mode="Night"
+fi
+
+# Build tooltip
+if [[ "$manual_override" == "true" ]]; then
+    tooltip="Brightness: ${percent}%\nColor Temperature: ${temp}K ($mode) [Manual]\n\nClick to adjust temperature"
+else
+    tooltip="Brightness: ${percent}%\nColor Temperature: ${temp}K ($mode) [Auto]\n\nClick to adjust temperature"
+fi
+
+# Output JSON for waybar
+echo "{\"text\":\"\",\"tooltip\":\"$tooltip\",\"class\":\"backlight\",\"alt\":\"$icon\"}"
+#+end_src
+
+** Hyprsunset Fuzzel Menu Script
+#+begin_src bash :tangle packages/matugen/.local/bin/hyprsunset-menu :shebang "#!/usr/bin/env bash"
+# Fuzzel menu for selecting hyprsunset color temperature
+set -euo pipefail
+
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/hyprsunset-temp"
+
+# Temperature presets with descriptions
+declare -A temps=(
+    ["󰛨 Daylight (6500K)"]="6500"
+    ["󰖨 Bright (5500K)"]="5500"
+    ["󰖚 Evening (4500K)"]="4500"
+    ["󰖙 Warm (3500K)"]="3500"
+    ["󰖔 Night (2500K)"]="2500"
+)
+
+# Get current temperature for highlighting
+current_temp=6500
+if [[ -f "$STATE_FILE" ]]; then
+    current_temp=$(cat "$STATE_FILE")
+fi
+
+# Build menu options (mark current with →)
+menu_options=""
+for label in "${!temps[@]}"; do
+    temp="${temps[$label]}"
+    if [[ "$temp" == "$current_temp" ]]; then
+        menu_options+="→ $label\n"
+    else
+        menu_options+="  $label\n"
+    fi
+done
+
+# Show fuzzel menu and get selection
+selected=$(echo -e "${menu_options}" | fuzzel --dmenu --placeholder="Color Temperature..." --width=20)
+
+# Exit if nothing selected
+if [[ -z "$selected" ]]; then
+    exit 0
+fi
+
+# Remove the → marker if present
+selected="${selected#→ }"
+selected="${selected#  }"
+
+# Get temperature from selection
+for label in "${!temps[@]}"; do
+    if [[ "$label" == "$selected" ]]; then
+        new_temp="${temps[$label]}"
+        break
+    fi
+done
+
+# Apply new temperature
+if [[ -n "${new_temp:-}" ]]; then
+    # Kill existing hyprsunset and start with new temperature
+    pkill hyprsunset || true
+    sleep 0.1
+    hyprsunset -t "$new_temp" &
+
+    # Save state
+    echo "$new_temp" > "$STATE_FILE"
+
+    # Notify user
+    notify-send "Color Temperature" "Set to ${new_temp}K" -t 2000
+fi
 #+end_src
 
 ** Mako Actions Fuzzel Menu
@@ -4857,7 +5158,9 @@ SUPER + M → Restore notification
 SUPER + CTRL + M → Dismiss notification
 SUPER + SHIFT + M → Notification actions menu
 SUPER + CTRL + SHIFT + M → List all notifications
-SUPER + I → Network manager
+SUPER + SHIFT + I → Network manager
+SUPER + C → Color picker
+SUPER + SHIFT + T → Color temperature
 SUPER + SHIFT + V → Clipboard history
 SUPER + CTRL + SHIFT + V → Clear clipboard"
             else # sway
@@ -4891,7 +5194,7 @@ SUPER + SHIFT + R → Re-tangle dotfiles"
                 bindings="SUPER + Left click → Move window
 SUPER + Right click → Resize window
 SUPER + Z → Resize window (keyboard)
-3-finger swipe left/right → Navigate workspaces
+3-finger horizontal swipe → Navigate workspaces
 3-finger swipe down → Toggle special workspace"
             else # sway
                 bindings="SUPER + Left click → Move window
