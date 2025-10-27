@@ -872,9 +872,10 @@ After auto-login is configured, Hyprland (or your selected WM) will start automa
 - =~/.local/bin/hyprsunset-menu= - Color temperature selector using fuzzel
   - Package: =packages/matugen/.local/bin/hyprsunset-menu=
   - Usage: Mod+Shift+T or click waybar backlight icon
-  - Presets: Daylight (6500K), Bright (5500K), Evening (4500K), Warm (3500K), Night (2500K)
+  - Options: Auto (Scheduled), Daylight (6500K), Bright (5500K), Evening (4500K), Warm (3500K), Night (2500K)
+  - Auto mode follows configured schedule: 7:30 daylight, 14:00→5500K, 16:00→4500K, 18:00→3500K, 20:00→2500K
   - Marks current selection with → indicator
-  - Automatically applies temperature and persists preference
+  - Manual selections persist until Auto mode is re-enabled
 - =~/.local/bin/waybar-hyprsunset= - Standalone hyprsunset monitor for waybar
   - Package: =packages/matugen/.local/bin/waybar-hyprsunset=
   - Displays current color temperature with icon

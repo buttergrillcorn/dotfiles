@@ -1151,14 +1151,10 @@ profile {
             "mode-mon-col": 3,
             "weeks-pos": "left",
             "on-scroll": 1,
-            "on-click-right": "mode"
-            // "format": {
-            //   "months": "<span color='#f7768e'><b>{}</b></span>",
-            //   "days": "<span color='#c0caf5'><b>{}</b></span>",
-            //   "weeks": "<span color='#9ece6a'>W{}</span>",
-            //   "weekdays": "<span color='#7aa2f7'>{}</span>",
-            //   "today": "<span color='#ff9e64'><b><u>{}</u></b></span>"
-            // }
+            "on-click-right": "mode",
+            "format": {
+              "today": "<b><u>{}</u></b>"
+            }
         },
         "actions": {
             "on-click-right": "mode",
@@ -1540,13 +1536,8 @@ group#tray-expander {
       "weeks-pos": "left",
       "on-scroll": 1,
       "on-click-right": "mode",
-      // "format": {
-      //   "months": "<span color='#f7768e'><b>{}</b></span>",
-      //   "days": "<span color='#c0caf5'><b>{}</b></span>",
-      //   "weeks": "<span color='#9ece6a'>W{}</span>",
-      //   "weekdays": "<span color='#7aa2f7'>{}</span>",
-      //   "today": "<span color='#ff9e64'><b><u>{}</u></b></span>"
-      // }
+    "format": {
+        "today": "<b><u>{}</u></b>"
     },
     "actions": {
       "on-click-right": "mode",
@@ -4147,6 +4138,13 @@ set -euo pipefail
 
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/hyprsunset-temp"
 
+# Add Auto option first
+if [[ -f "$STATE_FILE" ]]; then
+    auto_marker="  "
+else
+    auto_marker="→ "
+fi
+
 # Temperature presets with descriptions
 declare -A temps=(
     ["󰛨 Daylight (6500K)"]="6500"
@@ -4162,11 +4160,11 @@ if [[ -f "$STATE_FILE" ]]; then
     current_temp=$(cat "$STATE_FILE")
 fi
 
-# Build menu options (mark current with →)
-menu_options=""
+# Build menu options (Auto first, then manual temps)
+menu_options="${auto_marker}󰔎 Auto (Scheduled)\n"
 for label in "${!temps[@]}"; do
     temp="${temps[$label]}"
-    if [[ "$temp" == "$current_temp" ]]; then
+    if [[ "$temp" == "$current_temp" ]] && [[ -f "$STATE_FILE" ]]; then
         menu_options+="→ $label\n"
     else
         menu_options+="  $label\n"
@@ -4184,6 +4182,21 @@ fi
 # Remove the → marker if present
 selected="${selected#→ }"
 selected="${selected#  }"
+
+# Handle Auto mode
+if [[ "$selected" == "󰔎 Auto (Scheduled)" ]]; then
+    # Remove state file to return to auto mode
+    rm -f "$STATE_FILE"
+
+    # Kill existing hyprsunset and restart without arguments (uses config)
+    pkill hyprsunset || true
+    sleep 0.1
+    hyprsunset &
+
+    # Notify user
+    notify-send "Color Temperature" "Auto mode enabled (using schedule)" -t 2000
+    exit 0
+fi
 
 # Get temperature from selection
 for label in "${!temps[@]}"; do
