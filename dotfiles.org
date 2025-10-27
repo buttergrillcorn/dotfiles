@@ -6086,8 +6086,8 @@ if git fetch %s %s 2>&1; then \
       exit 1; \
     fi; \
   fi; \
-  # Check for local changes (including untracked)
-  if git diff --quiet && git diff --cached --quiet && [ -z \"$(git ls-files --others --exclude-standard)\" ]; then \
+  # Check for local changes (modifications, deletions, additions)
+  if [ -z \"$(git status --porcelain)\" ]; then \
     # No local changes, check for unpushed commits
     if git log %s/%s..HEAD 2>&1 | grep -q 'commit'; then \
       git push %s %s 2>&1 && echo 'PUSH_SUCCESS'; \
@@ -6095,7 +6095,7 @@ if git fetch %s %s 2>&1; then \
       echo 'NO_CHANGES'; \
     fi; \
   else \
-    # Has local changes, commit and push
+    # Has local changes (including deletions), commit and push
     git add -A 2>&1 && \
     git commit -m \"$(cat <<'COMMIT_MSG_EOF'\n%s\nCOMMIT_MSG_EOF\n)\" 2>&1 && \
     git push %s %s 2>&1 && echo 'SYNC_SUCCESS'; \
@@ -6103,7 +6103,7 @@ if git fetch %s %s 2>&1; then \
 else \
   # Offline mode - commit locally only
   echo 'OFFLINE'; \
-  if ! git diff --quiet || ! git diff --cached --quiet || [ -n \"$(git ls-files --others --exclude-standard)\" ]; then \
+  if [ -n \"$(git status --porcelain)\" ]; then \
     git add -A 2>&1 && \
     git commit -m \"$(cat <<'COMMIT_MSG_EOF'\n%s\nCOMMIT_MSG_EOF\n)\" 2>&1 && \
     echo 'OFFLINE_COMMIT_SUCCESS'; \
