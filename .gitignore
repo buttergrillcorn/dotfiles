@@ -9,3 +9,5 @@ packages/
 
 # Backup files
 *.bak
+dotfiles.org.backup
+dotfiles.org.old
