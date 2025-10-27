@@ -121,11 +121,46 @@ Configuration is optimized for fast startup (<100ms target):
 - Completion caching
 - Optional profiling with `zprof`
 
+## Doom Emacs & Denote
+
+The repository includes a comprehensive Doom Emacs configuration with Denote note-taking system.
+
+### Denote Git Sync
+
+Denote is configured with **automatic git synchronization** for seamless multi-device note-taking:
+
+**Features:**
+- Auto-sync on save (commits and pushes when saving files in `~/denote`)
+- Auto-pull on daemon startup (pulls latest changes when Emacs starts)
+- Periodic sync every 15 minutes
+- Idle sync after 5 minutes of inactivity
+- Offline support (commits locally when offline, auto-pushes when back online)
+- Smart commit messages with file names and timestamps
+- Conflict detection with clear notifications
+
+**Safety mechanisms:**
+- Detects ongoing git operations (merge/rebase) and skips sync
+- Single operation lock prevents concurrent syncs
+- Handles all file types: modifications, additions, deletions, renames
+- All operations run asynchronously (non-blocking)
+
+**Configuration location:** `dotfiles.org` under `*** Denote > **** Git Sync`
+
+**Keybindings:**
+- `SPC d g s` - Manual sync
+- `SPC d g t` - Toggle auto-sync on/off
+
+### Deployment
+```sh
+./scripts/stow-pkg.sh doom
+doom sync
+```
+
 ## Target Stack
 
-**Primary:** hyprland (includes waybar), hyprpaper, hypridle, hyprlock, mako, fuzzel, foot, yazi, qutebrowser, zsh, matugen
+**Primary:** hyprland (includes waybar), hyprpaper, hypridle, hyprlock, mako, fuzzel, foot, yazi, qutebrowser, doom emacs, denote, zsh, matugen
 
-**Alternative:** sway (includes waybar), swaybg, swayidle, swaylock, mako, fuzzel, foot, yazi, qutebrowser, zsh, matugen
+**Alternative:** sway (includes waybar), swaybg, swayidle, swaylock, mako, fuzzel, foot, yazi, qutebrowser, doom emacs, denote, zsh, matugen
 
 **Note:** Both Hyprland and Sway are fully supported. Hyprland is the primary/default WM, with Sway as an alternative.
 

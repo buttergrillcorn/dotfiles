@@ -12,6 +12,8 @@ Minimal Arch Linux dotfiles managed with org-mode and GNU Stow.
 - *Terminal*: foot
 - *File Manager*: yazi
 - *Browser*: qutebrowser
+- *Editor*: Doom Emacs
+- *Notes*: Denote (with automatic git sync)
 - *Lock*: hyprlock / waylock
 - *Idle*: hypridle / swayidle
 - *Wallpaper*: hyprpaper / swaybg
@@ -694,6 +696,123 @@ Subsequent launches: <100ms
 - Completion caching in =~/.cache/zsh/=
 - Optional profiling with =zprof= (uncomment in config)
 - Target startup time: <100ms
+
+** Doom Emacs Configuration
+Comprehensive Emacs configuration using Doom Emacs framework with Denote note-taking system.
+
+*** Features
+- *Evil mode*: Vim keybindings everywhere
+- *Vertico + Consult*: Modern completion and search
+- *Magit*: Powerful git porcelain
+- *LSP*: Language servers for multiple languages
+- *Org-mode*: Advanced org features with babel support
+- *Denote*: Simple, fast note-taking with automatic git sync
+- *Tree-sitter*: Better syntax highlighting
+- *Vterm*: Best terminal emulation in Emacs
+
+*** Denote Notes with Automatic Git Sync
+Denote is configured with automatic, intelligent git synchronization for seamless multi-device note-taking.
+
+**** Core Features
+- *Auto-sync on save*: Changes automatically committed and pushed when you save
+- *Auto-pull on startup*: Pulls latest changes when Emacs daemon starts
+- *Periodic sync*: Background sync every 15 minutes
+- *Idle sync*: Syncs after 5 minutes of inactivity
+- *Offline support*: Commits locally when offline, auto-pushes when back online
+- *Smart commit messages*: Generates descriptive messages with timestamps
+- *Conflict detection*: Aborts and notifies on merge conflicts
+
+**** Safety Features
+- Detects ongoing git operations (merge/rebase) and skips sync
+- Single operation lock prevents concurrent syncs
+- Handles all file types: modifications, additions, deletions, renames
+- All operations run asynchronously (non-blocking)
+
+**** Keybindings
+- *SPC d n*: Create new note
+- *SPC d d*: Open or create note
+- *SPC d l*: Find link
+- *SPC d b*: Show backlinks
+- *SPC d j*: Open today's journal entry
+- *SPC d s*: Search notes (consult-denote)
+- *SPC d g s*: Manual git sync
+- *SPC d g t*: Toggle auto-sync on/off
+
+**** Directory Structure
+Notes are stored in =~/denote/= with the following structure:
+- =~/denote/= - Main notes directory
+- =~/denote/journal/= - Daily journal entries
+- =~/denote/meta/= - Meta notes (todo.org, inbox.org)
+
+**** File Naming Convention
+Denote uses a simple, consistent naming scheme:
+#+begin_example
+20251027T143052--note-title__keyword1_keyword2.org
+#+end_example
+
+- Timestamp: =20251027T143052= (YYYYMMDDTHHMMSS)
+- Title: =note-title= (slugified)
+- Keywords: =keyword1_keyword2= (optional tags)
+
+**** Setup
+1. Install Doom Emacs:
+   #+begin_src sh
+   git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
+   ~/.config/emacs/bin/doom install
+   #+end_src
+
+2. Stow Doom package:
+   #+begin_src sh
+   ./scripts/stow-pkg.sh doom
+   #+end_src
+
+3. Sync Doom configuration:
+   #+begin_src sh
+   ~/.config/emacs/bin/doom sync
+   #+end_src
+
+4. Initialize git repository for notes (one-time):
+   #+begin_src sh
+   cd ~/denote
+   git init
+   git remote add origin <your-repo-url>
+   git add .
+   git commit -m "Initial commit"
+   git push -u origin main
+   #+end_src
+
+5. Start Emacs daemon (already auto-starts on Hyprland login):
+   #+begin_src sh
+   emacs --daemon
+   #+end_src
+
+**** Usage
+- *New note*: =SPC d n= → Enter title and keywords
+- *Daily journal*: =SPC d j= → Opens/creates today's entry
+- *Link notes*: =SPC d i l= → Insert link to another note
+- *Search*: =SPC d s= → Fuzzy search all notes
+- *Auto-sync*: Happens automatically on save, startup, periodically, and when idle
+
+**** Performance with emacsclient
+When using =emacsclient= (recommended):
+- Daemon starts once on login
+- Auto-sync runs once at daemon startup (~1-2s background)
+- Periodic/idle timers run in daemon (zero impact on emacsclient connections)
+- Each =emacsclient= connection is instant
+
+**** Offline Behavior
+When internet is unavailable:
+- Changes are committed locally
+- Push is skipped (no errors)
+- Shows: "📴 Offline: Changes committed locally"
+- Automatically pushes accumulated commits when back online
+
+**** Messages
+- ✓ "Denote notes synced successfully" - Online sync with push
+- ✓ "Denote notes pushed successfully" - Pushed unpushed commits
+- 📴 "Offline: Changes committed locally" - Committed while offline
+- ⚠️ "Merge conflict detected!" - Manual resolution needed
+- 🔒 "Git operation in progress, skipping..." - Safety check triggered
 
 * Usage
 
