@@ -609,10 +609,12 @@ listener {
     on-timeout = loginctl lock-session && rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache
 }
 
-# Suspend (30 minutes on battery, 60 minutes on AC)
+# Suspend then hibernate (30 minutes on battery, 60 minutes on AC)
+# Will suspend immediately, then automatically hibernate after 2 hours
+# This provides fast wake for short suspends, zero power drain for long suspends
 listener {
     timeout = 1800
-    on-timeout = systemctl suspend
+    on-timeout = systemctl suspend-then-hibernate
 }
 #+end_src
 **** Hyprlock
@@ -1058,19 +1060,19 @@ if [ -d /sys/class/power_supply/AC ] || [ -d /sys/class/power_supply/AC0 ] || [ 
     AC_PATH=$(find /sys/class/power_supply -name 'AC*' -o -name 'ACAD' | head -n 1)
 
     if [ -n "$AC_PATH" ] && [ "$(cat $AC_PATH/online)" = "0" ]; then
-        # On battery
+        # On battery - suspend after 30 min, then hibernate after 2 hours
         swayidle -w \
             timeout 300 'swaymsg "output * dpms off"' \
             resume 'swaymsg "output * dpms on"' \
             timeout 600 'swaylock' \
-            timeout 1800 'systemctl suspend'
+            timeout 1800 'systemctl suspend-then-hibernate'
     else
-        # Plugged in
+        # Plugged in - suspend after 60 min, then hibernate after 2 hours
         swayidle -w \
             timeout 600 'swaymsg "output * dpms off"' \
             resume 'swaymsg "output * dpms on"' \
             timeout 900 'swaylock' \
-            timeout 3600 'systemctl suspend'
+            timeout 3600 'systemctl suspend-then-hibernate'
     fi
 else
     # Fallback if no AC adapter found (desktop)
@@ -2603,6 +2605,8 @@ Enable profiling (optional)
 #+begin_src sh :tangle packages/zsh/.zshrc
 # Uncomment to profile zsh startup time
 # zmodload zsh/zprof
+#+end_src
+
 *** Core Configuration
 #+begin_src sh :tangle packages/zsh/.zshrc
 # ============================================================================
@@ -5690,7 +5694,7 @@ Extensible text editor and integrated development environment built on Emacs.
 
 **** Theme
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
-(setq doom-theme 'doom-dark+)
+(setq doom-theme 'modus-vivendi-tritanopia)
 #+end_src
 
 **** Line Numbers
