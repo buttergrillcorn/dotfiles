@@ -96,7 +96,7 @@ sudo pacman -S zoxide bat trash-cli fastfetch starship
 sudo pacman -S eza ripgrep fd dust duf btop fzf
 
 # System utilities
-sudo pacman -S udiskie wluma
+sudo pacman -S udisks2 udiskie wluma
 
 # KDE Connect
 sudo pacman -S kdeconnect
@@ -106,6 +106,9 @@ sudo pacman -S python-adblock  # Required for content blocking (Brave's Rust adb
 
 # Qutebrowser userscripts
 sudo pacman -S jq python-requests python-lxml python-readability-lxml yt-dlp
+
+# Yazi plugin dependencies
+sudo pacman -S mediainfo imagemagick
 #+end_src
 
 ** Optional Tools
@@ -813,7 +816,82 @@ When internet is unavailable:
 - 📴 "Offline: Changes committed locally" - Committed while offline
 - ⚠️ "Merge conflict detected!" - Manual resolution needed
 - 🔒 "Git operation in progress, skipping..." - Safety check triggered
+** Yazi Packages
+Yazi (The TUI file browser) setup requires a few packages to be installed manually.
+*** Upgrading packages
+#+begin_src sh
+ya pkg upgrade
+#+end_src
+*** Chmod
+A quick keybinding to access chmod with =c= =m=.
+#+begin_src sh
+ya pkg add yazi-rs/plugins:chmod
+#+end_src
 
+*** Media Info
+Use =mediainfo= to show media information in preview.
+This requires you to install =mediainfo= package.
+#+begin_src sh
+ya pkg add boydaihungst/mediainfo
+#+end_src
+*** Image Zoom
+Image zoom with =+= and =-=.
+Requires =imagemagick= package.
+#+begin_src sh
+ya pkg add yazi-rs/plugins:zoom
+#+end_src
+*** Trash Restore
+Restore trash with =R=.
+Requires =trash-cli= package.
+#+begin_src sh
+ya pkg add uhs-robert/recycle-bin
+#+end_src
+*** Kdeconnect-send
+Kdeconnect plugin to quick share files from Yazi to any paired device.
+Requires =kdeconnect=, obviously.
+To send a file: first select the file(s) with =space= and then send the files using =Ctrl s=
+#+begin_src sh
+ya pkg add Deepak22903/kdeconnect-send
+#+end_src
+*** Git Status
+Show the status of Git file changes as linemode in the file list.
+#+begin_src sh
+ya pkg add yazi-rs/plugins:git
+#+end_src
+*** Lazygit
+Plugin for quickly accessing =lazygit= with =g l=, which means the package will be required.
+#+begin_src sh
+ya pkg add Lil-Dank/lazygit
+#+end_src
+*** Clipboard
+A plugin that uses =xclip= (X11), =wl-copy= (Wayland) or =osascript= (Mac OS) to synchronise the currently yanked file(s) with the system clipboard.
+Usage: It will work automatically as you yank inside Yazi with =y=.
+#+begin_src sh
+ya pkg add XYenon/clipboard
+#+end_src
+*** Mount/un-mount
+A mount manager for Yazi, providing disk mount, unmount, and eject functionality with =M=.
+**** Supported platforms:
++ Linux with =udisksctl=, =lsblk= and =eject= both provided by =util-linux=.
++ Mac OS with =diskutil=, which is pre-installed.
+**** Install
+#+begin_src sh
+ya pkg add yazi-rs/plugins:mount
+#+end_src
+*** Yatline
+The first Yazi plugin for customizing both header-line and status-line.
+#+begin_src sh
+ya pkg add imsi32/yatline
+#+end_src
+*** Toggle-pane
+Toggle the show, hide, and maximize states for different panes: parent, current, and preview.
+#+begin_src sh
+ya pkg add yazi-rs/plugins:toggle-pane
+#+end_src
+**** Usage
+=T= to toggle preview panel.
+=P= to maximize (toggle) preview panel.
+=H= to hide parent + preview panel, maximizing (toggle) current panel.
 * Usage
 
 ** Edit configuration
