@@ -358,6 +358,7 @@ sudo pacman -S bitwarden-cli
 - Audio mixers (Wiremix): floating, 50% size, centered
 - Notifications and PiP windows don't steal focus
 - Fullscreen windows inhibit idle (Hyprland)
+- *.exe (Windows/wine) programmes will have fixed 100% opacity
 
 ** Tiling Behavior (Sway)
 - Automatic tiling with autotiling: Intelligently switches between horizontal/vertical splits based on window dimensions (Hyprland/Niri-like)

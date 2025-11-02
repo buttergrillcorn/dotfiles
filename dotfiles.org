@@ -316,6 +316,8 @@ windowrule = idleinhibit fullscreen, class:.*
 windowrule = noinitialfocus, class:(mako)
 windowrule = noinitialfocus, title:^(Picture-in-Picture)$
 
+# No transparency
+windowrule = opacity 1.0 override 1.0 override 1.0 override, class:(.*)(.exe)
 #+end_src
 
 ***** Workspace
