@@ -194,7 +194,7 @@ sudo pacman -S bitwarden-cli
 ** Keybindings (Hyprland)
 *** Applications
 - *Mod (Super/Win) + Return*: Terminal
-- *Mod + Shift + Return*: Floating scratchpad terminal (special workspace)
+- *Mod + Shift + Return*: Floating terminal
 - *Mod + D*: Application launcher (fuzzel)
 - *Mod + B*: Browser (qutebrowser)
 - *Mod + Shift + B*: Password manager (bitwarden-fuzzel)

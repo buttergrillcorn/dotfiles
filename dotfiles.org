@@ -279,8 +279,9 @@ gestures {
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Floating terminal
 windowrule = float, class:($terminal-float-id)
-windowrule = size 50% 50%, class:($terminal-float-id)
-windowrule = center, class:($terminal-float-id)
+windowrule = size 30% 30%, class:($terminal-float-id)
+windowrule = move 100%-w-20, class:($terminal-float-id)
+windowrule = move 100%-h-20, class:($terminal-float-id)
 
 # # Terminal blur
 # windowrulev2 = opacity 0.75 override 0.75 override 1.0 override, class:$terminal # Set opacity to 0.75 active, 0.75 inactive and 1.0 fullscreen for terminal
@@ -336,7 +337,7 @@ workspace = s[yes], gapsin:10, gapsout:20
 bind = $mainMod, Return, exec, $terminal
 # Disabled: Spawning directly to special workspace bypasses waybar toggle, causing inconsistent visibility
 # bind = $mainMod SHIFT, Return, exec, [workspace special silent] $terminal
-bind = $mainMod CTRL, Return, exec, $terminal-float
+bind = $mainMod SHIFT, Return, exec, $terminal-float
 bind = $mainMod, D, exec, $menu
 bind = $mainMod, B, exec, $browser
 bind = $mainMod SHIFT, B, exec, ~/.local/bin/bitwarden-fuzzel
@@ -2171,10 +2172,6 @@ on   = "P"
 run  = "plugin toggle-pane max-preview"
 desc = "Maximize or restore the preview pane"
 
-[[mgr.prepend_keymap]]
-on   = "H"
-run  = "plugin toggle-pane max-current"
-desc = "Hide parent and preview pane (maximize current pane)"
 #+end_src
 ** Qutebrowser
 Keyboard-driven, Vim-like web browser built on QtWebEngine.
@@ -5854,7 +5851,7 @@ Extensible text editor and integrated development environment built on Emacs.
        ;; gist              ; interacting with github gists
        lookup              ; navigate your code and its documentation
        (lsp               ; M-x vscode
-        +eglot)
+        +peek)
        magit             ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
@@ -5899,7 +5896,8 @@ Extensible text editor and integrated development environment built on Emacs.
        ;;(haskell +lsp)    ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ; a language you can depend on
-       json              ; At least it ain't XML
+       (json              ; At least it ain't XML
+        +lsp)
        ;;(java +lsp)       ; the poster child for carpal tunnel syndrome
        (javascript        ; all(hope(abandon(ye(who(enter(here))))))
         +lsp
@@ -5911,9 +5909,13 @@ Extensible text editor and integrated development environment built on Emacs.
         +lsp)
        ;;lean              ; for folks with too much to prove
        ;;ledger            ; be audit you can be
-       lua               ; one-based indices? one-based indices
+       (lua               ; one-based indices? one-based indices
+        +lsp
+        +tree-sitter
+        +fennel)
        (markdown          ; writing docs for people to ignore
-        +grip)
+        +grip
+        +tree-sitter)
        ;;nim               ; python + lisp at the speed of c
        ;; nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
@@ -5923,12 +5925,15 @@ Extensible text editor and integrated development environment built on Emacs.
         +noter
         +pandoc
         +pomodoro
+        +present
         +pretty)
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
-       ;; python            ; beautiful is better than ugly
-       qt                ; the 'cutest' gui framework ever
+       (python            ; beautiful is better than ugly
+        +lsp
+        +tree-sitter)
+       ;; qt                ; the 'cutest' gui framework ever
        ;;racket            ; a DSL for DSLs
        ;;raku              ; the artist formerly known as perl6
        ;;rest              ; Emacs as a REST client
@@ -5939,7 +5944,8 @@ Extensible text editor and integrated development environment built on Emacs.
         +tree-sitter)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        ;;scala             ; java, but good
        ;;(scheme +guile)   ; a fully conniving family of lisps
-       sh                ; she sells {ba,z,fi}sh shells on the C xor
+       (sh                ; she sells {ba,z,fi}sh shells on the C xor
+        +lsp)
        ;;sml
        ;;solidity          ; do you need a blockchain? No.
        ;;swift             ; who asked for emoji variables?
@@ -5947,7 +5953,9 @@ Extensible text editor and integrated development environment built on Emacs.
        (web               ; the tubes
         +lsp
         +tree-sitter)
-       ;;yaml              ; JSON, but readable
+       (yaml              ; JSON, but readable
+        +lsp
+        +tree-sitter)
        ;;zig               ; C, but simpler
 
        :email
