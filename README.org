@@ -353,7 +353,6 @@ sudo pacman -S bitwarden-cli
 
 ** Window Rules (Both WMs)
 - Picture-in-Picture windows: floating, no border, bottom-right corner, sticky
-- Floating scratchpad terminal: centered, 50% width/height, automatically moved to scratchpad/special workspace
 - Auto-floating apps: bluetooth managers (blueman, blueberry), audio control (pavucontrol, wiremix), kdeconnect, etc.
 - Audio mixers (Wiremix): floating, 50% size, centered
 - Notifications and PiP windows don't steal focus

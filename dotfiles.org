@@ -280,8 +280,7 @@ gestures {
 # Floating terminal
 windowrule = float, class:($terminal-float-id)
 windowrule = size 30% 30%, class:($terminal-float-id)
-windowrule = move 100%-w-20, class:($terminal-float-id)
-windowrule = move 100%-h-20, class:($terminal-float-id)
+windowrule = move 20 100%-w-20, class:($terminal-float-id)
 
 # # Terminal blur
 # windowrulev2 = opacity 0.75 override 0.75 override 1.0 override, class:$terminal # Set opacity to 0.75 active, 0.75 inactive and 1.0 fullscreen for terminal
