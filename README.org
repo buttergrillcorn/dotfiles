@@ -292,6 +292,7 @@ sudo pacman -S bitwarden-cli
   - Battery: Smart dual battery (BAT0+BAT1) showing combined percentage (e.g., 73% of 96Wh total)
     - Tooltip shows individual battery status and energy in Wh
     - Icon reflects combined charge level and charging state
+    - Shows 󰚥 when plugged in but not charging (battery charge threshold reached)
 - Pomodoro timer: Minimal productivity timer with visual states
   - 󱫐 Idle (click to start 25-minute work session)
   - 󰔟 24:59 Working (shows countdown, click to pause, right-click to reset)
@@ -712,6 +713,9 @@ Comprehensive Emacs configuration using Doom Emacs framework with Denote note-ta
 - *Denote*: Simple, fast note-taking with automatic git sync
 - *Tree-sitter*: Better syntax highlighting
 - *Vterm*: Best terminal emulation in Emacs
+- *Claude Code*: Anthropic's Claude AI integration for Emacs (SPC e)
+- *Pulsar*: Visual pulse highlighting on cursor movement and after select operations
+- *Pixel-perfect scrolling*: Smooth touchpad scrolling support for Wayland
 
 *** Denote Notes with Automatic Git Sync
 Denote is configured with automatic, intelligent git synchronization for seamless multi-device note-taking.
@@ -835,7 +839,7 @@ This requires you to install =mediainfo= package.
 ya pkg add boydaihungst/mediainfo
 #+end_src
 *** Image Zoom
-Image zoom with =+= and =-=.
+Image zoom with =z i= (zoom in) and =z o= (zoom out).
 Requires =imagemagick= package.
 #+begin_src sh
 ya pkg add yazi-rs/plugins:zoom

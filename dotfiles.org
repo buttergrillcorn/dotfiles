@@ -1975,12 +1975,12 @@ desc = "Chmod on selected files"
 *** Zoom
 #+begin_src toml :tangle packages/yazi/.config/yazi/keymap.toml
 [[mgr.prepend_keymap]]
-on   = "+"
+on   = [ "z", "i" ]
 run  = "plugin zoom 1"
 desc = "Zoom in hovered file"
 
 [[mgr.prepend_keymap]]
-on   = "-"
+on   = [ "z", "o" ]
 run  = "plugin zoom -1"
 desc = "Zoom out hovered file"
 #+end_src
@@ -3547,7 +3547,7 @@ if [[ "$charging" == true ]]; then
 elif [[ "$state" == "Full" ]]; then
     icon="󰂅"
 elif [[ "$state" == "Plugged" ]]; then
-    icon=""
+    icon="󰚥"
 else
     if [[ $combined_percent -ge 90 ]]; then icon="󰁹"
     elif [[ $combined_percent -ge 80 ]]; then icon="󰂂"
@@ -5979,7 +5979,7 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ** packages.el
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/packages.el
-;; -*- no-byte-compile: t; -*-
+;; no-byte-compile: t; -*-
 ;;; $DOOMDIR/packages.el
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5990,15 +5990,27 @@ Extensible text editor and integrated development environment built on Emacs.
 ;; on the command line, then restart Emacs for the changes to take effect -- or
 ;; use 'M-x doom/reload'.
 
+;; Orgmode
 (package! org-autolist)
 (package! org-appear)
 (package! org-auto-tangle)
+
+;; Denote
 (package! denote)
 (package! denote-menu)
 (package! denote-org)
 (package! denote-explore)
 (package! consult-denote)
 (package! denote-journal)
+
+;; Claude Code
+(package! inheritenv
+  :recipe (:host github :repo "purcell/inheritenv"))
+(package! claude-code
+  :recipe (:host github :repo "stevemolitor/claude-code.el"))
+
+;; Pulsar
+(package! pulsar)
 #+end_src
 
 ** config.el
@@ -6037,7 +6049,17 @@ Extensible text editor and integrated development environment built on Emacs.
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 (setq display-line-numbers-type 'relative)
 #+end_src
-
+*** Misc
+**** Touchpad Scrolling Fix
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+;; enable pixel-precise scrolling
+(when (fboundp 'pixel-scroll-precision-mode)
+  (pixel-scroll-precision-mode 1))
+;; optional: reduce jumpiness from mouse-wheel settings
+;; (setq mouse-wheel-scroll-amount '(0.01)   ; fraction of window (or use pixel values)
+;;       mouse-wheel-progressive-speed nil
+;;       mouse-wheel-follow-mouse t)
+#+end_src
 *** Key Binds
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
 ;; (map! "C-h" 'switch-to-prev-buffer)
@@ -6287,7 +6309,7 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
 (use-package! denote-journal
   :after denote
   :config
-  (setq denote-journal-title-format "%Y-%m-%e"))
+  (setq denote-journal-title-format "%Y-%m-%d"))
 #+end_src
 
 ***** Key Binds
@@ -6675,4 +6697,72 @@ It would show up something like this instead:
 ;; (projectile-add-known-project "~/roam")
 (projectile-add-known-project "~/stow")
 #+end_src
+*** Claude Code
+***** Configuration
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+(use-package! claude-code
+  :after inheritenv
+  :config
+  (setq claude-code-terminal-backend 'vterm)
+  (claude-code-mode)
+  :bind
+  (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode)))
+#+end_src
 
+***** Key Binds
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+(map! :leader :desc "Claude Code" "e" #'claude-code-transient)
+      ;; (:prefix-map ("e" . "Claude")
+      ;;  :desc "Start" "e" #'claude-code-transient))
+#+end_src
+*** Pulsar
+Pulse highlight line on demand or after running select functions
+**** Configuration
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+(use-package! pulsar
+  :config
+  (require 'pulsar)
+
+  ;; Check the default value of `pulsar-pulse-functions'.  That is where
+  ;; you add more commands that should cause a pulse after they are
+  ;; invoked
+
+  (setq pulsar-pulse t)
+  (setq pulsar-delay 0.055)
+  (setq pulsar-iterations 10)
+  (setq pulsar-face 'pulsar-magenta)
+  (setq pulsar-highlight-face 'pulsar-yellow)
+
+  (pulsar-global-mode 1)
+
+  ;; OR use the local mode for select mode hooks
+
+  (dolist (hook '(org-mode-hook emacs-lisp-mode-hook))
+    (add-hook hook #'pulsar-mode))
+
+  ;; pulsar does not define any key bindings.  This is just a sample that
+  ;; respects the key binding conventions.  Evaluate:
+  ;;
+  ;;     (info "(elisp) Key Binding Conventions")
+  ;;
+  ;; The author uses C-x l for `pulsar-pulse-line' and C-x L for
+  ;; `pulsar-highlight-line'.
+  ;;
+  ;; You can replace `pulsar-highlight-line' with the command
+  ;; `pulsar-highlight-dwim'.
+  ;; (let ((map global-map))
+  ;;   (define-key map (kbd "C-c h p") #'pulsar-pulse-line)
+  ;;   (define-key map (kbd "C-c h h") #'pulsar-highlight-line))
+
+  ;; Use pulsar with next-error
+  (add-hook 'next-error-hook #'pulsar-pulse-line)
+
+  ;; Use pulsar in the minibuffer
+  (add-hook 'minibuffer-setup-hook #'pulsar-pulse-line-blue)
+
+  ;; Use pulsar with other packages
+
+  ;;; integration with the `consult' package:
+  (add-hook 'consult-after-jump-hook #'pulsar-recenter-top)
+  (add-hook 'consult-after-jump-hook #'pulsar-reveal-entry))
+#+end_src
