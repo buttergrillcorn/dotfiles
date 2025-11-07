@@ -6633,18 +6633,23 @@ Simple ox-hugo integration for publishing denote notes as blog posts. Blog posts
 
 ***** Configuration
 #+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
-;; ox-hugo blog configuration
-(defvar denote-blog-export-dir (expand-file-name "~/denote/blog/")
-  "Directory where blog markdown files are exported for Hugo.")
+;; ox-hugo blog configuration for Hugo site at ~/denote/blog/
+;; Posts will be exported to ~/denote/blog/content/posts/
+(defvar denote-blog-hugo-base-dir (expand-file-name "~/denote/blog/")
+  "Hugo site base directory.")
 
-;; Ensure export directory exists
-(unless (file-directory-p denote-blog-export-dir)
-  (make-directory denote-blog-export-dir t))
+(defvar denote-blog-hugo-section "posts"
+  "Hugo section where blog posts are exported (creates content/posts/).")
 
-;; Configure ox-hugo to export to separate directory
+;; Ensure Hugo content directory exists
+(let ((content-dir (expand-file-name "content" denote-blog-hugo-base-dir)))
+  (unless (file-directory-p content-dir)
+    (make-directory content-dir t)))
+
+;; Configure ox-hugo
 (after! ox-hugo
-  (setq org-hugo-base-dir (expand-file-name "~/denote/")
-        org-hugo-section "blog"))
+  (setq org-hugo-base-dir denote-blog-hugo-base-dir
+        org-hugo-section denote-blog-hugo-section))
 #+end_src
 
 ***** Blog Post Creation
@@ -6662,8 +6667,8 @@ Simple ox-hugo integration for publishing denote notes as blog posts. Blog posts
       ;; Find the #+title line and add properties after it
       (when (re-search-forward "^#\\+title:" nil t)
         (end-of-line)
-        (insert "\n#+hugo_base_dir: ~/denote/")
-        (insert "\n#+hugo_section: blog-export")
+        (insert "\n#+hugo_base_dir: ~/denote/blog/")
+        (insert "\n#+hugo_section: posts")
         (insert "\n#+export_file_name: " (file-name-base (buffer-file-name)))
         (insert "\n\n. * Blog Post Content\n")))))
 #+end_src
@@ -6681,7 +6686,8 @@ Simple ox-hugo integration for publishing denote notes as blog posts. Blog posts
             (require 'ox-hugo)
             ;; Export to markdown
             (org-hugo-export-to-md)
-            (message "Blog post exported to %s" denote-blog-export-dir))
+            (message "Blog post exported to %s/content/%s/"
+                     denote-blog-hugo-base-dir denote-blog-hugo-section))
         (message "Current note doesn't have 'blog' keyword")))))
 
 (defun denote-blog-export-all ()
@@ -6699,7 +6705,8 @@ Simple ox-hugo integration for publishing denote notes as blog posts. Blog posts
                 (org-hugo-export-to-md)
                 (setq count (1+ count)))
             (error (message "Error exporting %s: %s" file err)))))
-      (message "Exported %d blog post(s) to %s" count denote-blog-export-dir))))
+      (message "Exported %d blog post(s) to %s/content/%s/"
+               count denote-blog-hugo-base-dir denote-blog-hugo-section))))
 #+end_src
 
 ***** Fix: Ensure denote only opens .org files
