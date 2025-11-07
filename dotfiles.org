@@ -6628,6 +6628,102 @@ fi"
         :desc "Toggle auto-sync" "t" #'denote-git-toggle-auto-sync)))
 #+end_src
 
+**** Blog / ox-hugo
+Simple ox-hugo integration for publishing denote notes as blog posts. Blog posts are exported to a separate directory to avoid conflicts with org files.
+
+***** Configuration
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+;; ox-hugo blog configuration
+(defvar denote-blog-export-dir (expand-file-name "~/denote/blog/")
+  "Directory where blog markdown files are exported for Hugo.")
+
+;; Ensure export directory exists
+(unless (file-directory-p denote-blog-export-dir)
+  (make-directory denote-blog-export-dir t))
+
+;; Configure ox-hugo to export to separate directory
+(after! ox-hugo
+  (setq org-hugo-base-dir (expand-file-name "~/denote/")
+        org-hugo-section "blog"))
+#+end_src
+
+***** Blog Post Creation
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+(defun denote-blog-new-post ()
+  "Create a new denote note with 'blog' keyword and ox-hugo properties."
+  (interactive)
+  (let* ((title (read-string "Blog post title: "))
+         (keywords '("blog")))
+    ;; Create denote note with blog keyword
+    (denote title keywords nil nil)
+    ;; Insert ox-hugo properties
+    (save-excursion
+      (goto-char (point-min))
+      ;; Find the #+title line and add properties after it
+      (when (re-search-forward "^#\\+title:" nil t)
+        (end-of-line)
+        (insert "\n#+hugo_base_dir: ~/denote/")
+        (insert "\n#+hugo_section: blog-export")
+        (insert "\n#+export_file_name: " (file-name-base (buffer-file-name)))
+        (insert "\n\n. * Blog Post Content\n")))))
+#+end_src
+
+***** Export Functions
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+(defun denote-blog-export-current ()
+  "Export current denote note to markdown using ox-hugo if it has 'blog' keyword."
+  (interactive)
+  (if (not buffer-file-name)
+      (message "Not visiting a file")
+    (let* ((keywords (denote-retrieve-keywords-value buffer-file-name (denote-filetype-heuristics buffer-file-name))))
+      (if (member "blog" keywords)
+          (progn
+            (require 'ox-hugo)
+            ;; Export to markdown
+            (org-hugo-export-to-md)
+            (message "Blog post exported to %s" denote-blog-export-dir))
+        (message "Current note doesn't have 'blog' keyword")))))
+
+(defun denote-blog-export-all ()
+  "Export all denote notes with 'blog' keyword to markdown."
+  (interactive)
+  (let ((blog-files (denote-directory-files-matching-regexp "_blog"))
+        (count 0))
+    (if (not blog-files)
+        (message "No blog posts found")
+      (dolist (file blog-files)
+        (with-current-buffer (find-file-noselect file)
+          (condition-case err
+              (progn
+                (require 'ox-hugo)
+                (org-hugo-export-to-md)
+                (setq count (1+ count)))
+            (error (message "Error exporting %s: %s" file err)))))
+      (message "Exported %d blog post(s) to %s" count denote-blog-export-dir))))
+#+end_src
+
+***** Fix: Ensure denote only opens .org files
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+;; Ensure denote only considers .org files, not .md files
+(after! denote
+  (setq denote-file-type 'org)
+  ;; Filter out markdown files from denote directory listings
+  (advice-add 'denote-directory-files :filter-return
+              (lambda (files)
+                (seq-filter (lambda (file) (string-suffix-p ".org" file))
+                            files))))
+#+end_src
+
+***** Keybindings
+#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+(map! :leader
+      (:prefix-map ("d" . "denote")
+       (:prefix ("b" . "blog")
+        :desc "New blog post" "n" #'denote-blog-new-post
+        :desc "Export current" "e" #'denote-blog-export-current
+        :desc "Export all blogs" "E" #'denote-blog-export-all)))
+#+end_src
+
 **** Completion Formatting
 Custom functions to make the formatting of calling =denote-open-or-create= to be cleaner.
 It would show up something like this instead:

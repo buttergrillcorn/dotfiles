@@ -820,6 +820,49 @@ When internet is unavailable:
 - 📴 "Offline: Changes committed locally" - Committed while offline
 - ⚠️ "Merge conflict detected!" - Manual resolution needed
 - 🔒 "Git operation in progress, skipping..." - Safety check triggered
+
+**** Blog Publishing with ox-hugo
+Denote integrates with ox-hugo for publishing notes as blog posts. Blog posts are exported to a separate directory to prevent conflicts with your original org files.
+
+***** Features
+- *Automatic setup*: Creates blog posts with all necessary ox-hugo properties
+- *Separate export*: Markdown files go to =~/denote/blog/= (not mixed with org files)
+- *No conflicts*: Original org files remain untouched, denote always opens org files
+- *Selective export*: Only notes with =blog= keyword are exported
+- *Batch export*: Export all blog posts at once or individually
+
+***** Creating Blog Posts
+Use =SPC d b n= to create a new blog post:
+1. Prompts for blog title
+2. Creates denote note with =blog= keyword
+3. Automatically adds ox-hugo properties:
+   - =#+hugo_base_dir:= Base directory for Hugo
+   - =#+hugo_section:= Section where markdown is exported
+   - =#+export_file_name:= Filename for the exported markdown
+4. Adds a starter heading for content
+
+***** Exporting to Markdown
+- =SPC d b e= - Export current note (if it has =blog= keyword)
+- =SPC d b E= - Export all notes with =blog= keyword
+
+Exported markdown files are saved to =~/denote/blog/= for use with Hugo static site generator.
+
+***** Workflow Example
+#+begin_example
+1. SPC d b n → Create new blog post "My First Post"
+2. Write your content in the org file
+3. SPC d b e → Export to markdown
+4. Markdown file created: ~/denote/blog/20251107T123456--my-first-post__blog.md
+5. Original org file stays in ~/denote/ untouched
+#+end_example
+
+***** Configuration
+Change the export directory by editing =denote-blog-export-dir= in =dotfiles.org=:
+#+begin_src emacs-lisp
+(defvar denote-blog-export-dir (expand-file-name "~/hugo/content/posts/")
+  "Directory where blog markdown files are exported for Hugo.")
+#+end_src
+
 ** Yazi Packages
 Yazi (The TUI file browser) setup requires a few packages to be installed manually.
 *** Upgrading packages
