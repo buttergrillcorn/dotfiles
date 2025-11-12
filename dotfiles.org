@@ -6866,11 +6866,23 @@ Uses ID-based tracking to handle renames safely."
   ;; Check for blog keyword
   (unless (denote-blog--has-blog-keyword-p buffer-file-name)
     (if (y-or-n-p "Current note doesn't have 'blog' keyword. Add it? ")
-        (let ((current-keywords (denote-retrieve-keywords-value
-                                buffer-file-name
-                                (denote-filetype-heuristics buffer-file-name))))
-          (denote-rename-file-keywords buffer-file-name
-                                       (cons "blog" current-keywords))
+        (let* ((current-keywords (denote-retrieve-keywords-value
+                                 buffer-file-name
+                                 (denote-filetype-heuristics buffer-file-name)))
+               (new-keywords (if (listp current-keywords)
+                               (cons "blog" current-keywords)
+                             (list "blog"))))
+          ;; Add keyword to front matter
+          (save-excursion
+            (goto-char (point-min))
+            (if (re-search-forward "^#\\+filetags:" nil t)
+                (progn
+                  (end-of-line)
+                  (insert " :blog")
+                  (save-buffer))
+              (user-error "Could not find #+filetags line")))
+          ;; Sync filename with front matter
+          (denote-rename-file-using-front-matter buffer-file-name)
           (revert-buffer t t))
       (user-error "Cancelled: note needs 'blog' keyword to publish")))
 
