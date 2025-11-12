@@ -6717,11 +6717,16 @@ Returns just the filename (not full path)."
   "Ensure current buffer has ox-hugo properties. Add missing ones with smart defaults."
   (save-excursion
     (goto-char (point-min))
-    (let ((has-base-dir (re-search-forward "^#\\+hugo_base_dir:" nil t))
-          (insert-pos nil))
+    (let ((has-base-dir (re-search-forward "^#\\+hugo_base_dir:" nil t)))
 
-      (unless has-base-dir
-        ;; Find the last Denote property line (after #+identifier:, #+title:, #+filetags:)
+      (if has-base-dir
+          ;; Properties exist - update hugo_section to match current config
+          (progn
+            (goto-char (point-min))
+            (when (re-search-forward "^#\\+hugo_section: .*$" nil t)
+              (replace-match (format "#+hugo_section: %s" denote-blog-hugo-section))))
+
+        ;; Properties don't exist - add them all
         (goto-char (point-min))
         (let ((last-prop-pos (point-min)))
           (while (re-search-forward "^#\\+\\(title\\|date\\|filetags\\|identifier\\):" nil t)
@@ -6731,8 +6736,8 @@ Returns just the filename (not full path)."
           (when last-prop-pos
             (goto-char last-prop-pos)
             ;; Add ox-hugo properties with smart defaults
-            (insert "\n#+hugo_base_dir: ~/denote/blog/")
-            (insert "\n#+hugo_section: posts")
+            (insert (format "\n#+hugo_base_dir: %s" denote-blog-hugo-base-dir))
+            (insert (format "\n#+hugo_section: %s" denote-blog-hugo-section))
             (insert (format "\n#+hugo_date: %s" (format-time-string "%Y-%m-%d")))
 
             ;; Convert denote keywords to hugo tags (exclude 'blog')
