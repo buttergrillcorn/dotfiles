@@ -825,18 +825,20 @@ When internet is unavailable:
 Denote integrates with ox-hugo for publishing notes as blog posts. The Hugo site lives at =~/denote/blog/= and follows Hugo's standard directory structure.
 
 ***** Features
-- *Automatic setup*: Creates blog posts with all necessary ox-hugo properties
-- *Hugo-compliant export*: Markdown files go to =~/denote/blog/content/posts/=
+- *ID-based tracking*: Safely handles note renames without breaking exports
+- *Diff checking*: Shows changes before overwriting existing posts
+- *Denote templates*: Auto-inserts ox-hugo properties when creating blog notes
+- *Hugo-compliant export*: Markdown files go to =~/denote/blog/content/blog/=
 - *No conflicts*: Original org files remain untouched, denote always opens org files
-- *Selective export*: Only notes with =blog= keyword are exported
-- *Batch export*: Export all blog posts at once or individually
+- *Selective publishing*: Only notes with =blog= keyword are published
+- *Batch publishing*: Publish all blog posts at once or individually
 
 ***** Hugo Directory Structure
 #+begin_example
 ~/denote/
 ├── blog/                    # Hugo site root
 │   ├── content/
-│   │   └── posts/          # Exported blog posts (.md files)
+│   │   └── blog/           # Published blog posts (.md files)
 │   ├── themes/
 │   ├── static/
 │   ├── config.toml
@@ -845,39 +847,48 @@ Denote integrates with ox-hugo for publishing notes as blog posts. The Hugo site
 #+end_example
 
 ***** Creating Blog Posts
-Use =SPC d b n= to create a new blog post:
-1. Prompts for blog title
-2. Creates denote note with =blog= keyword in =~/denote/=
-3. Automatically adds ox-hugo properties:
+Create a note with the =blog= keyword using standard denote commands:
+1. Use =SPC d n= or =SPC d d= to create a new note
+2. Add =blog= as one of the keywords when prompted
+3. Denote template automatically adds ox-hugo properties:
    - =#+hugo_base_dir: ~/denote/blog/= - Hugo site root
-   - =#+hugo_section: posts= - Exports to =content/posts/=
-   - =#+export_file_name:= - Filename for the exported markdown
-4. Adds a starter heading for content
+   - =#+hugo_section: blog= - Exports to =content/blog/=
+   - =#+hugo_tags:= - Populated from denote keywords (excluding 'blog')
+   - =#+hugo_draft: false= - Publishes immediately
 
-***** Exporting to Markdown
-- =SPC d b e= - Export current note (if it has =blog= keyword)
-- =SPC d b E= - Export all notes with =blog= keyword
+***** Publishing to Markdown
+- =SPC d p= - Publish current note (prompts to add =blog= keyword if missing)
+- =SPC d P= - Publish all notes with =blog= keyword
 
-Exported markdown files are saved to =~/denote/blog/content/posts/= following Hugo's standard content structure.
+When publishing:
+1. Checks if note has =blog= keyword (prompts to add if missing)
+2. Ensures ox-hugo properties exist (adds smart defaults if missing)
+3. Exports to markdown with ID-based filename tracking
+4. Shows diff if updating existing post (asks for confirmation)
+5. Handles renames safely (finds old export by ID, shows diff, deletes old file)
+
+Exported markdown files are saved to =~/denote/blog/content/blog/= following Hugo's standard content structure.
 
 ***** Workflow Example
 #+begin_example
-1. SPC d b n → Create new blog post "My First Post"
+1. SPC d n → Create new note with title "My First Post" and keyword "blog"
 2. Write your content in the org file (saved in ~/denote/)
-3. SPC d b e → Export to markdown
-4. Markdown file created: ~/denote/blog/content/posts/my-first-post.md
+3. SPC d p → Publish to markdown
+4. Markdown file created: ~/denote/blog/content/blog/20251107T123456--my-first-post__blog.md
 5. Original org file: ~/denote/20251107T123456--my-first-post__blog.org (untouched)
-6. Build Hugo site: cd ~/denote/blog && hugo
+6. Later, rename the note with SPC d r r
+7. SPC d p → Shows diff and safely updates (old file deleted, new file created)
+8. Build Hugo site: cd ~/denote/blog && hugo
 #+end_example
 
 ***** Configuration
 You can customize the Hugo paths by editing these variables in =dotfiles.org=:
-#+begin_src emacs-lisp
+#+begin_src elisp
 (defvar denote-blog-hugo-base-dir (expand-file-name "~/denote/blog/")
   "Hugo site base directory.")
 
-(defvar denote-blog-hugo-section "posts"
-  "Hugo section where blog posts are exported (creates content/posts/).")
+(defvar denote-blog-hugo-section "blog"
+  "Hugo section where blog posts are exported (creates content/blog/).")
 #+end_src
 
 ** Yazi Packages

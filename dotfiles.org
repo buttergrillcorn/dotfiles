@@ -5736,7 +5736,7 @@ esac
 Extensible text editor and integrated development environment built on Emacs.
 
 ** init.el
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/init.el
+#+begin_src elisp :tangle packages/doom/.config/doom/init.el
 ;;; init.el -*- lexical-binding: t; -*-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5978,7 +5978,7 @@ Extensible text editor and integrated development environment built on Emacs.
 #+end_src
 
 ** packages.el
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/packages.el
+#+begin_src elisp :tangle packages/doom/.config/doom/packages.el
 ;; no-byte-compile: t; -*-
 ;;; $DOOMDIR/packages.el
 
@@ -6015,7 +6015,7 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ** config.el
 *** Header
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6027,31 +6027,31 @@ Extensible text editor and integrated development environment built on Emacs.
 #+end_src
 
 *** User Information
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (setq user-full-name "James"
       user-mail-address "jamesyuli@outlook.com")
 #+end_src
 
 *** UI
 **** Font
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (setq doom-font (font-spec :family "Sarasa Term SC Nerd" :size 16 :weight 'Semibold)
       doom-variable-pitch-font (font-spec :family "Noto Sans CJK SC" :size 16)
       doom-unicode-font (font-spec :family "Symbols Nerd Font Mono" :size 16))
 #+end_src
 
 **** Theme
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (setq doom-theme 'modus-vivendi-tritanopia)
 #+end_src
 
 **** Line Numbers
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (setq display-line-numbers-type 'relative)
 #+end_src
 *** Misc
 **** Touchpad Scrolling Fix
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; enable pixel-precise scrolling
 (when (fboundp 'pixel-scroll-precision-mode)
   (pixel-scroll-precision-mode 1))
@@ -6061,14 +6061,14 @@ Extensible text editor and integrated development environment built on Emacs.
 ;;       mouse-wheel-follow-mouse t)
 #+end_src
 *** Key Binds
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; (map! "C-h" 'switch-to-prev-buffer)
 ;; (map! "C-l" 'switch-to-next-buffer)
 ;; (map! "C-S-l" 'recenter-top-bottom)
 #+end_src
 
 *** Which Key
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; (setq which-key-idle-delay 0.2)
 (setq auto-save-visited-interval 15)
 (auto-save-visited-mode +1)
@@ -6079,12 +6079,12 @@ Extensible text editor and integrated development environment built on Emacs.
 **** Basic
 
 ***** Directory
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (setq org-directory "~/denote")
 #+end_src
 
 ***** Capture Template
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (setq org-capture-templates
         `(("t" "Todo" entry (file "~/denote/meta/todo.org")
@@ -6099,12 +6099,12 @@ Extensible text editor and integrated development environment built on Emacs.
 #+end_src
 
 ***** Babel
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (org-babel-do-load-languages
    'org-babel-load-languages
    '(
-     (emacs-lisp . t)
+     (elisp . t)
      (python . t)
      (conf-toml . t)
      (rust . t)
@@ -6112,21 +6112,21 @@ Extensible text editor and integrated development environment built on Emacs.
 #+end_src
 
 ***** Appearance
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (setq org-hide-emphasis-markers t)
   (setq org-pretty-entities t))
 #+end_src
 
 ***** Pomodoro
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (setq org-pomodoro-length 30)
 #+end_src
 
 **** Agenda
 
 ***** Directory
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (setq org-agenda-files '("~/denote" "~/denote/journal")))
 #+end_src
@@ -6134,25 +6134,25 @@ Extensible text editor and integrated development environment built on Emacs.
 **** Extension Packages
 
 ***** Auto List
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (add-hook 'org-mode-hook
           (lambda () (org-autolist-mode)))
 #+end_src
 
 ***** Org Appear
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (add-hook 'org-mode-hook 'org-appear-mode))
 #+end_src
 
 ***** Org Auto Tangle
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! org
   (add-hook 'org-mode-hook 'org-auto-tangle-mode))
 #+end_src
 
 ***** Safe List
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (setq org-auto-tangle-babel-safelist '(
                                        "~/example.org"
                                        "~/example2.org"
@@ -6164,7 +6164,7 @@ Extensible text editor and integrated development environment built on Emacs.
 **** Core
 
 ***** Configuration
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (use-package! denote
   :hook
   (dired-mode . denote-dired-mode)
@@ -6178,7 +6178,7 @@ Extensible text editor and integrated development environment built on Emacs.
 #+end_src
 
 ***** Key Binds
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (map! :leader
       (:prefix-map ("d" . "denote")
        :desc "new note" "n" #'denote
@@ -6213,7 +6213,7 @@ Extensible text editor and integrated development environment built on Emacs.
 **** Org
 
 ***** Key Binds
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (map! :leader
       (:prefix-map ("d" . "denote")
        :desc "backlink for heading" "B" #'denote-org-link-to-heading
@@ -6229,7 +6229,7 @@ Extensible text editor and integrated development environment built on Emacs.
 **** Explore
 
 ***** Configuration
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (use-package! denote-explore
   :after denote
   :config
@@ -6237,7 +6237,7 @@ Extensible text editor and integrated development environment built on Emacs.
 #+end_src
 
 ***** Key Binds
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! denote-explore
   (map! :leader
         (:prefix ("d" . "denote")
@@ -6275,7 +6275,7 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ***** Temporary Solution
 Temporary solution for "denote-id-regexp" being obsolete in the new version of Denote.
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! denote
   (unless (boundp 'denote-id-regexp)
     ;; Try to find the actual variable name in your denote version
@@ -6287,14 +6287,14 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
 **** Consult
 
 ***** Configuration
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (use-package! consult-denote
   :config
   (consult-denote-mode 1))
 #+end_src
 
 ***** Key Binds
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (map! :leader
       (:prefix-map ("d" . "denote")
        :desc "Search notes" "s" #'consult-denote-find
@@ -6305,7 +6305,7 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
 **** Journal
 
 ***** Configuration
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (use-package! denote-journal
   :after denote
   :config
@@ -6313,7 +6313,7 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
 #+end_src
 
 ***** Key Binds
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (map! :leader
       (:prefix-map ("d" . "denote")
        :desc "find/create journal" "j" #'denote-journal-new-or-existing-entry
@@ -6333,7 +6333,7 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
 Automatic git sync for denote notes directory. Commits and pushes changes on save with smart commit messages, conflict handling, and offline support.
 
 ***** Configuration
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Denote Git Sync Configuration
 (defvar denote-git-auto-sync-enabled t
   "Enable automatic git sync on save for denote files.")
@@ -6364,7 +6364,7 @@ Automatic git sync for denote notes directory. Commits and pushes changes on sav
 #+end_src
 
 ***** Helper Functions
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Helper: Check if file is in denote directory
 (defun denote-in-denote-directory-p ()
   "Return t if current buffer file is in denote directory."
@@ -6412,7 +6412,7 @@ Automatic git sync for denote notes directory. Commits and pushes changes on sav
 #+end_src
 
 ***** Core Sync Function
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Core sync function with offline support
 (defun denote-git-sync (&optional quiet)
   "Safely sync denote directory with git: pull, commit, and push.
@@ -6524,7 +6524,7 @@ fi"
 #+end_src
 
 ***** Auto-Save Hook
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Auto-sync on save hook
 (defun denote-git-auto-sync-on-save ()
   "Automatically sync denote notes after saving if enabled."
@@ -6537,7 +6537,7 @@ fi"
 #+end_src
 
 ***** Startup Sync
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Sync on daemon startup
 (defun denote-git-startup-sync ()
   "Sync denote notes when Emacs daemon starts."
@@ -6549,7 +6549,7 @@ fi"
 #+end_src
 
 ***** Periodic Sync Timer
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Start periodic sync timer
 (defun denote-git-start-periodic-sync ()
   "Start periodic sync timer for denote notes."
@@ -6577,7 +6577,7 @@ fi"
 #+end_src
 
 ***** Idle Sync Timer
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Start idle sync timer
 (defun denote-git-start-idle-sync ()
   "Start idle sync timer for denote notes."
@@ -6604,7 +6604,7 @@ fi"
 #+end_src
 
 ***** Keybindings and Toggle
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Toggle auto-sync
 (defun denote-git-toggle-auto-sync ()
   "Toggle automatic git sync for denote notes."
@@ -6629,17 +6629,17 @@ fi"
 #+end_src
 
 **** Blog / ox-hugo
-Simple ox-hugo integration for publishing denote notes as blog posts. Blog posts are exported to a separate directory to avoid conflicts with org files.
+Automated blogging system for publishing denote notes as Hugo blog posts. Uses ID-based tracking for safe renames, diff checking before overwrites, and denote templates for minimal friction publishing.
 
 ***** Configuration
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; ox-hugo blog configuration for Hugo site at ~/denote/blog/
 ;; Posts will be exported to ~/denote/blog/content/posts/
 (defvar denote-blog-hugo-base-dir (expand-file-name "~/denote/blog/")
   "Hugo site base directory.")
 
-(defvar denote-blog-hugo-section "posts"
-  "Hugo section where blog posts are exported (creates content/posts/).")
+(defvar denote-blog-hugo-section "blog"
+  "Hugo section where blog posts are exported (creates content/blog/).")
 
 ;; Ensure Hugo content directory exists
 (let ((content-dir (expand-file-name "content" denote-blog-hugo-base-dir)))
@@ -6652,65 +6652,280 @@ Simple ox-hugo integration for publishing denote notes as blog posts. Blog posts
         org-hugo-section denote-blog-hugo-section))
 #+end_src
 
-***** Blog Post Creation
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
-(defun denote-blog-new-post ()
-  "Create a new denote note with 'blog' keyword and ox-hugo properties."
-  (interactive)
-  (let* ((title (read-string "Blog post title: "))
-         (keywords '("blog")))
-    ;; Create denote note with blog keyword
-    (denote title keywords nil nil)
-    ;; Insert ox-hugo properties
-    (save-excursion
-      (goto-char (point-min))
-      ;; Find the #+title line and add properties after it
-      (when (re-search-forward "^#\\+title:" nil t)
-        (end-of-line)
-        (insert "\n#+hugo_base_dir: ~/denote/blog/")
-        (insert "\n#+hugo_section: posts")
-        (insert "\n#+export_file_name: " (file-name-base (buffer-file-name)))
-        (insert "\n\n. * Blog Post Content\n")))))
+***** Denote Template for Blog Posts
+:LOGBOOK:
+CLOCK: [2025-11-07 Fri 19:35]
+:END:
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Define denote template for blog posts with ox-hugo properties
+(after! denote
+  (setq denote-templates
+        '((blog . "#+hugo_base_dir: ~/denote/blog/
+#+hugo_section: blog
+#+hugo_tags:
+#+hugo_draft: false
+
+"))))
 #+end_src
 
-***** Export Functions
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
-(defun denote-blog-export-current ()
-  "Export current denote note to markdown using ox-hugo if it has 'blog' keyword."
-  (interactive)
-  (if (not buffer-file-name)
-      (message "Not visiting a file")
-    (let* ((keywords (denote-retrieve-keywords-value buffer-file-name (denote-filetype-heuristics buffer-file-name))))
-      (if (member "blog" keywords)
-          (progn
-            (require 'ox-hugo)
-            ;; Export to markdown
-            (org-hugo-export-to-md)
-            (message "Blog post exported to %s/content/%s/"
-                     denote-blog-hugo-base-dir denote-blog-hugo-section))
-        (message "Current note doesn't have 'blog' keyword")))))
+***** Helper Functions
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Get denote ID from file
+(defun denote-blog--get-identifier (file)
+  "Get denote identifier from FILE."
+  (when file
+    (denote-retrieve-filename-identifier file)))
 
-(defun denote-blog-export-all ()
-  "Export all denote notes with 'blog' keyword to markdown."
+;; Find existing export by ID
+(defun denote-blog--find-export-by-id (identifier)
+  "Find existing markdown export matching IDENTIFIER in Hugo content directory.
+Returns full path if found, nil otherwise."
+  (when identifier
+    (let* ((content-dir (expand-file-name
+                        (concat "content/" denote-blog-hugo-section)
+                        denote-blog-hugo-base-dir))
+           (pattern (concat identifier "--*.md"))
+           (matches (directory-files content-dir t
+                                    (concat "^" (regexp-quote identifier) "--.*\\.md$"))))
+      (car matches))))
+
+;; Get export filename from org file
+(defun denote-blog--get-export-filename (org-file)
+  "Get the markdown filename that should be exported from ORG-FILE.
+Returns just the filename (not full path)."
+  (concat (file-name-base org-file) ".md"))
+
+;; Get full export path
+(defun denote-blog--get-export-path (org-file)
+  "Get full export path for ORG-FILE."
+  (expand-file-name
+   (denote-blog--get-export-filename org-file)
+   (expand-file-name (concat "content/" denote-blog-hugo-section)
+                     denote-blog-hugo-base-dir)))
+
+;; Check if file has blog keyword
+(defun denote-blog--has-blog-keyword-p (file)
+  "Check if FILE has 'blog' keyword."
+  (when file
+    (let ((keywords (denote-retrieve-keywords-value
+                    file
+                    (denote-filetype-heuristics file))))
+      (member "blog" keywords))))
+
+;; Ensure ox-hugo properties exist
+(defun denote-blog--ensure-properties ()
+  "Ensure current buffer has ox-hugo properties. Add missing ones with smart defaults."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((has-base-dir (re-search-forward "^#\\+hugo_base_dir:" nil t))
+          (insert-pos nil))
+
+      (unless has-base-dir
+        ;; Find the last Denote property line (after #+identifier:, #+title:, #+filetags:)
+        (goto-char (point-min))
+        (let ((last-prop-pos (point-min)))
+          (while (re-search-forward "^#\\+\\(title\\|date\\|filetags\\|identifier\\):" nil t)
+            (end-of-line)
+            (setq last-prop-pos (point)))
+
+          (when last-prop-pos
+            (goto-char last-prop-pos)
+            ;; Add ox-hugo properties with smart defaults
+            (insert "\n#+hugo_base_dir: ~/denote/blog/")
+            (insert "\n#+hugo_section: posts")
+            (insert (format "\n#+hugo_date: %s" (format-time-string "%Y-%m-%d")))
+
+            ;; Convert denote keywords to hugo tags (exclude 'blog')
+            (let ((keywords (denote-retrieve-keywords-value
+                            buffer-file-name
+                            (denote-filetype-heuristics buffer-file-name))))
+              (insert (format "\n#+hugo_tags: %s"
+                             (mapconcat 'identity (remove "blog" keywords) " "))))
+
+            (insert "\n#+hugo_draft: false")
+            (message "Added ox-hugo properties with smart defaults")))))))
+#+end_src
+
+***** Diff and Export Functions
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Show diff between old and new content
+(defun denote-blog--show-diff (old-content new-content old-file new-file)
+  "Show diff between OLD-CONTENT and NEW-CONTENT in diff-mode.
+OLD-FILE and NEW-FILE are labels for the diff. Return t if user confirms, nil otherwise."
+  (let ((diff-buf (get-buffer-create "*Blog Diff*")))
+    (with-current-buffer diff-buf
+      (erase-buffer)
+      (let ((inhibit-read-only t)
+            (old-temp (make-temp-file "denote-blog-old-"))
+            (new-temp (make-temp-file "denote-blog-new-")))
+        (unwind-protect
+            (progn
+              ;; Write contents to temp files
+              (with-temp-file old-temp (insert old-content))
+              (with-temp-file new-temp (insert new-content))
+
+              ;; Run diff
+              (call-process "diff" nil t nil
+                          "-u"
+                          "--label" (format "Current: %s" old-file)
+                          "--label" (format "New: %s" new-file)
+                          old-temp new-temp))
+          ;; Cleanup
+          (delete-file old-temp)
+          (delete-file new-temp)))
+
+      (diff-mode)
+      (view-mode 1)
+      (goto-char (point-min))
+      (pop-to-buffer diff-buf)
+
+      (let ((response (read-char-choice
+                      "Publish? (y)es, (n)o: "
+                      '(?y ?n))))
+        (kill-buffer diff-buf)
+        (eq response ?y)))))
+
+;; Core export with ID-based tracking and diff checking
+(defun denote-blog--export-with-diff (org-file)
+  "Export ORG-FILE to Hugo markdown with ID-based tracking and diff checking.
+Returns t if published, nil if skipped/cancelled."
+  (let* ((identifier (denote-blog--get-identifier org-file))
+         (target-path (denote-blog--get-export-path org-file))
+         (existing-export (denote-blog--find-export-by-id identifier))
+         (target-filename (file-name-nondirectory target-path)))
+
+    (unless identifier
+      (user-error "Could not extract denote identifier from %s" org-file))
+
+    ;; Export to markdown
+    (require 'ox-hugo)
+    (let ((org-hugo-base-dir denote-blog-hugo-base-dir)
+          (org-hugo-section denote-blog-hugo-section))
+      (org-hugo-export-to-md))
+
+    ;; Get the newly exported content
+    (let ((new-content (with-temp-buffer
+                        (insert-file-contents target-path)
+                        (buffer-string))))
+
+      (cond
+       ;; No existing export - new post
+       ((not existing-export)
+        (message "✓ Published new post: %s" target-filename)
+        t)
+
+       ;; Same filename - check if content changed
+       ((string= existing-export target-path)
+        (let ((old-content (with-temp-buffer
+                            (insert-file-contents existing-export)
+                            (buffer-string))))
+          (if (string= old-content new-content)
+              (progn
+                (message "No changes detected, skipping")
+                nil)
+            ;; Show diff and confirm
+            (if (denote-blog--show-diff old-content new-content
+                                       (file-name-nondirectory existing-export)
+                                       target-filename)
+                (progn
+                  (message "✓ Updated: %s" target-filename)
+                  t)
+              (progn
+                (delete-file target-path)
+                (message "Publish cancelled")
+                nil)))))
+
+       ;; Different filename (renamed) - show diff and handle
+       (t
+        (let ((old-content (with-temp-buffer
+                            (insert-file-contents existing-export)
+                            (buffer-string)))
+              (old-filename (file-name-nondirectory existing-export)))
+          (if (denote-blog--show-diff old-content new-content
+                                     old-filename target-filename)
+              (progn
+                (delete-file existing-export)
+                (message "✓ Updated and renamed: %s → %s" old-filename target-filename)
+                t)
+            (progn
+              (delete-file target-path)
+              (message "Publish cancelled")
+              nil))))))))
+#+end_src
+
+***** Interactive Publish Functions
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Publish current blog post (SPC d p)
+(defun denote-blog-publish ()
+  "Publish current denote note as blog post with diff checking.
+Uses ID-based tracking to handle renames safely."
   (interactive)
-  (let ((blog-files (denote-directory-files-matching-regexp "_blog"))
-        (count 0))
-    (if (not blog-files)
-        (message "No blog posts found")
+  (unless buffer-file-name
+    (user-error "Not visiting a file"))
+
+  ;; Check for blog keyword
+  (unless (denote-blog--has-blog-keyword-p buffer-file-name)
+    (if (y-or-n-p "Current note doesn't have 'blog' keyword. Add it? ")
+        (let ((current-keywords (denote-retrieve-keywords-value
+                                buffer-file-name
+                                (denote-filetype-heuristics buffer-file-name))))
+          (denote-rename-file-keywords buffer-file-name
+                                       (cons "blog" current-keywords))
+          (revert-buffer t t))
+      (user-error "Cancelled: note needs 'blog' keyword to publish")))
+
+  (save-buffer)
+
+  ;; Ensure ox-hugo properties exist
+  (denote-blog--ensure-properties)
+  (save-buffer)
+
+  ;; Export with diff checking
+  (condition-case err
+      (denote-blog--export-with-diff buffer-file-name)
+    (error
+     (message "✗ Export failed: %s" (error-message-string err))
+     nil)))
+
+;; Publish all blog posts (SPC d P)
+(defun denote-blog-publish-all ()
+  "Publish all denote notes with 'blog' keyword.
+Shows diff for each changed post before publishing."
+  (interactive)
+  (let* ((all-files (denote-directory-files))
+         (blog-files (seq-filter
+                     (lambda (file)
+                       (denote-blog--has-blog-keyword-p file))
+                     all-files))
+         (published 0)
+         (skipped 0)
+         (failed 0))
+    (unless blog-files
+      (user-error "No blog posts found (no files with 'blog' keyword)"))
+
+    (when (y-or-n-p (format "Process %d blog post(s)? " (length blog-files)))
       (dolist (file blog-files)
+        (message "\n==> Processing: %s" (file-name-nondirectory file))
         (with-current-buffer (find-file-noselect file)
           (condition-case err
               (progn
-                (require 'ox-hugo)
-                (org-hugo-export-to-md)
-                (setq count (1+ count)))
-            (error (message "Error exporting %s: %s" file err)))))
-      (message "Exported %d blog post(s) to %s/content/%s/"
-               count denote-blog-hugo-base-dir denote-blog-hugo-section))))
+                (denote-blog--ensure-properties)
+                (save-buffer)
+                (if (denote-blog--export-with-diff file)
+                    (setq published (1+ published))
+                  (setq skipped (1+ skipped))))
+            (error
+             (setq failed (1+ failed))
+             (message "✗ Failed to export %s: %s"
+                     (file-name-nondirectory file)
+                     (error-message-string err))))))
+
+      (message "\n==> Publish complete: %d published, %d skipped, %d failed"
+               published skipped failed))))
 #+end_src
 
 ***** Fix: Ensure denote only opens .org files
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Ensure denote only considers .org files, not .md files
 (after! denote
   (setq denote-file-type 'org)
@@ -6722,13 +6937,12 @@ Simple ox-hugo integration for publishing denote notes as blog posts. Blog posts
 #+end_src
 
 ***** Keybindings
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
-(map! :leader
-      (:prefix-map ("d" . "denote")
-       (:prefix ("b" . "blog")
-        :desc "New blog post" "n" #'denote-blog-new-post
-        :desc "Export current" "e" #'denote-blog-export-current
-        :desc "Export all blogs" "E" #'denote-blog-export-all)))
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! denote
+  (map! :leader
+        (:prefix-map ("d" . "denote")
+         :desc "Publish current" "p" #'denote-blog-publish
+         :desc "Publish all blogs" "P" #'denote-blog-publish-all)))
 #+end_src
 
 **** Completion Formatting
@@ -6740,7 +6954,7 @@ It would show up something like this instead:
 | [ 2003-09-01 ] note title                                 keyword1 keyword2 |
 |                                                                             |
 |-----------------------------------------------------------------------------|
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Simple denote completion formatting
 (defun my-format-denote-candidate (file)
   "Format denote file for completion display with right-aligned keywords."
@@ -6794,7 +7008,7 @@ It would show up something like this instead:
 
 *** Projectile
 **** Add Projects
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; (projectile-add-known-project "~/org")
 (projectile-add-known-project "~/denote")
 ;; (projectile-add-known-project "~/roam")
@@ -6802,7 +7016,7 @@ It would show up something like this instead:
 #+end_src
 *** Claude Code
 ***** Configuration
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (use-package! claude-code
   :after inheritenv
   :config
@@ -6813,7 +7027,7 @@ It would show up something like this instead:
 #+end_src
 
 ***** Key Binds
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (map! :leader :desc "Claude Code" "e" #'claude-code-transient)
       ;; (:prefix-map ("e" . "Claude")
       ;;  :desc "Start" "e" #'claude-code-transient))
@@ -6821,7 +7035,7 @@ It would show up something like this instead:
 *** Pulsar
 Pulse highlight line on demand or after running select functions
 **** Configuration
-#+begin_src emacs-lisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (use-package! pulsar
   :config
   (require 'pulsar)
@@ -6840,7 +7054,7 @@ Pulse highlight line on demand or after running select functions
 
   ;; OR use the local mode for select mode hooks
 
-  (dolist (hook '(org-mode-hook emacs-lisp-mode-hook))
+  (dolist (hook '(org-mode-hook elisp-mode-hook))
     (add-hook hook #'pulsar-mode))
 
   ;; pulsar does not define any key bindings.  This is just a sample that
