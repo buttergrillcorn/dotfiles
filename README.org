@@ -210,7 +210,7 @@ sudo pacman -S bitwarden-cli
 - *Mod + F*: Toggle floating
 - *Mod + Shift + F*: Maximized fullscreen
 - *Mod + Ctrl + F*: True fullscreen
-- *Mod + Tab*: Focus last window
+- *Mod + T*: Focus last window
 - *Mod + Alt + S*: Pin window (sticky across workspaces)
 
 *** Layout Modes (Groups & Pseudo-tiling)
@@ -219,7 +219,7 @@ sudo pacman -S bitwarden-cli
 - *Mod + Ctrl + G*: Lock/unlock group
 - *Mod + S*: Change group active window (cycle forward)
 - *Mod + E*: Toggle split direction
-- *Mod + T*: Cycle focus to next window
+- *Mod + Tab*: Cycle focus to next window
 - *Mod + P*: Toggle pseudo-tiling
 
 *** Navigation & Movement

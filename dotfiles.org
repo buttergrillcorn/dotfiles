@@ -356,7 +356,7 @@ bind = $mainMod, Q, killactive
 bind = $mainMod CTRL, F, fullscreen, 0
 bind = $mainMod SHIFT, F, fullscreen, 1
 bind = $mainMod, F, togglefloating
-bind = $mainMod, Tab, focuscurrentorlast
+bind = $mainMod, T, focuscurrentorlast
 bind = $mainMod ALT, S, pin
 
 # Layout modes
@@ -364,7 +364,7 @@ bind = $mainMod, G, togglegroup
 bind = $mainMod SHIFT, G, moveoutofgroup
 bind = $mainMod CTRL, G, lockactivegroup, toggle
 bind = $mainMod, S, changegroupactive, f
-bind = $mainMod, T, cyclenext
+bind = $mainMod, Tab, cyclenext
 
 # Pseudo-tiling
 bind = $mainMod, P, pseudo
@@ -4936,13 +4936,13 @@ SUPER + P → Wallpaper selector"
 SUPER + CTRL + F → Fullscreen
 SUPER + SHIFT + F → Maximize (fullscreen mode 1)
 SUPER + F → Toggle floating
-SUPER + Tab → Focus last window
+SUPER + T → Focus last window
 SUPER + ALT + S → Pin window
 SUPER + G → Toggle group/tabs
 SUPER + SHIFT + G → Move out of group
 SUPER + CTRL + G → Lock group
 SUPER + S → Change group tab (forward)
-SUPER + T → Cycle through windows
+SUPER + Tab → Cycle through windows
 SUPER + P → Pseudo-tiling mode"
             else # sway
                 bindings="SUPER + Q → Close window
