@@ -474,7 +474,7 @@ bind = SHIFT, Print, exec, ~/.local/bin/screenshot.sh screen
 bind = $mainMod SHIFT CTRL, S, exec, ~/.local/bin/screenshot.sh screen
 
 # Laptop Lid
-bindl = , switch:on:[Lid Switch], exec, systemctl suspend
+bindl = , switch:on:[Lid Switch], exec, systemctl suspend-then-hibernate
 #+end_src
 
 ***** Utilities
@@ -1034,7 +1034,7 @@ bindsym $mod+Shift+q exec swaynag -t warning -m 'Exit sway?' -B 'Yes' 'swaymsg e
 **** Lid Switch
 #+begin_src conf :tangle packages/sway/.config/sway/config
 # Lid close: turn off screen, lock, and sleep
-bindswitch --reload --locked lid:on exec 'swaymsg "output * dpms off" && swaylock && systemctl suspend'
+bindswitch --reload --locked lid:on exec 'swaymsg "output * dpms off" && swaylock && systemctl suspend-then-hibernate'
 
 # Lid open: wake screen
 bindswitch --reload --locked lid:off exec 'swaymsg "output * dpms on"'

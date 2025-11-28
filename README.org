@@ -375,16 +375,17 @@ sudo pacman -S bitwarden-cli
 
 ** Power Management (Sway)
 - Conditional swayidle timeouts based on power state:
-  - Battery: 5min screen off, 10min lock, 30min sleep
-  - Plugged in: 10min screen off, 15min lock, 1hr sleep
-- Lid close: screen off, lock, and sleep
+  - Battery: 5min screen off, 10min lock, 30min suspend-then-hibernate
+  - Plugged in: 10min screen off, 15min lock, 1hr suspend-then-hibernate
+- Lid close: screen off, lock, and suspend-then-hibernate
 - Lid open: wake screen
 
 ** Power Management (Hyprland)
 - Hypridle timeouts:
   - 5min: Screen off
   - 10min: Lock screen
-  - 30min: Suspend
+  - 30min: Suspend-then-hibernate
+- Lid close: Suspend-then-hibernate
 - Before sleep: Lock session
 - After sleep: Turn screen on
 
