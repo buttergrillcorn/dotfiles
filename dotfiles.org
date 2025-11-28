@@ -2412,8 +2412,10 @@ c.editor.command = ['emacsclient', '-c', '-a', ' ', '+{line}:{column}', '{}']
 **** Search Engines
 #+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
 # Custom search engines
-c.url.searchengines['DEFAULT'] = 'https://duckduckgo.com/?q={}'
+# c.url.searchengines['DEFAULT'] = 'https://duckduckgo.com/?q={}'
+c.url.searchengines['DEFAULT'] = 'https://kagi.com/search?q={}'
 c.url.searchengines['gg'] = 'https://www.google.com/search?q={}'
+c.url.searchengines['mar'] = 'https://marginalia-search.com/search?query={}'
 c.url.searchengines['am'] = 'https://www.amazon.co.uk/s?k={}'
 c.url.searchengines['yt'] = 'https://www.youtube.com/results?search_query={}'
 c.url.searchengines['aur'] = 'https://aur.archlinux.org/packages?O=0&K={}'
