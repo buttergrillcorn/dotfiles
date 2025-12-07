@@ -7312,20 +7312,18 @@ If region is active, its text becomes the link description."
 **** File-level IDs
 ***** Add File ID
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Add org-id at file level (before first heading, after headers)
+;; Add org-id to first heading of file
 (defun wiki/add-file-id ()
-  "Add org-id property at file level. Places it after #+title/#+hugo_* headers but before first heading."
+  "Add org-id to the first heading in the file."
   (interactive)
   (save-excursion
     (goto-char (point-min))
-    ;; Skip past #+title, #+date, #+hugo_*, #+export_* headers
-    (while (looking-at "^#\\+\\(title\\|date\\|hugo_\\|export_\\)")
-      (forward-line 1))
-    ;; Skip any blank lines
-    (while (looking-at "^[[:space:]]*$")
-      (forward-line 1))
-    ;; Now we're either at a heading or at the right place for properties
-    (org-id-get-create)))
+    ;; Find first heading
+    (if (re-search-forward "^\\* " nil t)
+        (progn
+          (beginning-of-line)
+          (org-id-get-create))
+      (message "No heading found. Create a heading first."))))
 #+end_src
 
 **** ox-hugo Link Export
@@ -7452,8 +7450,8 @@ If region is active, its text becomes the link description."
        :desc "Backlinks" "b" #'wiki/backlinks
        :desc "Insert heading link" "h" #'wiki/insert-heading-link
        :desc "Create ID (heading)" "i" #'org-id-get-create
+       :desc "Add file ID" "I" #'wiki/add-file-id
        :desc "Insert file link" "l" #'wiki/insert-link
-       :desc "Add file ID" "F" #'wiki/add-file-id
        :desc "Git sync (push)" "p" #'wiki/git-sync
        :desc "Toggle auto-sync" "A" #'wiki/toggle-auto-sync))
 #+end_src
