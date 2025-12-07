@@ -7300,16 +7300,19 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 **** File-level IDs
 ***** Add File ID
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Add org-id at file level (before first heading)
+;; Add org-id at file level (before first heading, after headers)
 (defun wiki/add-file-id ()
-  "Add org-id property at file level (before first heading)."
+  "Add org-id property at file level. Places it after #+title/#+hugo_* headers but before first heading."
   (interactive)
   (save-excursion
     (goto-char (point-min))
-    ;; Skip to just before first heading or end of file
-    (if (re-search-forward "^\\*" nil t)
-        (beginning-of-line)
-      (goto-char (point-max)))
+    ;; Skip past #+title, #+date, #+hugo_*, #+export_* headers
+    (while (looking-at "^#\\+\\(title\\|date\\|hugo_\\|export_\\)")
+      (forward-line 1))
+    ;; Skip any blank lines
+    (while (looking-at "^[[:space:]]*$")
+      (forward-line 1))
+    ;; Now we're either at a heading or at the right place for properties
     (org-id-get-create)))
 #+end_src
 
