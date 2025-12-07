@@ -7257,45 +7257,38 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 ***** Insert Heading Link
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (defun wiki/insert-heading-link ()
-  "Insert an org-id link to a heading across all wiki files. Uses selected text as link description if region is active."
+  "Insert an org-id link to a heading across all wiki files using ripgrep. Uses selected text as link description if region is active."
   (interactive)
   (let* ((default-directory org-directory)
          (description (when (use-region-p)
                         (buffer-substring-no-properties (region-beginning) (region-end))))
-         ;; Get all org files (non-recursive to stay in root only)
-         (org-files (directory-files org-directory t "\\.org$"))
-         ;; Collect all headings from all files
-         (headings
-          (let (result)
-            (dolist (file org-files)
-              (with-current-buffer (find-file-noselect file)
-                (org-map-entries
-                 (lambda ()
-                   (let* ((heading (org-get-heading t t t t))
-                          (file-name (file-name-nondirectory buffer-file-name))
-                          (marker (point-marker))
-                          (display (format "%s [%s]" heading file-name)))
-                     (push (cons display marker) result))))))
-            (nreverse result)))
-         ;; Let user select a heading
-         (selection (consult--read headings
-                                  :prompt "Heading: "
-                                  :category 'consult-org-heading
-                                  :require-match t
-                                  :sort nil))
-         (marker (cdr (assoc selection headings)))
-         (id (save-excursion
-               (with-current-buffer (marker-buffer marker)
-                 (goto-char (marker-position marker))
-                 (org-id-get-create))))
-         (title (or description
-                    (save-excursion
-                      (with-current-buffer (marker-buffer marker)
-                        (goto-char (marker-position marker))
-                        (org-get-heading t t t t))))))
+         ;; Use consult--grep to search for org headings with ripgrep
+         (selected (consult--grep
+                    "Heading: "
+                    #'consult--ripgrep-make-builder
+                    org-directory
+                    "^\\* "  ;; Search for lines starting with "* " (org headings)
+                    nil))
+         ;; Parse the selected result (format: "file:line:content")
+         (parts (split-string selected ":"))
+         (file (expand-file-name (car parts) org-directory))
+         (line (string-to-number (cadr parts)))
+         (id nil)
+         (title nil))
+
+    ;; Jump to the heading and get/create ID
+    (save-excursion
+      (with-current-buffer (find-file-noselect file)
+        (goto-char (point-min))
+        (forward-line (1- line))
+        (org-back-to-heading t)
+        (setq id (org-id-get-create))
+        (setq title (org-get-heading t t t t))))
+
+    ;; Insert the link
     (when (use-region-p)
       (delete-region (region-beginning) (region-end)))
-    (insert (format "[[id:%s][%s]]" id title))))
+    (insert (format "[[id:%s][%s]]" id (or description title)))))
 #+end_src
 
 **** Backlinks
