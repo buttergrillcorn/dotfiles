@@ -7218,9 +7218,11 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Search wiki notes with consult-ripgrep
 (defun wiki/search ()
-  "Search all wiki notes with live preview."
+  "Search org files in wiki root directory only."
   (interactive)
-  (consult-ripgrep org-directory))
+  (let ((default-directory org-directory)
+        (consult-ripgrep-args (concat consult-ripgrep-args " --max-depth=1 -g '*.org'")))
+    (consult-ripgrep org-directory)))
 #+end_src
 
 **** ID-based Linking
@@ -7228,9 +7230,11 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Insert ID-based link to file
 (defun wiki/insert-link ()
-  "Insert an org-id link to a file."
+  "Insert an org-id link to a file. Uses selected text as link description if region is active."
   (interactive)
   (let* ((default-directory org-directory)
+         (description (when (use-region-p)
+                        (buffer-substring-no-properties (region-beginning) (region-end))))
          (file (consult--read
                 (directory-files org-directory nil "\\.org$")
                 :prompt "Link to file: "
@@ -7241,9 +7245,12 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
                (save-excursion
                  (goto-char (point-min))
                  (org-id-get-create))))
-         (title (with-current-buffer (find-file-noselect full-path)
-                  (or (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
-                      (file-name-sans-extension file)))))
+         (title (or description
+                    (with-current-buffer (find-file-noselect full-path)
+                      (or (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
+                          (file-name-sans-extension file))))))
+    (when (use-region-p)
+      (delete-region (region-beginning) (region-end)))
     (insert (format "[[id:%s][%s]]" id title))))
 #+end_src
 
@@ -7251,17 +7258,26 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Insert ID-based link to heading
 (defun wiki/insert-heading-link ()
-  "Insert an org-id link to a specific heading with consult."
+  "Insert an org-id link to a heading across all wiki files. Uses selected text as link description if region is active."
   (interactive)
-  (let* ((marker (consult-org-heading))
+  (let* ((default-directory org-directory)
+         (description (when (use-region-p)
+                        (buffer-substring-no-properties (region-beginning) (region-end))))
+         ;; Open all org files in background so consult-org-heading can search them
+         (org-files (directory-files org-directory t "\\.org$"))
+         (buffers (mapcar #'find-file-noselect org-files))
+         (marker (consult-org-heading))
          (id (save-excursion
                (with-current-buffer (marker-buffer marker)
                  (goto-char (marker-position marker))
                  (org-id-get-create))))
-         (title (save-excursion
-                  (with-current-buffer (marker-buffer marker)
-                    (goto-char (marker-position marker))
-                    (org-get-heading t t t t)))))
+         (title (or description
+                    (save-excursion
+                      (with-current-buffer (marker-buffer marker)
+                        (goto-char (marker-position marker))
+                        (org-get-heading t t t t))))))
+    (when (use-region-p)
+      (delete-region (region-beginning) (region-end)))
     (insert (format "[[id:%s][%s]]" id title))))
 #+end_src
 
@@ -7344,9 +7360,16 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
         (set-process-sentinel
          proc
          (lambda (process event)
-           (if (zerop (process-exit-status process))
-               (message "✓ Wiki synced successfully")
-             (progn
+           (let ((output (with-current-buffer "*wiki-git-sync*" (buffer-string))))
+             (cond
+              ;; Success (exit code 0)
+              ((zerop (process-exit-status process))
+               (message "✓ Wiki synced successfully"))
+              ;; Nothing to commit is not an error
+              ((string-match-p "nothing to commit\\|no changes added to commit" output)
+               (message "✓ Wiki up to date (nothing to commit)"))
+              ;; Actual error
+              (t
                (message "✗ Wiki sync failed - see *wiki-git-sync* buffer")
                (display-buffer "*wiki-git-sync*")))))))))
 
@@ -7385,13 +7408,12 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 (map! :leader
       (:prefix ("n" . "notes")
        :desc "Find/create note" "n" #'wiki/find-note
-       :desc "Search notes (grep)" "G" #'wiki/search
+       :desc "Search notes" "s" #'wiki/search
        :desc "Backlinks" "b" #'wiki/backlinks
-       :desc "Goto ID" "g" #'org-id-goto
        :desc "Insert heading link" "h" #'wiki/insert-heading-link
        :desc "Create ID (heading)" "i" #'org-id-get-create
+       :desc "Insert file link" "l" #'wiki/insert-link
        :desc "Add file ID" "F" #'wiki/add-file-id
-       :desc "Insert ID link" "I" #'wiki/insert-link
        :desc "Git sync (push)" "p" #'wiki/git-sync
        :desc "Toggle auto-sync" "A" #'wiki/toggle-auto-sync))
 #+end_src
