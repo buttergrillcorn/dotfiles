@@ -7317,14 +7317,37 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 ;; Export org-id links to Hugo-compatible relative links
 (after! ox-hugo
   (defun org-hugo-link--org-id-to-path (link)
-    "Convert org-id LINK to Hugo-compatible path."
+    "Convert org-id LINK to Hugo-compatible path with anchors for heading links."
     (let* ((id (org-element-property :path link))
-           (file (org-id-find-id-file id)))
-      (when file
-        (let* ((basename (file-name-sans-extension (file-name-nondirectory file)))
-               (title (with-current-buffer (find-file-noselect file)
-                        (or (org-get-title) basename))))
-          (cons (format "/notes/%s" basename) title)))))
+           (marker (org-id-find id)))
+      (when marker
+        (with-current-buffer (marker-buffer marker)
+          (save-excursion
+            (goto-char (marker-position marker))
+            (let* ((basename (file-name-sans-extension
+                             (file-name-nondirectory (buffer-file-name))))
+                   (element (org-element-at-point))
+                   ;; Check if we're at a heading or file-level property
+                   (is-heading (eq (org-element-type element) 'heading))
+                   (heading-text (when is-heading
+                                  (org-element-property :raw-value element)))
+                   ;; Generate Hugo-compatible slug from heading
+                   (slug (when heading-text
+                          (thread-last heading-text
+                            (downcase)
+                            (replace-regexp-in-string "[^a-z0-9-]" "-")
+                            (replace-regexp-in-string "-+" "-")
+                            (replace-regexp-in-string "^-\\|-$" ""))))
+                   ;; Build path with optional anchor
+                   (path (if slug
+                            (format "/notes/%s#%s" basename slug)
+                          (format "/notes/%s" basename)))
+                   ;; Get title for fallback link text
+                   (title (if heading-text
+                             heading-text
+                           (or (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
+                               basename))))
+              (cons path title)))))))
 
   ;; Hook into ox-hugo link export
   (defun wiki/ox-hugo-link (link desc info)
