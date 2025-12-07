@@ -128,142 +128,142 @@ env = XMODIFIERS,@im=fcitx
 **** Input
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 input {
-    kb_layout = us
-    kb_options = ctrl:swapcaps
+kb_layout = us
+kb_options = ctrl:swapcaps
 
-    follow_mouse = 1
-    float_switch_override_focus = 1
+follow_mouse = 1
+float_switch_override_focus = 1
 
-    touchpad {
-        disable_while_typing = true
-        natural_scroll = true
-        scroll_factor = 0.7
-        middle_button_emulation = true
-    }
+touchpad {
+disable_while_typing = true
+natural_scroll = true
+scroll_factor = 0.7
+middle_button_emulation = true
+}
 
-    sensitivity = 0
+sensitivity = 0
 }
 #+end_src
 
 **** General
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 general {
-    border_size = 3
+border_size = 3
 
-    gaps_in = 3
-    gaps_out = 5
+gaps_in = 3
+gaps_out = 5
 
-    layout = dwindle
-    allow_tearing = false
-    resize_on_border = true
-    hover_icon_on_border = true
+layout = dwindle
+allow_tearing = false
+resize_on_border = true
+hover_icon_on_border = true
 
-    snap {
-        enabled = true
-    }
+snap {
+enabled = true
+}
 }
 #+end_src
 **** Decoration
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 decoration {
-    rounding = 0
+rounding = 0
 
-    active_opacity = 1
-    inactive_opacity = 0.75
+active_opacity = 1
+inactive_opacity = 0.75
 
-    dim_modal = false
-    dim_special = 0.2
+dim_modal = false
+dim_special = 0.2
 
-    blur {
-        enabled = true
-        special = true
-        popups = true
-        size = 5
-        passes = 1
-        noise = 0.03
-    }
+blur {
+enabled = true
+special = true
+popups = true
+size = 5
+passes = 1
+noise = 0.03
+}
 
-    shadow {
-        enabled = false
-    }
+shadow {
+enabled = false
+}
 }
 #+end_src
 **** Colours
 These will be set by Matugen
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 general {
-    col.active_border = $primary
-    col.inactive_border = $background
+col.active_border = $primary
+col.inactive_border = $background
 }
 
 group {
-    col.border_active = $secondary
-    col.border_inactive = $secondary_container
-    col.border_locked_active = $tertiary
-    col.border_locked_inactive = $tertiary_container
+col.border_active = $secondary
+col.border_inactive = $secondary_container
+col.border_locked_active = $tertiary
+col.border_locked_inactive = $tertiary_container
 
-    groupbar {
-        text_color = $on_secondary
-        text_color_inactive = $on_primary_container
-        col.active = $secondary
-        col.inactive = $secondary_container
-        col.locked_active = $tertiary
-        col.locked_inactive = $tertiary_container
-    }
+groupbar {
+text_color = $on_secondary
+text_color_inactive = $on_primary_container
+col.active = $secondary
+col.inactive = $secondary_container
+col.locked_active = $tertiary
+col.locked_inactive = $tertiary_container
+}
 }
 #+end_src
 **** Animations
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 animations {
-    enabled = true
+enabled = true
 
-    # Smooth bezier curves (Material Design inspired)
-    bezier = smoothOut, 0.36, 0, 0.66, -0.56
-    bezier = smoothIn, 0.25, 1, 0.5, 1
-    bezier = overshot, 0.05, 0.9, 0.1, 1.1
-    bezier = linear, 0, 0, 1, 1
+# Smooth bezier curves (Material Design inspired)
+bezier = smoothOut, 0.36, 0, 0.66, -0.56
+bezier = smoothIn, 0.25, 1, 0.5, 1
+bezier = overshot, 0.05, 0.9, 0.1, 1.1
+bezier = linear, 0, 0, 1, 1
 
-    # Window animations
-    animation = windows, 1, 4, smoothIn, slide
-    animation = windowsOut, 1, 4, smoothOut, slide
-    animation = windowsMove, 1, 4, smoothIn, slide
+# Window animations
+animation = windows, 1, 4, smoothIn, slide
+animation = windowsOut, 1, 4, smoothOut, slide
+animation = windowsMove, 1, 4, smoothIn, slide
 
-    # Border and fade
-    animation = border, 1, 10, default
-    animation = borderangle, 1, 100, linear, loop
-    animation = fade, 1, 4, smoothIn
-    animation = fadeOut, 1, 4, smoothOut
+# Border and fade
+animation = border, 1, 10, default
+animation = borderangle, 1, 100, linear, loop
+animation = fade, 1, 4, smoothIn
+animation = fadeOut, 1, 4, smoothOut
 
-    # Workspace animations with slide
-    animation = workspaces, 1, 5, overshot, slide
+# Workspace animations with slide
+animation = workspaces, 1, 5, overshot, slide
 
-    # Special workspace animations (slide from bottom)
-    animation = specialWorkspace, 1, 5, smoothIn, slidevert
+# Special workspace animations (slide from bottom)
+animation = specialWorkspace, 1, 5, smoothIn, slidevert
 }
 #+end_src
 
 **** Group
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 group {
-    groupbar {
-        render_titles = false
-        font_family = "<<font>>"
-        font_size = 12
-        rounding = 0
-        indicator_height = 6
-        gaps_in = 2
-        gaps_out = 3
-        keep_upper_gap = false
-    }
+groupbar {
+render_titles = false
+font_family = "<<font>>"
+font_size = 12
+rounding = 0
+indicator_height = 6
+gaps_in = 2
+gaps_out = 3
+keep_upper_gap = false
+}
 }
 #+end_src
 **** Layouts
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 dwindle {
-    # pseudotile = true
-    # preserve_split = false
-    # smart_split = false
-    # smart_resizing = true
+# pseudotile = true
+# preserve_split = false
+# smart_split = false
+# smart_resizing = true
 }
 
 master {
@@ -554,23 +554,23 @@ bindm = $mainMod, z, resizewindow
 **** Misc
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 misc {
-    force_default_wallpaper = 0
-    disable_hyprland_logo = true
-    disable_splash_rendering = true
-    mouse_move_enables_dpms = true
-    key_press_enables_dpms = true
-    # Keep special workspace open when empty (prevents returning to normal workspace without waybar)
-    close_special_on_empty = false
-    vrr = 0
+force_default_wallpaper = 0
+disable_hyprland_logo = true
+disable_splash_rendering = true
+mouse_move_enables_dpms = true
+key_press_enables_dpms = true
+# Keep special workspace open when empty (prevents returning to normal workspace without waybar)
+close_special_on_empty = false
+vrr = 0
 }
 
 cursor {
-    # Warp cursor when toggling special workspace for better UX
-    warp_on_toggle_special = 1
+# Warp cursor when toggling special workspace for better UX
+warp_on_toggle_special = 1
 }
 
 ecosystem {
-    no_donation_nag = true
+no_donation_nag = true
 }
 #+end_src
 
@@ -595,31 +595,31 @@ Idle management daemon for Hyprland.
 # Idle management daemon for Hyprland
 
 general {
-    lock_cmd = pidof hyprlock || hyprlock
-    before_sleep_cmd = loginctl lock-session && rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache
-    after_sleep_cmd = hyprctl dispatch dpms on
-    ignore_dbus_inhibit = false
+lock_cmd = pidof hyprlock || hyprlock
+before_sleep_cmd = loginctl lock-session && rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache
+after_sleep_cmd = hyprctl dispatch dpms on
+ignore_dbus_inhibit = false
 }
 
 # Screen off (5 minutes on battery, 10 minutes on AC)
 listener {
-    timeout = 300
-    on-timeout = hyprctl dispatch dpms off
-    on-resume = hyprctl dispatch dpms on
+timeout = 300
+on-timeout = hyprctl dispatch dpms off
+on-resume = hyprctl dispatch dpms on
 }
 
 # Lock screen (10 minutes on battery, 15 minutes on AC)
 listener {
-    timeout = 600
-    on-timeout = loginctl lock-session && rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache
+timeout = 600
+on-timeout = loginctl lock-session && rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache
 }
 
 # Suspend then hibernate (30 minutes on battery, 60 minutes on AC)
 # Will suspend immediately, then automatically hibernate after 2 hours
 # This provides fast wake for short suspends, zero power drain for long suspends
 listener {
-    timeout = 1800
-    on-timeout = systemctl suspend-then-hibernate
+timeout = 1800
+on-timeout = systemctl suspend-then-hibernate
 }
 #+end_src
 **** Hyprlock
@@ -632,74 +632,74 @@ Lock screen utility for Hyprland.
 source = ~/.cache/matugen/colors-hyprlock.conf
 
 general {
-    hide_cursor = true
-    disable_loading_bar = false
-    grace = 0
+hide_cursor = true
+disable_loading_bar = false
+grace = 0
 }
 
 background {
-    monitor =
-    path = <<wallpaper>>
-    zindex = -1
+monitor =
+path = <<wallpaper>>
+zindex = -1
 }
 
 input-field {
-    monitor =
-    size = 150, 50
-    outline_thickness = 3
+monitor =
+size = 150, 50
+outline_thickness = 3
 
-    dots_size = 0.25
-    dots_spacing = 0.75
-    dots_rounding = 0
+dots_size = 0.25
+dots_spacing = 0.75
+dots_rounding = 0
 
-    outer_color = $primary
-    inner_color = $surface
-    font_color = $on_surface
-    font_family = <<font>>
+outer_color = $primary
+inner_color = $surface
+font_color = $on_surface
+font_family = <<font>>
 
-    fade_on_empty = false
+fade_on_empty = false
 
-    placeholder_text = ENTER PIN
+placeholder_text = ENTER PIN
 
-    rounding = 0
+rounding = 0
 
-    check_color = $tertiary
-    fail_color = $error
-    fail_text = Authentication Failed
+check_color = $tertiary
+fail_color = $error
+fail_text = Authentication Failed
 
-    position = 0, 0
-    halign = center
-    valign = center
+position = 0, 0
+halign = center
+valign = center
 
-    zindex = 1
+zindex = 1
 }
 #+end_src
 **** Hyprsunset
 Blue light filter / color temperature control for Hyprland.
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprsunset.conf
 profile {
-    time = 7:30
-    identity = true
+time = 7:30
+identity = true
 }
 
 profile {
-    time = 14:00
-    temperature = 5500
+time = 14:00
+temperature = 5500
 }
 
 profile {
-    time = 16:00
-    temperature = 4500
+time = 16:00
+temperature = 4500
 }
 
 profile {
-    time = 18:00
-    temperature = 3500
+time = 18:00
+temperature = 3500
 }
 
 profile {
-    time = 20:00
-    temperature = 2500
+time = 20:00
+temperature = 2500
 }
 #+end_src
 ** Sway
@@ -719,21 +719,21 @@ include /home/james/.cache/matugen/colors-sway
 *** Input
 #+begin_src conf :tangle packages/sway/.config/sway/config
 input type:keyboard {
-    xkb_layout us
-    xkb_options ctrl:swapcaps
+xkb_layout us
+xkb_options ctrl:swapcaps
 }
 
 input type:touchpad {
-    tap enabled
-    natural_scroll enabled
-    scroll_factor 0.7
-    accel_profile adaptive
-    middle_emulation enabled
-    dwt enabled
+tap enabled
+natural_scroll enabled
+scroll_factor 0.7
+accel_profile adaptive
+middle_emulation enabled
+dwt enabled
 }
 
 input type:pointer {
-    dwt enabled
+dwt enabled
 }
 #+end_src
 
@@ -998,18 +998,18 @@ bindsym $mod+slash exec ~/.local/bin/help-menu
 #+begin_src conf :tangle packages/sway/.config/sway/config
 # Resize mode (use Mod+r to enter)
 mode "resize" {
-    bindsym h resize shrink width 15px
-    bindsym j resize grow height 15px
-    bindsym k resize shrink height 15px
-    bindsym l resize grow width 15px
+bindsym h resize shrink width 15px
+bindsym j resize grow height 15px
+bindsym k resize shrink height 15px
+bindsym l resize grow width 15px
 
-    bindsym Left resize shrink width 15px
-    bindsym Down resize grow height 15px
-    bindsym Up resize shrink height 15px
-    bindsym Right resize grow width 15px
+bindsym Left resize shrink width 15px
+bindsym Down resize grow height 15px
+bindsym Up resize shrink height 15px
+bindsym Right resize grow width 15px
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
+bindsym Return mode "default"
+bindsym Escape mode "default"
 }
 
 bindsym $mod+r mode "resize"
@@ -1206,7 +1206,7 @@ Status bar configured for Hyprland with custom modules and styling.
             "on-scroll": 1,
             "on-click-right": "mode",
             "format": {
-              "today": "<b><u>{}</u></b>"
+                "today": "<b><u>{}</u></b>"
             }
         },
         "actions": {
@@ -1258,8 +1258,8 @@ Status bar configured for Hyprland with custom modules and styling.
         "format-connected": "",
         // "format-connected-battery": "{icon}",
         // "format-icons": {
-        //     "connected-battery": ["󰤾", "󰤿", "󰥀", "󰥁", "󰥂", "󰥃", "󰥄", "󰥅", "󰥆", "󰥈" ]
-        // },
+            //     "connected-battery": ["󰤾", "󰤿", "󰥀", "󰥁", "󰥂", "󰥃", "󰥄", "󰥅", "󰥆", "󰥈" ]
+            // },
         "tooltip-format": "Bluetooth: {num_connections} connected",
         "on-click": "blueman-manager"
     },
@@ -1315,30 +1315,30 @@ Status bar configured for Hyprland with custom modules and styling.
 **** Styling
 #+begin_src css :tangle packages/hyprland/.config/waybar/style.css
 . * {
-  border: none;
-  font-family: <<font>>;
-  font-weight: bold;
-  font-size: 14px;
-  border-radius: 0;
-  min-height: 0;
+    border: none;
+    font-family: <<font>>;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 0;
+    min-height: 0;
 }
 
 @import url("/home/james/.cache/matugen/colors-waybar.css");
 
 window#waybar {
-  background: alpha(@background, 0.8);
-  color: @foreground;
+    background: alpha(@background, 0.8);
+    color: @foreground;
 }
 
 /* Tooltip styling */
 #tooltip {
-  background: @background;
-  border: 2px solid @primary;
-  color: @on_surface;
+    background: @background;
+    border: 2px solid @primary;
+    color: @on_surface;
 }
 
 #tooltip label {
-  color: @on_surface;
+    color: @on_surface;
 }
 
 /* Left section - idle inhibitor and workspaces */
@@ -1351,7 +1351,7 @@ window#waybar {
 }
 
 #idle_inhibitor.activated {
-  color: @primary;
+    color: @primary;
 }
 
 #workspaces {
@@ -1359,26 +1359,26 @@ window#waybar {
 }
 
 #workspaces button {
-  all: initial;
-  padding: 0 5px;
-  margin: 0 5px;
-  color: @foreground;
+    all: initial;
+    padding: 0 5px;
+    margin: 0 5px;
+    color: @foreground;
 }
 
 #workspaces button.active {
-  color: @primary;
+    color: @primary;
 }
 
 #workspaces button.special {
-  color: @secondary;
+    color: @secondary;
 }
 
 #workspaces button.urgent {
-  color: @error;
+    color: @error;
 }
 
 #workspaces button:hover {
-  color: @primary;
+    color: @primary;
 }
 
 #workspaces button.empty {
@@ -1415,15 +1415,15 @@ window#waybar {
 }
 
 #clock {
-  margin: 0 10px;
+    margin: 0 10px;
 }
 
 #custom-update {
-  margin: 0 10px;
+    margin: 0 10px;
 }
 
 #custom-update.updates {
-  color: @tertiary;
+    color: @tertiary;
 }
 
 /* Right section - system info modules */
@@ -1455,11 +1455,11 @@ group#tray-expander {
 }
 
 #tray > .passive {
-  -gtk-icon-effect: dim;
+    -gtk-icon-effect: dim;
 }
 
 #tray > .needs-attention {
-  -gtk-icon-effect: highlight;
+    -gtk-icon-effect: highlight;
 }
 
 .tray-group-item {
@@ -1468,30 +1468,30 @@ group#tray-expander {
 
 /* Battery states */
 #custom-battery.charging {
-  color: @tertiary;
+    color: @tertiary;
 }
 
 #custom-battery.warning {
-  color: @secondary;
+    color: @secondary;
 }
 
 #custom-battery.critical {
-  color: @error;
+    color: @error;
 }
 
 /* Bluetooth states */
 #bluetooth.connected {
-  color: @secondary;
+    color: @secondary;
 }
 
 /* Network states */
 #network.disconnected {
-  color: @error;
+    color: @error;
 }
 
 /* Audio muted state */
 #pulseaudio.muted {
-  color: @error;
+    color: @error;
 }
 #+end_src
 
@@ -1502,239 +1502,239 @@ Status bar configured for Sway with i3-compatible workspaces module.
 **** Configuration
 #+begin_src json :tangle packages/sway/.config/waybar/config
 {
-  "reload_style_on_change": true,
-  "layer": "top",
-  "position": "top",
+    "reload_style_on_change": true,
+    "layer": "top",
+    "position": "top",
     "height": 30,
-  "spacing": 0,
-  "margin-top": 0,
-  "margin-bottom": 0,
-  "margin-left": 0,
-  "margin-right": 0,
+    "spacing": 0,
+    "margin-top": 0,
+    "margin-bottom": 0,
+    "margin-left": 0,
+    "margin-right": 0,
 
-  "modules-left": [
-    "idle_inhibitor",
-    "sway/workspaces"
-  ],
+    "modules-left": [
+        "idle_inhibitor",
+        "sway/workspaces"
+    ],
 
-  "modules-center": [
-    "custom/pomodoro",
-    "clock",
-    "custom/update"
-  ],
+    "modules-center": [
+        "custom/pomodoro",
+        "clock",
+        "custom/update"
+    ],
 
-  "modules-right": [
-    "group/tray-expander",
-    "cpu",
-    "memory",
-    "bluetooth",
-    "network",
-    "pulseaudio",
-    "custom/backlight",
-    "custom/battery"
-  ],
+    "modules-right": [
+        "group/tray-expander",
+        "cpu",
+        "memory",
+        "bluetooth",
+        "network",
+        "pulseaudio",
+        "custom/backlight",
+        "custom/battery"
+    ],
 
-  "idle_inhibitor": {
-    "format": "{icon}",
-    "format-icons": {
-      "activated": "󰅶",
-      "deactivated": "󰾪"
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "󰅶",
+            "deactivated": "󰾪"
+        },
+        "tooltip-format-activated": "Idle Inhibitor: Active",
+        "tooltip-format-deactivated": "Idle Inhibitor: Inactive"
     },
-    "tooltip-format-activated": "Idle Inhibitor: Active",
-    "tooltip-format-deactivated": "Idle Inhibitor: Inactive"
-  },
 
-  "sway/workspaces": {
-    "format": "{icon}",
-    "format-icons": {
-      "default": "",
-      "1": "1",
-      "2": "2",
-      "3": "3",
-      "4": "4",
-      "5": "5",
-      "6": "6",
-      "7": "7",
-      "8": "8",
-      "9": "9",
-      "urgent": ""
+    "sway/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "default": "",
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "urgent": ""
+        },
+        "persistent_workspaces": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": []
+        }
     },
-    "persistent_workspaces": {
-      "1": [],
-      "2": [],
-      "3": [],
-      "4": [],
-      "5": [],
-      "6": [],
-      "7": [],
-      "8": [],
-      "9": []
+
+    "custom/pomodoro": {
+        "format": "{alt} {text}",
+        "exec": "~/.local/bin/waybar-pomodoro",
+        "return-type": "json",
+        "interval": 1,
+        "on-click": "~/.local/bin/waybar-pomodoro toggle",
+        "on-click-right": "~/.local/bin/waybar-pomodoro reset"
+    },
+
+    "clock": {
+        "format": "{:L%A %H:%M}",
+        "format-alt": "{:L%d %B W%V %Y}",
+        "tooltip-format": "<tt>{calendar}</tt>",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 3,
+            "weeks-pos": "left",
+            "on-scroll": 1,
+            "on-click-right": "mode",
+            "format": {
+                "today": "<b><u>{}</u></b>"
+            },
+            "actions": {
+                "on-click-right": "mode",
+                "on-scroll-up": "shift_up",
+                "on-scroll-down": "shift_down"
+            }
+        },
+
+        "custom/update": {
+            "format": "{}",
+            "exec": "~/.local/bin/waybar-updates",
+            "on-click": "foot --app-id=floating-foot -e sh -c 'yay -Syu && echo && echo Done! Press Enter to close && read'",
+            "return-type": "json",
+            "interval": 3600,
+            "signal": 7
+        },
+
+        "cpu": {
+            "interval": 5,
+            "format": "󰍛",
+            "tooltip-format": "CPU: {usage}%",
+            "on-click": "foot --app-id=floating-foot -e btop"
+        },
+
+        "memory": {
+            "interval": 5,
+            "format": "󰘚",
+            "tooltip-format": "RAM: {used:0.1f}G / {total:0.1f}G ({percentage}%)",
+            "on-click": "foot --app-id=floating-foot -e btop"
+        },
+
+        "network": {
+            "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+            "format": "{icon}",
+            "format-wifi": "{icon}",
+            "format-ethernet": "󰀂",
+            "format-disconnected": "󰤮",
+            "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+            "tooltip-format-ethernet": "Wired\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+            "tooltip-format-disconnected": "Disconnected",
+            "interval": 3,
+            "on-click": "networkmanager_dmenu"
+        },
+
+        "bluetooth": {
+            "format": "",
+            "format-disabled": "󰂲",
+            "format-connected": "",
+            // "format-connected-battery": "{icon}",
+            // "format-icons": {
+                //     "connected-battery": ["󰤾", "󰤿", "󰥀", "󰥁", "󰥂", "󰥃", "󰥄", "󰥅", "󰥆", "󰥈" ]
+                // },
+            "tooltip-format": "Bluetooth: {num_connections} connected",
+            "on-click": "blueman-manager"
+        },
+
+        "pulseaudio": {
+            "format": "{icon}",
+            "format-muted": "",
+            "format-icons": {
+                "default": ["", "", "", "", "", "", "", "", "", ""],
+            },
+            "tooltip-format": "Volume: {volume}%",
+            "scroll-step": 5,
+            "on-click": "foot --class=Wiremix -e wiremix",
+            "on-click-right": "pamixer -t"
+        },
+
+        "custom/backlight": {
+            "format": "{alt}",
+            "exec": "~/.local/bin/waybar-backlight",
+            "return-type": "json",
+            "interval": 2,
+            "on-click": "~/.local/bin/hyprsunset-menu"
+        },
+
+        "custom/battery": {
+            "format": "{}",
+            "exec": "~/.local/bin/waybar-battery",
+            "return-type": "json",
+            "interval": 10
+        },
+
+        "group/tray-expander": {
+            "orientation": "inherit",
+            "drawer": {
+                "transition-duration": 600,
+                "children-class": "tray-group-item"
+            },
+            "modules": ["custom/expand-icon", "tray"]
+        },
+
+        "custom/expand-icon": {
+            "format": "󰇙",
+            "tooltip": false
+        },
+
+        "tray": {
+            "icon-size": 12,
+            "spacing": 30
+        }
     }
-  },
-
-  "custom/pomodoro": {
-    "format": "{alt} {text}",
-    "exec": "~/.local/bin/waybar-pomodoro",
-    "return-type": "json",
-    "interval": 1,
-    "on-click": "~/.local/bin/waybar-pomodoro toggle",
-    "on-click-right": "~/.local/bin/waybar-pomodoro reset"
-  },
-
-  "clock": {
-    "format": "{:L%A %H:%M}",
-    "format-alt": "{:L%d %B W%V %Y}",
-    "tooltip-format": "<tt>{calendar}</tt>",
-    "calendar": {
-      "mode": "month",
-      "mode-mon-col": 3,
-      "weeks-pos": "left",
-      "on-scroll": 1,
-      "on-click-right": "mode",
-    "format": {
-        "today": "<b><u>{}</u></b>"
-    },
-    "actions": {
-      "on-click-right": "mode",
-      "on-scroll-up": "shift_up",
-      "on-scroll-down": "shift_down"
-    }
-  },
-
-  "custom/update": {
-    "format": "{}",
-    "exec": "~/.local/bin/waybar-updates",
-    "on-click": "foot --app-id=floating-foot -e sh -c 'yay -Syu && echo && echo Done! Press Enter to close && read'",
-    "return-type": "json",
-    "interval": 3600,
-    "signal": 7
-  },
-
-  "cpu": {
-    "interval": 5,
-    "format": "󰍛",
-    "tooltip-format": "CPU: {usage}%",
-    "on-click": "foot --app-id=floating-foot -e btop"
-  },
-
-  "memory": {
-    "interval": 5,
-    "format": "󰘚",
-    "tooltip-format": "RAM: {used:0.1f}G / {total:0.1f}G ({percentage}%)",
-    "on-click": "foot --app-id=floating-foot -e btop"
-  },
-
-  "network": {
-    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
-    "format": "{icon}",
-    "format-wifi": "{icon}",
-    "format-ethernet": "󰀂",
-    "format-disconnected": "󰤮",
-    "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
-    "tooltip-format-ethernet": "Wired\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
-    "tooltip-format-disconnected": "Disconnected",
-    "interval": 3,
-    "on-click": "networkmanager_dmenu"
-  },
-
-  "bluetooth": {
-    "format": "",
-    "format-disabled": "󰂲",
-    "format-connected": "",
-      // "format-connected-battery": "{icon}",
-      // "format-icons": {
-      //     "connected-battery": ["󰤾", "󰤿", "󰥀", "󰥁", "󰥂", "󰥃", "󰥄", "󰥅", "󰥆", "󰥈" ]
-      // },
-    "tooltip-format": "Bluetooth: {num_connections} connected",
-    "on-click": "blueman-manager"
-  },
-
-  "pulseaudio": {
-    "format": "{icon}",
-    "format-muted": "",
-    "format-icons": {
-      "default": ["", "", "", "", "", "", "", "", "", ""],
-    },
-    "tooltip-format": "Volume: {volume}%",
-    "scroll-step": 5,
-    "on-click": "foot --class=Wiremix -e wiremix",
-    "on-click-right": "pamixer -t"
-  },
-
-  "custom/backlight": {
-    "format": "{alt}",
-    "exec": "~/.local/bin/waybar-backlight",
-    "return-type": "json",
-    "interval": 2,
-    "on-click": "~/.local/bin/hyprsunset-menu"
-  },
-
-  "custom/battery": {
-    "format": "{}",
-    "exec": "~/.local/bin/waybar-battery",
-    "return-type": "json",
-    "interval": 10
-  },
-
-  "group/tray-expander": {
-    "orientation": "inherit",
-    "drawer": {
-      "transition-duration": 600,
-      "children-class": "tray-group-item"
-    },
-    "modules": ["custom/expand-icon", "tray"]
-  },
-
-  "custom/expand-icon": {
-    "format": "󰇙",
-    "tooltip": false
-  },
-
-  "tray": {
-    "icon-size": 12,
-    "spacing": 30
-  }
-}
 #+end_src
 
 **** Styling
 #+begin_src css :tangle packages/sway/.config/waybar/style.css
 . * {
-  border: none;
-  font-family: <<font>>;
-  font-weight: bold;
-  font-size: 13px;
-  min-height: 0;
+    border: none;
+    font-family: <<font>>;
+    font-weight: bold;
+    font-size: 13px;
+    min-height: 0;
 }
 
 window#waybar {
-  background-color: alpha(@background, 0.85);
+    background-color: alpha(@background, 0.85);
 }
 
 tooltip {
-  background-color: @background;
-  border: 2px solid @primary;
-  border-radius: 10px;
-  opacity: 0.9;
+    background-color: @background;
+    border: 2px solid @primary;
+    border-radius: 10px;
+    opacity: 0.9;
 }
 
 tooltip * {
-  color: @foreground;
+    color: @foreground;
 }
 
 /* Left section - idle inhibitor, workspaces */
 #idle_inhibitor {
-  margin: 0 10px;
+    margin: 0 10px;
 }
 
 #workspaces button {
     all: unset;
-  padding: 0 10px;
-  color: @foreground;
+    padding: 0 10px;
+    color: @foreground;
 }
 
 #workspaces button:hover {
-  color: @primary;
+    color: @primary;
 }
 
 #workspaces button.empty {
@@ -1743,41 +1743,41 @@ tooltip * {
 
 /* Center section - pomodoro, clock and update */
 #custom-pomodoro {
-  margin: 0 10px;
-  color: @foreground;
+    margin: 0 10px;
+    color: @foreground;
 }
 
 #custom-pomodoro.work {
-  color: @primary;
+    color: @primary;
 }
 
 #custom-pomodoro.break {
-  color: @secondary;
+    color: @secondary;
 }
 
 #custom-pomodoro.paused {
-  opacity: 0.7;
+    opacity: 0.7;
 }
 
 #custom-pomodoro.idle {
-  opacity: 0.5;
+    opacity: 0.5;
 }
 
 #clock {
-  margin: 0 10px;
+    margin: 0 10px;
 }
 
 #custom-update {
-  margin: 0 5px;
+    margin: 0 5px;
 }
 
 #custom-update.pending {
-  color: @primary;
+    color: @primary;
 }
 
 /* Right section - tray and system stats */
 #tray {
-  margin: 0 10px;
+    margin: 0 10px;
 }
 
 #custom-expand-icon {
@@ -1792,21 +1792,21 @@ tooltip * {
 #backlight,
 #custom-backlight,
 #custom-battery {
-  margin: 0 10px;
+    margin: 0 10px;
 }
 
 /* Hardware status colors */
 #bluetooth.disabled {
-  opacity: 0.5;
+    opacity: 0.5;
 }
 
 #network.disconnected {
-  color: @error;
+    color: @error;
 }
 
 /* Audio muted state */
 #pulseaudio.muted {
-  color: @error;
+    color: @error;
 }
 #+end_src
 
@@ -1948,29 +1948,29 @@ desc = "Chmod on selected files"
 *** Media Info
 #+begin_src toml :tangle packages/yazi/.config/yazi/yazi.toml
 [plugin]
-  prepend_preloaders = [
-    # Replace magick, image, video with mediainfo
-    { mime = "{audio,video,image}/*", run = "mediainfo" },
-    { mime = "application/subrip", run = "mediainfo" },
-    # Adobe Illustrator, Adobe Photoshop is image/adobe.photoshop, already handled above
-    { mime = "application/postscript", run = "mediainfo" },
-  ]
-  prepend_previewers = [
-    # Replace magick, image, video with mediainfo
-    { mime = "{audio,video,image}/*", run = "mediainfo"},
-    { mime = "application/subrip", run = "mediainfo" },
-    # Adobe Illustrator, Adobe Photoshop is image/adobe.photoshop, already handled above
-    { mime = "application/postscript", run = "mediainfo" },
-  ]
-  # There are more extensions which are supported by mediainfo.
-  # Just add file's MIME type to `previewers`, `preloaders` above.
-  # https://mediaarea.net/en/MediaInfo/Support/Formats
+prepend_preloaders = [
+# Replace magick, image, video with mediainfo
+{ mime = "{audio,video,image}/*", run = "mediainfo" },
+{ mime = "application/subrip", run = "mediainfo" },
+# Adobe Illustrator, Adobe Photoshop is image/adobe.photoshop, already handled above
+{ mime = "application/postscript", run = "mediainfo" },
+]
+prepend_previewers = [
+# Replace magick, image, video with mediainfo
+{ mime = "{audio,video,image}/*", run = "mediainfo"},
+{ mime = "application/subrip", run = "mediainfo" },
+# Adobe Illustrator, Adobe Photoshop is image/adobe.photoshop, already handled above
+{ mime = "application/postscript", run = "mediainfo" },
+]
+# There are more extensions which are supported by mediainfo.
+# Just add file's MIME type to `previewers`, `preloaders` above.
+# https://mediaarea.net/en/MediaInfo/Support/Formats
 
 # For a large file like Adobe Illustrator, Adobe Photoshop, etc
 # you may need to increase the memory limit if no image is rendered.
 # https://yazi-rs.github.io/docs/configuration/yazi#tasks
 [tasks]
-  image_alloc      = 1073741824        # = 1024*1024*1024 = 1024MB
+image_alloc      = 1073741824        # = 1024*1024*1024 = 1024MB
 #+end_src
 *** Zoom
 #+begin_src toml :tangle packages/yazi/.config/yazi/keymap.toml
@@ -1988,9 +1988,9 @@ desc = "Zoom out hovered file"
 **** Configuration
 #+begin_src lua :tangle packages/yazi/.config/yazi/init.lua
 require("recycle-bin"):setup({
-  -- Optional: Override automatic trash directory discovery
-  -- trash_dir = "~/.local/share/Trash/",  -- Uncomment to use specific directory
-})
+    -- Optional: Override automatic trash directory discovery
+    -- trash_dir = "~/.local/share/Trash/",  -- Uncomment to use specific directory
+                            })
 #+end_src
 **** Keybinding
 #+begin_src toml :tangle packages/yazi/.config/yazi/keymap.toml
@@ -2005,7 +2005,7 @@ Un-comment/enable this to always show a prompt for selecting a target device, ev
 #+begin_src lua :tangle packages/yazi/.config/yazi/init.lua
 -- Always show device selection
 -- require("kdeconnect-send"):setup({
-    -- auto_select_single = false,
+-- auto_select_single = false,
 -- })
 #+end_src
 **** Keybinding
@@ -2074,12 +2074,12 @@ require("yatline"):setup({
 	inverse_separator = { open = "", close = "" },
 
 	style_a = {
-		fg = "black",
-		bg_mode = {
-			normal = "white",
-			select = "brightyellow",
-			un_set = "brightred"
-		}
+      fg = "black",
+      bg_mode = {
+        normal = "white",
+        select = "brightyellow",
+        un_set = "brightred"
+      }
 	},
 	style_b = { bg = "brightblack", fg = "brightwhite" },
 	style_c = { bg = "black", fg = "brightwhite" },
@@ -2111,54 +2111,54 @@ require("yatline"):setup({
 	component_positions = { "header", "tab", "status" },
 
 	header_line = {
-		left = {
-			section_a = {
-        			{type = "line", custom = false, name = "tabs", params = {"left"}},
-			},
-			section_b = {
-			},
-			section_c = {
-			}
-		},
-		right = {
-			section_a = {
-        			{type = "string", custom = false, name = "date", params = {"%A, %d %B %Y"}},
-			},
-			section_b = {
-        			{type = "string", custom = false, name = "date", params = {"%X"}},
-			},
-			section_c = {
-			}
-		}
+      left = {
+        section_a = {
+          {type = "line", custom = false, name = "tabs", params = {"left"}},
+        },
+        section_b = {
+        },
+        section_c = {
+        }
+      },
+      right = {
+        section_a = {
+          {type = "string", custom = false, name = "date", params = {"%A, %d %B %Y"}},
+        },
+        section_b = {
+          {type = "string", custom = false, name = "date", params = {"%X"}},
+        },
+        section_c = {
+        }
+      }
 	},
 
 	status_line = {
-		left = {
-			section_a = {
-        			{type = "string", custom = false, name = "tab_mode"},
-			},
-			section_b = {
-        			{type = "string", custom = false, name = "hovered_size"},
-			},
-			section_c = {
-        			{type = "string", custom = false, name = "hovered_path"},
-        			{type = "coloreds", custom = false, name = "count"},
-			}
-		},
-		right = {
-			section_a = {
-        			{type = "string", custom = false, name = "cursor_position"},
-			},
-			section_b = {
-        			{type = "string", custom = false, name = "cursor_percentage"},
-			},
-			section_c = {
-        			{type = "string", custom = false, name = "hovered_file_extension", params = {true}},
-        			{type = "coloreds", custom = false, name = "permissions"},
-			}
-		}
+      left = {
+        section_a = {
+          {type = "string", custom = false, name = "tab_mode"},
+        },
+        section_b = {
+          {type = "string", custom = false, name = "hovered_size"},
+        },
+        section_c = {
+          {type = "string", custom = false, name = "hovered_path"},
+          {type = "coloreds", custom = false, name = "count"},
+        }
+      },
+      right = {
+        section_a = {
+          {type = "string", custom = false, name = "cursor_position"},
+        },
+        section_b = {
+          {type = "string", custom = false, name = "cursor_percentage"},
+        },
+        section_c = {
+          {type = "string", custom = false, name = "hovered_file_extension", params = {true}},
+          {type = "coloreds", custom = false, name = "permissions"},
+        }
+      }
 	},
-})
+                        })
 #+end_src
 *** Toggle-pane
 **** Keybinding
@@ -2413,7 +2413,8 @@ c.editor.command = ['emacsclient', '-c', '-a', ' ', '+{line}:{column}', '{}']
 #+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
 # Custom search engines
 # c.url.searchengines['DEFAULT'] = 'https://duckduckgo.com/?q={}'
-c.url.searchengines['DEFAULT'] = 'https://kagi.com/search?q={}'
+# c.url.searchengines['DEFAULT'] = 'https://kagi.com/search?q={}'
+c.url.searchengines['DEFAULT'] = 'https://www.startpage.com/sp/search?q={}'
 c.url.searchengines['gg'] = 'https://www.google.com/search?q={}'
 c.url.searchengines['mar'] = 'https://marginalia-search.com/search?query={}'
 c.url.searchengines['am'] = 'https://www.amazon.co.uk/s?k={}'
@@ -2537,7 +2538,7 @@ try:
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{doc.title()}</title>
     <style>
-        * {{
+        ,* {{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -2743,7 +2744,7 @@ cp ~/stow/qutebrowser/.config/qutebrowser/bookmarks/urls ~/.config/qutebrowser/b
 GTK application theming with custom settings and Material You integration.
 
 *** GTK 3.0
-#+begin_src ini :tangle packages/matugen/.config/gtk-3.0/settings.ini
+#+begin_src conf :tangle packages/matugen/.config/gtk-3.0/settings.ini
 [Settings]
 gtk-application-prefer-dark-theme=true
 gtk-theme-name=adw-gtk3-dark
@@ -2764,7 +2765,7 @@ gtk-xft-rgba=rgb
 #+end_src
 
 *** GTK 4.0
-#+begin_src ini :tangle packages/matugen/.config/gtk-4.0/settings.ini
+#+begin_src conf :tangle packages/matugen/.config/gtk-4.0/settings.ini
 [Settings]
 gtk-application-prefer-dark-theme=true
 gtk-theme-name=adw-gtk3-dark
@@ -2782,7 +2783,7 @@ gtk-xft-rgba=rgb
 Qt application theming to match system appearance.
 
 *** Qt6ct
-#+begin_src ini :tangle packages/matugen/.config/qt6ct/qt6ct.conf
+#+begin_src conf :tangle packages/matugen/.config/qt6ct/qt6ct.conf
 [Appearance]
 color_scheme_path=/home/james/.config/qt6ct/colors/matugen.conf
 custom_palette=true
@@ -2814,7 +2815,7 @@ geometry=@ByteArray()
 #+end_src
 
 *** Qt5ct
-#+begin_src ini :tangle packages/matugen/.config/qt5ct/qt5ct.conf
+#+begin_src conf :tangle packages/matugen/.config/qt5ct/qt5ct.conf
 [Appearance]
 color_scheme_path=/home/james/.config/qt5ct/colors/matugen.conf
 custom_palette=true
@@ -3027,7 +3028,7 @@ $on_error = rgb({{colors.on_error.default.hex_stripped}})
 #+end_src
 
 **** Foot Template
-#+begin_src ini :tangle packages/matugen/.config/matugen/templates/foot.ini
+#+begin_src conf :tangle packages/matugen/.config/matugen/templates/foot.ini
 # Generated by matugen
 
 [colors]
@@ -3074,7 +3075,7 @@ progress-color=over {{colors.primary.default.hex}}
 #+end_src
 
 **** Fuzzel Template
-#+begin_src ini :tangle packages/matugen/.config/matugen/templates/fuzzel.ini
+#+begin_src conf :tangle packages/matugen/.config/matugen/templates/fuzzel.ini
 # Generated by matugen
 
 [colors]
@@ -3088,7 +3089,7 @@ border={{colors.primary.default.hex}}ff
 #+end_src
 
 **** Networkmanager_dmenu Template
-#+begin_src ini :tangle packages/matugen/.config/matugen/templates/networkmanager_dmenu.ini
+#+begin_src conf :tangle packages/matugen/.config/matugen/templates/networkmanager_dmenu.ini
 # Generated by matugen - networkmanager_dmenu configuration
 
 [dmenu_passphrase]
@@ -3246,84 +3247,84 @@ c.colors.webpage.darkmode.enabled = (mode.lower() == 'dark')
 #+begin_src html :tangle packages/matugen/.config/matugen/templates/qutebrowser-startpage.html
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Start</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      ,* {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      }
 
-        body {
-            font-family: monospace;
-            background-color: {{colors.background.default.hex}};
-            color: {{colors.on_background.default.hex}};
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
+      body {
+      font-family: monospace;
+      background-color: {{colors.background.default.hex}};
+      color: {{colors.on_background.default.hex}};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      }
 
-        .container {
-            text-align: center;
-            width: 100%;
-            max-width: 600px;
-            padding: 2rem;
-        }
+      .container {
+      text-align: center;
+      width: 100%;
+      max-width: 600px;
+      padding: 2rem;
+      }
 
-        h1 {
-            color: {{colors.primary.default.hex}};
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            font-weight: normal;
-        }
+      h1 {
+      color: {{colors.primary.default.hex}};
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      font-weight: normal;
+      }
 
-        form {
-            width: 100%;
-        }
+      form {
+      width: 100%;
+      }
 
-        input[type="search"] {
-            width: 100%;
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
-            font-family: monospace;
-            background-color: {{colors.surface.default.hex}};
-            color: {{colors.on_surface.default.hex}};
-            border: 2px solid {{colors.outline.default.hex}};
-            border-radius: 0;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+      input[type="search"] {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      font-family: monospace;
+      background-color: {{colors.surface.default.hex}};
+      color: {{colors.on_surface.default.hex}};
+      border: 2px solid {{colors.outline.default.hex}};
+      border-radius: 0;
+      outline: none;
+      transition: border-color 0.2s;
+      }
 
-        input[type="search"]:focus {
-            border-color: {{colors.primary.default.hex}};
-        }
+      input[type="search"]:focus {
+      border-color: {{colors.primary.default.hex}};
+      }
 
-        input[type="search"]::placeholder {
-            color: {{colors.on_surface_variant.default.hex}};
-        }
+      input[type="search"]::placeholder {
+      color: {{colors.on_surface_variant.default.hex}};
+      }
     </style>
     <script>
-        function handleSearch(event) {
-            event.preventDefault();
-            const query = document.getElementById('search-input').value.trim();
-            if (query) {
-                window.location.href = 'https://duckduckgo.com/?q=' + encodeURIComponent(query);
-            }
-        }
+      function handleSearch(event) {
+      event.preventDefault();
+      const query = document.getElementById('search-input').value.trim();
+      if (query) {
+      window.location.href = 'https://www.startpage.com//search?query=' + encodeURIComponent(query);
+      }
+      }
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>~</h1>
-        <form onsubmit="handleSearch(event)">
-            <input type="search" id="search-input" placeholder="search" autofocus autocomplete="off">
-        </form>
+      <h1>*</h1>
+      <form onsubmit="handleSearch(event)">
+        <input type="search" id="search-input" placeholder="search" autofocus autocomplete="off">
+      </form>
     </div>
-</body>
+  </body>
 </html>
 #+end_src
 
@@ -3917,7 +3918,7 @@ case "${1:-}" in
     mute)
         pamixer -t
         ;;
-    *)
+    ,*)
         echo "Usage: $0 {up|down|mute}"
         exit 1
         ;;
@@ -3954,7 +3955,7 @@ case "${1:-}" in
     down)
         light -U 5
         ;;
-    *)
+    ,*)
         echo "Usage: $0 {up|down}"
         exit 1
         ;;
@@ -4878,7 +4879,7 @@ case "$PARENT_LAYOUT" in
     splitv) echo "⬍" ;;
     tabbed) echo "☰" ;;
     stacked) echo "☷" ;;
-    *) echo "▪" ;;  # Default symbol for unknown/single window
+    ,*) echo "▪" ;;  # Default symbol for unknown/single window
 esac
 #+end_src
 
@@ -5255,7 +5256,7 @@ Enable profiling (optional)
 
 # Auto-start WM on TTY1 (before anything else)
 if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
-  exec ~/.local/bin/select-wm.sh hyprland
+    exec ~/.local/bin/select-wm.sh hyprland
 fi
 
 # History configuration
@@ -5313,8 +5314,8 @@ setopt MULTIOS                   # Enable multiple redirections
 # Install zinit if not present
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 if [[ ! -d "$ZINIT_HOME" ]]; then
-   mkdir -p "$(dirname $ZINIT_HOME)"
-   git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+    mkdir -p "$(dirname $ZINIT_HOME)"
+    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
 
 # Load zinit
@@ -5512,18 +5513,18 @@ function mkcd() {
 function extract() {
     if [ -f "$1" ]; then
         case "$1" in
-            *.tar.bz2)   tar xjf "$1"     ;;
-            *.tar.gz)    tar xzf "$1"     ;;
-            *.bz2)       bunzip2 "$1"     ;;
-            *.rar)       unrar x "$1"     ;;
-            *.gz)        gunzip "$1"      ;;
-            *.tar)       tar xf "$1"      ;;
-            *.tbz2)      tar xjf "$1"     ;;
-            *.tgz)       tar xzf "$1"     ;;
-            *.zip)       unzip "$1"       ;;
-            *.Z)         uncompress "$1"  ;;
-            *.7z)        7z x "$1"        ;;
-            *)           echo "'$1' cannot be extracted via extract()" ;;
+            ,*.tar.bz2)   tar xjf "$1"     ;;
+            ,*.tar.gz)    tar xzf "$1"     ;;
+            ,*.bz2)       bunzip2 "$1"     ;;
+            ,*.rar)       unrar x "$1"     ;;
+            ,*.gz)        gunzip "$1"      ;;
+            ,*.tar)       tar xf "$1"      ;;
+            ,*.tbz2)      tar xjf "$1"     ;;
+            ,*.tgz)       tar xzf "$1"     ;;
+            ,*.zip)       unzip "$1"       ;;
+            ,*.Z)         uncompress "$1"  ;;
+            ,*.7z)        7z x "$1"        ;;
+            ,*)           echo "'$1' cannot be extracted via extract()" ;;
         esac
     else
         echo "'$1' is not a valid file"
@@ -5647,7 +5648,7 @@ alias myip="curl ifconfig.me"
 
 # Show fastfetch on new terminal
 if [[ -o interactive ]] && [[ -z "$TMUX" ]]; then
-  fastfetch
+    fastfetch
 fi
 #+end_src
 
@@ -5719,18 +5720,18 @@ style = "bright-black"
 WM="${1:-hyprland}"
 
 case "$WM" in
-  hyprland|sway|river|niri)
-    # Special handling for hyprland executable
-    if [ "$WM" = "hyprland" ]; then
-      exec Hyprland
-    else
-      exec "$WM"
-    fi
-    ;;
-  *)
-    echo "Unknown WM: $WM"
-    exit 1
-    ;;
+    hyprland|sway|river|niri)
+        # Special handling for hyprland executable
+        if [ "$WM" = "hyprland" ]; then
+            exec Hyprland
+        else
+            exec "$WM"
+        fi
+        ;;
+    ,*)
+        echo "Unknown WM: $WM"
+        exit 1
+        ;;
 esac
 #+end_src
 
@@ -5776,6 +5777,7 @@ Extensible text editor and integrated development environment built on Emacs.
        ;;  +icons
        ;;  +childframe)
        (vertico           ; the search engine of the future
+        +childframe
         +icons)
 
        :ui
@@ -5793,14 +5795,15 @@ Extensible text editor and integrated development environment built on Emacs.
        nav-flash         ; blink cursor line after big motions
        ;; neotree           ; a project drawer, like NERDTree for vim
        ophints           ; highlight the region an operation acts on
-       (popup +defaults)   ; tame sudden yet inevitable temporary windows
+       (popup +all)   ; tame sudden yet inevitable temporary windows
        ;; tabs              ; a tab bar for Emacs
-       treemacs          ; a project drawer, like neotree but cooler
+       (treemacs          ; a project drawer, like neotree but cooler
+        +lsp)
        unicode           ; extended unicode support for various languages
-       ;; (vc-gutter +pretty) ; vcs diff in the fringe
+       (vc-gutter +pretty) ; vcs diff in the fringe
        ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        window-select     ; visually switch windows
-       ;; workspaces        ; tab emulation, persistence & separate workspaces
+       workspaces        ; tab emulation, persistence & separate workspaces
        zen               ; distraction-free coding or writing
 
        :editor
@@ -5814,8 +5817,8 @@ Extensible text editor and integrated development environment built on Emacs.
        ;; lispy             ; vim for lisp, for people who don't like vim
        ;; multiple-cursors  ; editing in many places at once
        ;; objed             ; text object editing for the innocent
-       ;; parinfer          ; turn lisp into python, sort of
-       ;; rotate-text       ; cycle region at point between text candidates
+       parinfer          ; turn lisp into python, sort of
+       rotate-text       ; cycle region at point between text candidates
        snippets          ; my elves. They type so I don't have to
        word-wrap         ; soft wrapping with language-aware indent
 
@@ -5837,7 +5840,10 @@ Extensible text editor and integrated development environment built on Emacs.
        vterm             ; the best terminal emulation in Emacs
 
        :checkers
-       syntax              ; tasing you for every semicolon you forget
+       (syntax              ; tasing you for every semicolon you forget
+        +childframe
+        +flymake
+        +icons)
        (spell +aspell) ; tasing you for misspelling mispelling
        ;;grammar           ; tasing grammar mistake every you make
 
@@ -5852,7 +5858,8 @@ Extensible text editor and integrated development environment built on Emacs.
        ;;ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)     ; run code, run (also, repls)
        ;; gist              ; interacting with github gists
-       lookup              ; navigate your code and its documentation
+       (lookup              ; navigate your code and its documentation
+        +dictionary)
        (lsp               ; M-x vscode
         +peek)
        magit             ; a git porcelain for Emacs
@@ -6013,6 +6020,9 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ;; Pulsar
 (package! pulsar)
+
+;; Mason
+(package! mason)
 #+end_src
 
 ** config.el
@@ -6037,7 +6047,7 @@ Extensible text editor and integrated development environment built on Emacs.
 *** UI
 **** Font
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(setq doom-font (font-spec :family "Sarasa Term SC Nerd" :size 16 :weight 'Semibold)
+(setq doom-font (font-spec :family "Sarasa Term SC Nerd" :size 16 :weight 'Regular)
       doom-variable-pitch-font (font-spec :family "Noto Sans CJK SC" :size 16)
       doom-unicode-font (font-spec :family "Symbols Nerd Font Mono" :size 16))
 #+end_src
@@ -6074,7 +6084,15 @@ Extensible text editor and integrated development environment built on Emacs.
 ;; (setq which-key-idle-delay 0.2)
 (setq auto-save-visited-interval 15)
 (auto-save-visited-mode +1)
+
+(map! :after which-key
+      :map which-key-mode-map
+      "C-n" #'which-key-show-next-page-no-cycle
+      "C-n" #'which-key-show-next-page-no-cycle)
+
 #+end_src
+
+#+RESULTS:
 
 *** Org Mode
 
@@ -6082,7 +6100,7 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ***** Directory
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(setq org-directory "~/denote")
+(setq org-directory "~/wiki/")
 #+end_src
 
 ***** Capture Template
@@ -6176,7 +6194,19 @@ Extensible text editor and integrated development environment built on Emacs.
   (setq denote-rename-buffer-format "[%k] %t")
   (setq denote-directory "~/denote")
   (setq denote-known-keywords nil)
-  (setq denote-date-prompt-use-org-read-date t))
+  (setq denote-date-prompt-use-org-read-date t)
+
+  ;; Digital Garden: Publish by default
+  ;; Only use org files (default), exclude markdown
+  (setq denote-file-type 'org)
+
+  ;; Exclude Hugo content directory from Denote searches
+  (setq denote-allow-multiple-file-types nil)
+  (setq denote-excluded-directories-regexp "blog/content\\|blog/public"))
+
+;; denote-org provides heading links and backlinks functionality
+(use-package! denote-org
+  :after denote)
 #+end_src
 
 ***** Key Binds
@@ -6190,7 +6220,7 @@ Extensible text editor and integrated development environment built on Emacs.
        :desc "open/create note" "d" #'denote-open-or-create
        :desc "find link" "l" #'denote-find-link
        :desc "backlinks" "b" #'denote-backlinks
-       :desc "backlink for heading" "B" #'denote-org-link-to-heading
+       :desc "backlinks for heading" "B" #'denote-org-backlinks-for-heading
        :desc "template" "t" #'denote-template
        :desc "capture region" "c" #'denote-region
        (:prefix ("i" . "insert")
@@ -6213,21 +6243,9 @@ Extensible text editor and integrated development environment built on Emacs.
 #+end_src
 
 **** Org
-
-***** Key Binds
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(map! :leader
-      (:prefix-map ("d" . "denote")
-       :desc "backlink for heading" "B" #'denote-org-link-to-heading
-       (:prefix ("i" . "insert")
-        :desc "insert heading link" "h" #'denote-org-link-to-heading
-        (:prefix ("d" . "dynamic blocks")
-         :desc "links" "l" #'denote-org-dblock-insert-links
-         :desc "backlinks" "b" #'denote-org-dblock-insert-backlinks
-         :desc "files" "f" #'denote-org-dblock-insert-files
-         :desc "missing links" "m" #'denote-org-dblock-insert-missing-links))))
-#+end_src
-
+;; Org-specific denote configuration moved to main keybindings above
+;; No duplicate keybindings needed here
+        
 **** Explore
 
 ***** Configuration
@@ -6307,7 +6325,7 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
 **** Journal
 
 ***** Configuration
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle no
 (use-package! denote-journal
   :after denote
   :config
@@ -6315,7 +6333,7 @@ Temporary solution for "denote-id-regexp" being obsolete in the new version of D
 #+end_src
 
 ***** Key Binds
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+#+begin_src elisp :tangle no
 (map! :leader
       (:prefix-map ("d" . "denote")
        :desc "find/create journal" "j" #'denote-journal-new-or-existing-entry
@@ -6625,343 +6643,9 @@ fi"
 ;; Keybindings
 (map! :leader
       (:prefix-map ("d" . "denote")
-       (:prefix ("g" . "git")
-        :desc "Sync notes" "s" #'denote-git-sync
-        :desc "Toggle auto-sync" "t" #'denote-git-toggle-auto-sync)))
-#+end_src
-
-**** Blog / ox-hugo
-Automated blogging system for publishing denote notes as Hugo blog posts. Uses ID-based tracking for safe renames, diff checking before overwrites, and denote templates for minimal friction publishing.
-
-***** Configuration
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; ox-hugo blog configuration for Hugo site at ~/denote/blog/
-;; Posts will be exported to ~/denote/blog/content/posts/
-(defvar denote-blog-hugo-base-dir (expand-file-name "~/denote/blog/")
-  "Hugo site base directory.")
-
-(defvar denote-blog-hugo-section "blog"
-  "Hugo section where blog posts are exported (creates content/blog/).")
-
-;; Ensure Hugo content directory exists
-(let ((content-dir (expand-file-name "content" denote-blog-hugo-base-dir)))
-  (unless (file-directory-p content-dir)
-    (make-directory content-dir t)))
-
-;; Configure ox-hugo
-(after! ox-hugo
-  (setq org-hugo-base-dir denote-blog-hugo-base-dir
-        org-hugo-section denote-blog-hugo-section))
-#+end_src
-
-***** Denote Template for Blog Posts
-:LOGBOOK:
-CLOCK: [2025-11-07 Fri 19:35]
-:END:
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Define denote template for blog posts with ox-hugo properties
-(after! denote
-  (setq denote-templates
-        '((blog . "#+hugo_base_dir: ~/denote/blog/
-#+hugo_section: blog
-#+hugo_tags:
-#+hugo_draft: false
-
-"))))
-#+end_src
-
-***** Helper Functions
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Get denote ID from file
-(defun denote-blog--get-identifier (file)
-  "Get denote identifier from FILE."
-  (when file
-    (denote-retrieve-filename-identifier file)))
-
-;; Find existing export by ID
-(defun denote-blog--find-export-by-id (identifier)
-  "Find existing markdown export matching IDENTIFIER in Hugo content directory.
-Returns full path if found, nil otherwise."
-  (when identifier
-    (let* ((content-dir (expand-file-name
-                        (concat "content/" denote-blog-hugo-section)
-                        denote-blog-hugo-base-dir))
-           (pattern (concat identifier "--*.md"))
-           (matches (directory-files content-dir t
-                                    (concat "^" (regexp-quote identifier) "--.*\\.md$"))))
-      (car matches))))
-
-;; Get export filename from org file
-(defun denote-blog--get-export-filename (org-file)
-  "Get the markdown filename that should be exported from ORG-FILE.
-Returns just the filename (not full path)."
-  (concat (file-name-base org-file) ".md"))
-
-;; Get full export path
-(defun denote-blog--get-export-path (org-file)
-  "Get full export path for ORG-FILE."
-  (expand-file-name
-   (denote-blog--get-export-filename org-file)
-   (expand-file-name (concat "content/" denote-blog-hugo-section)
-                     denote-blog-hugo-base-dir)))
-
-;; Check if file has blog keyword
-(defun denote-blog--has-blog-keyword-p (file)
-  "Check if FILE has 'blog' keyword."
-  (when file
-    (let ((keywords (denote-retrieve-keywords-value
-                    file
-                    (denote-filetype-heuristics file))))
-      (member "blog" keywords))))
-
-;; Ensure ox-hugo properties exist
-(defun denote-blog--ensure-properties ()
-  "Ensure current buffer has ox-hugo properties. Add missing ones with smart defaults."
-  (save-excursion
-    (goto-char (point-min))
-    (let ((has-base-dir (re-search-forward "^#\\+hugo_base_dir:" nil t)))
-
-      (if has-base-dir
-          ;; Properties exist - update hugo_section to match current config
-          (progn
-            (goto-char (point-min))
-            (when (re-search-forward "^#\\+hugo_section: .*$" nil t)
-              (replace-match (format "#+hugo_section: %s" denote-blog-hugo-section))))
-
-        ;; Properties don't exist - add them all
-        (goto-char (point-min))
-        (let ((last-prop-pos (point-min)))
-          (while (re-search-forward "^#\\+\\(title\\|date\\|filetags\\|identifier\\):" nil t)
-            (end-of-line)
-            (setq last-prop-pos (point)))
-
-          (when last-prop-pos
-            (goto-char last-prop-pos)
-            ;; Add ox-hugo properties with smart defaults
-            (insert (format "\n#+hugo_base_dir: %s" denote-blog-hugo-base-dir))
-            (insert (format "\n#+hugo_section: %s" denote-blog-hugo-section))
-            (insert (format "\n#+hugo_date: %s" (format-time-string "%Y-%m-%d")))
-
-            ;; Convert denote keywords to hugo tags (exclude 'blog')
-            (let ((keywords (denote-retrieve-keywords-value
-                            buffer-file-name
-                            (denote-filetype-heuristics buffer-file-name))))
-              (insert (format "\n#+hugo_tags: %s"
-                             (mapconcat 'identity (remove "blog" keywords) " "))))
-
-            (insert "\n#+hugo_draft: false")
-            (message "Added ox-hugo properties with smart defaults")))))))
-#+end_src
-
-***** Diff and Export Functions
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Show diff between old and new content
-(defun denote-blog--show-diff (old-content new-content old-file new-file)
-  "Show diff between OLD-CONTENT and NEW-CONTENT in diff-mode.
-OLD-FILE and NEW-FILE are labels for the diff. Return t if user confirms, nil otherwise."
-  (let ((diff-buf (get-buffer-create "*Blog Diff*")))
-    (with-current-buffer diff-buf
-      (erase-buffer)
-      (let ((inhibit-read-only t)
-            (old-temp (make-temp-file "denote-blog-old-"))
-            (new-temp (make-temp-file "denote-blog-new-")))
-        (unwind-protect
-            (progn
-              ;; Write contents to temp files
-              (with-temp-file old-temp (insert old-content))
-              (with-temp-file new-temp (insert new-content))
-
-              ;; Run diff
-              (call-process "diff" nil t nil
-                          "-u"
-                          "--label" (format "Current: %s" old-file)
-                          "--label" (format "New: %s" new-file)
-                          old-temp new-temp))
-          ;; Cleanup
-          (delete-file old-temp)
-          (delete-file new-temp)))
-
-      (diff-mode)
-      (view-mode 1)
-      (goto-char (point-min))
-      (pop-to-buffer diff-buf)
-
-      (let ((response (read-char-choice
-                      "Publish? (y)es, (n)o: "
-                      '(?y ?n))))
-        (kill-buffer diff-buf)
-        (eq response ?y)))))
-
-;; Core export with ID-based tracking and diff checking
-(defun denote-blog--export-with-diff (org-file)
-  "Export ORG-FILE to Hugo markdown with ID-based tracking and diff checking.
-Returns t if published, nil if skipped/cancelled."
-  (let* ((identifier (denote-blog--get-identifier org-file))
-         (target-path (denote-blog--get-export-path org-file))
-         (existing-export (denote-blog--find-export-by-id identifier))
-         (target-filename (file-name-nondirectory target-path)))
-
-    (unless identifier
-      (user-error "Could not extract denote identifier from %s" org-file))
-
-    ;; Export to markdown
-    (require 'ox-hugo)
-    (let ((org-hugo-base-dir denote-blog-hugo-base-dir)
-          (org-hugo-section denote-blog-hugo-section))
-      (org-hugo-export-to-md))
-
-    ;; Get the newly exported content
-    (let ((new-content (with-temp-buffer
-                        (insert-file-contents target-path)
-                        (buffer-string))))
-
-      (cond
-       ;; No existing export - new post
-       ((not existing-export)
-        (message "✓ Published new post: %s" target-filename)
-        t)
-
-       ;; Same filename - check if content changed
-       ((string= existing-export target-path)
-        (let ((old-content (with-temp-buffer
-                            (insert-file-contents existing-export)
-                            (buffer-string))))
-          (if (string= old-content new-content)
-              (progn
-                (message "No changes detected, skipping")
-                nil)
-            ;; Show diff and confirm
-            (if (denote-blog--show-diff old-content new-content
-                                       (file-name-nondirectory existing-export)
-                                       target-filename)
-                (progn
-                  (message "✓ Updated: %s" target-filename)
-                  t)
-              (progn
-                (delete-file target-path)
-                (message "Publish cancelled")
-                nil)))))
-
-       ;; Different filename (renamed) - show diff and handle
-       (t
-        (let ((old-content (with-temp-buffer
-                            (insert-file-contents existing-export)
-                            (buffer-string)))
-              (old-filename (file-name-nondirectory existing-export)))
-          (if (denote-blog--show-diff old-content new-content
-                                     old-filename target-filename)
-              (progn
-                (delete-file existing-export)
-                (message "✓ Updated and renamed: %s → %s" old-filename target-filename)
-                t)
-            (progn
-              (delete-file target-path)
-              (message "Publish cancelled")
-              nil))))))))
-#+end_src
-
-***** Interactive Publish Functions
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Publish current blog post (SPC d p)
-(defun denote-blog-publish ()
-  "Publish current denote note as blog post with diff checking.
-Uses ID-based tracking to handle renames safely."
-  (interactive)
-  (unless buffer-file-name
-    (user-error "Not visiting a file"))
-
-  ;; Check for blog keyword
-  (unless (denote-blog--has-blog-keyword-p buffer-file-name)
-    (if (y-or-n-p "Current note doesn't have 'blog' keyword. Add it? ")
-        (let* ((current-keywords (denote-retrieve-keywords-value
-                                 buffer-file-name
-                                 (denote-filetype-heuristics buffer-file-name)))
-               (new-keywords (if (listp current-keywords)
-                               (cons "blog" current-keywords)
-                             (list "blog"))))
-          ;; Add keyword to front matter
-          (save-excursion
-            (goto-char (point-min))
-            (if (re-search-forward "^#\\+filetags:" nil t)
-                (progn
-                  (end-of-line)
-                  (insert " :blog")
-                  (save-buffer))
-              (user-error "Could not find #+filetags line")))
-          ;; Sync filename with front matter
-          (denote-rename-file-using-front-matter buffer-file-name)
-          (revert-buffer t t))
-      (user-error "Cancelled: note needs 'blog' keyword to publish")))
-
-  (save-buffer)
-
-  ;; Ensure ox-hugo properties exist
-  (denote-blog--ensure-properties)
-  (save-buffer)
-
-  ;; Export with diff checking
-  (condition-case err
-      (denote-blog--export-with-diff buffer-file-name)
-    (error
-     (message "✗ Export failed: %s" (error-message-string err))
-     nil)))
-
-;; Publish all blog posts (SPC d P)
-(defun denote-blog-publish-all ()
-  "Publish all denote notes with 'blog' keyword.
-Shows diff for each changed post before publishing."
-  (interactive)
-  (let* ((all-files (denote-directory-files))
-         (blog-files (seq-filter
-                     (lambda (file)
-                       (denote-blog--has-blog-keyword-p file))
-                     all-files))
-         (published 0)
-         (skipped 0)
-         (failed 0))
-    (unless blog-files
-      (user-error "No blog posts found (no files with 'blog' keyword)"))
-
-    (when (y-or-n-p (format "Process %d blog post(s)? " (length blog-files)))
-      (dolist (file blog-files)
-        (message "\n==> Processing: %s" (file-name-nondirectory file))
-        (with-current-buffer (find-file-noselect file)
-          (condition-case err
-              (progn
-                (denote-blog--ensure-properties)
-                (save-buffer)
-                (if (denote-blog--export-with-diff file)
-                    (setq published (1+ published))
-                  (setq skipped (1+ skipped))))
-            (error
-             (setq failed (1+ failed))
-             (message "✗ Failed to export %s: %s"
-                     (file-name-nondirectory file)
-                     (error-message-string err))))))
-
-      (message "\n==> Publish complete: %d published, %d skipped, %d failed"
-               published skipped failed))))
-#+end_src
-
-***** Fix: Ensure denote only opens .org files
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Ensure denote only considers .org files, not .md files
-(after! denote
-  (setq denote-file-type 'org)
-  ;; Filter out markdown files from denote directory listings
-  (advice-add 'denote-directory-files :filter-return
-              (lambda (files)
-                (seq-filter (lambda (file) (string-suffix-p ".org" file))
-                            files))))
-#+end_src
-
-***** Keybindings
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(after! denote
-  (map! :leader
-        (:prefix-map ("d" . "denote")
-         :desc "Publish current" "p" #'denote-blog-publish
-         :desc "Publish all blogs" "P" #'denote-blog-publish-all)))
+                   (:prefix ("g" . "git")
+                    :desc "Sync notes" "s" #'denote-git-sync
+                    :desc "Toggle auto-sync" "t" #'denote-git-toggle-auto-sync)))
 #+end_src
 
 **** Completion Formatting
@@ -7024,6 +6708,649 @@ It would show up something like this instead:
 ;; Apply the override
 (advice-add 'denote-file-prompt :override #'my-denote-file-prompt)
 #+end_src
+**** Publishing
+***** Load Build Configuration
+Load the denote site build configuration when ox-publish is available.
+All publish settings are centralized in ~/denote/.site/build.el.
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! ox-publish
+  (let ((build-file (expand-file-name "~/denote/.site/build.el")))
+    (when (file-exists-p build-file)
+      (load-file build-file))))
+#+end_src
+***** Local Testing Server
+#+begin_src elisp :tangle packages/doom/.config/doom/packages.el
+(package! simple-httpd)
+#+end_src
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq httpd-root "~/denote/.site/public")
+#+end_src
+
+**** Hugo Publishing (ox-hugo)
+Configuration for publishing Denote notes to Hugo using ox-hugo.
+
+***** Package
+#+begin_src elisp :tangle packages/doom/.config/doom/packages.el
+(package! ox-hugo)
+#+end_src
+
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package! ox-hugo
+  :after ox)
+#+end_src
+
+***** Update Index Function
+Function to update only the dynamic sections of index.org while preserving manual content.
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun denote-hugo-update-index ()
+  "Update dynamic sections of index.org (stats, random note, recent notes)."
+  (interactive)
+  (let* ((denote-dir (expand-file-name denote-directory))
+         (index-file (expand-file-name "index.org" denote-dir))
+         (files (directory-files denote-dir t "\\.org$"))
+         ;; Filter publishable files (exclude index.org, all-notes.org, search.org, private)
+         (publishable-files
+          (seq-filter
+           (lambda (f)
+             (and (string-match-p "^[0-9]\\{8\\}T[0-9]\\{6\\}" (file-name-nondirectory f))
+                  (not (with-temp-buffer
+                         (insert-file-contents f)
+                         (goto-char (point-min))
+                         (re-search-forward "^#\\+filetags:.*:private:" nil t)))))
+           files))
+         ;; Sort by modification time, newest first
+         (sorted-files (sort publishable-files
+                            (lambda (a b)
+                              (time-less-p (file-attribute-modification-time (file-attributes b))
+                                          (file-attribute-modification-time (file-attributes a))))))
+         ;; Get recent files (limit to 5)
+         (recent-files (seq-take sorted-files 5))
+         ;; Calculate statistics
+         (total-notes (length publishable-files))
+         (total-connections
+          (let ((count 0))
+            (dolist (file publishable-files)
+              (with-temp-buffer
+                (insert-file-contents file)
+                (goto-char (point-min))
+                (while (re-search-forward "\\[\\[denote:" nil t)
+                  (setq count (1+ count)))))
+            count))
+         ;; Random note
+         (random-note (when publishable-files
+                       (nth (random (length publishable-files)) publishable-files))))
+
+    ;; Read current index.org content
+    (with-temp-buffer
+      (insert-file-contents index-file)
+      (let ((content (buffer-string)))
+
+        ;; Update Statistics section
+        (setq content
+              (replace-regexp-in-string
+               "<!-- AUTO_GENERATED_START:STATS -->\\(.*?\\)<!-- AUTO_GENERATED_END:STATS -->"
+               (concat "<!-- AUTO_GENERATED_START:STATS -->\n"
+                      (format "*%d* notes • *%d* connections\n" total-notes total-connections)
+                      "<!-- AUTO_GENERATED_END:STATS -->")
+               content nil nil 1))
+
+        ;; Update Random Note section
+        (setq content
+              (replace-regexp-in-string
+               "<!-- AUTO_GENERATED_START:RANDOM -->\\(.*?\\)<!-- AUTO_GENERATED_END:RANDOM -->"
+               (concat "<!-- AUTO_GENERATED_START:RANDOM -->\n"
+                      (if random-note
+                          (let* ((filename (file-name-nondirectory random-note))
+                                 (title
+                                  (with-temp-buffer
+                                    (insert-file-contents random-note)
+                                    (goto-char (point-min))
+                                    (if (re-search-forward "^#\\+title: \\(.*\\)$" nil t)
+                                        (match-string 1)
+                                      "Untitled"))))
+                            (format "** Random Note\n[[file:%s][%s]]\n" filename title))
+                        "")
+                      "<!-- AUTO_GENERATED_END:RANDOM -->")
+               content nil nil 1))
+
+        ;; Update Recent Notes section
+        (setq content
+              (replace-regexp-in-string
+               "<!-- AUTO_GENERATED_START:RECENT -->\\(.*?\\)<!-- AUTO_GENERATED_END:RECENT -->"
+               (concat "<!-- AUTO_GENERATED_START:RECENT -->\n"
+                      "** Recent Notes\n"
+                      (mapconcat
+                       (lambda (file)
+                         (let* ((filename (file-name-nondirectory file))
+                                (title
+                                 (with-temp-buffer
+                                   (insert-file-contents file)
+                                   (goto-char (point-min))
+                                   (if (re-search-forward "^#\\+title: \\(.*\\)$" nil t)
+                                       (match-string 1)
+                                     "Untitled")))
+                                (tags
+                                 (with-temp-buffer
+                                   (insert-file-contents file)
+                                   (goto-char (point-min))
+                                   (if (re-search-forward "^#\\+filetags: \\(.*\\)$" nil t)
+                                       (match-string 1)
+                                     ""))))
+                           (format "- [[file:%s][%s]] %s" filename title tags)))
+                       recent-files
+                       "\n")
+                      "\n<!-- AUTO_GENERATED_END:RECENT -->")
+               content nil nil 1))
+
+        ;; Write back to file
+        (with-temp-file index-file
+          (insert content))))
+
+    (message "Index updated: %d notes, %d connections" total-notes total-connections)))
+#+end_src
+
+***** Ensure Hugo Metadata
+Helper function to ensure Hugo metadata exists and is CAPITALIZED before export.
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun denote-hugo--ensure-metadata ()
+  "Ensure Hugo metadata exists and is properly CAPITALIZED for ox-hugo.
+Adds missing metadata, fixes lowercase to uppercase, and saves the buffer."
+  (save-excursion
+    ;; Remove any lowercase Hugo keyword variants
+    (goto-char (point-min))
+    (while (re-search-forward "^#\\+hugo_\\(base_dir\\|section\\|date\\|tags\\|draft\\):" nil t)
+      (let ((key (match-string 1))
+            (line-start (line-beginning-position))
+            (line-end (line-end-position)))
+        ;; Get the value
+        (goto-char line-start)
+        (when (re-search-forward "^#\\+hugo_[^:]+:[ \t]*\\(.*\\)$" line-end t)
+          (let ((value (match-string 1)))
+            ;; Delete the lowercase line
+            (delete-region line-start (1+ line-end))
+            ;; We'll add uppercase version below
+            ))))
+
+    ;; Now ensure UPPERCASE metadata exists
+    (goto-char (point-min))
+    (unless (re-search-forward "^#\\+HUGO_BASE_DIR:" nil t)
+      (goto-char (point-min))
+      (when (re-search-forward "^#\\+identifier:" nil t)
+        (forward-line 1)
+        (insert "#+HUGO_BASE_DIR: ~/denote/blog\n")))
+
+    (goto-char (point-min))
+    (unless (re-search-forward "^#\\+HUGO_SECTION:" nil t)
+      (goto-char (point-min))
+      (when (re-search-forward "^#\\+HUGO_BASE_DIR:" nil t)
+        (forward-line 1)
+        (insert "#+HUGO_SECTION: ./\n")))
+
+    (goto-char (point-min))
+    (unless (re-search-forward "^#\\+HUGO_DRAFT:" nil t)
+      (goto-char (point-min))
+      (when (re-search-forward "^#\\+HUGO_SECTION:" nil t)
+        (end-of-line)
+        (insert "\n#+HUGO_DRAFT: false")))
+
+    ;; Add/update HUGO_DATE
+    (let ((date (save-excursion
+                  (goto-char (point-min))
+                  (when (re-search-forward "^#\\+date:[ \t]+\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)" nil t)
+                    (match-string-no-properties 1)))))
+      (when date
+        (goto-char (point-min))
+        (if (re-search-forward "^#\\+HUGO_DATE:" nil t)
+            (progn
+              (beginning-of-line)
+              (kill-line)
+              (insert (format "#+HUGO_DATE: %s" date)))
+          (goto-char (point-min))
+          (when (re-search-forward "^#\\+HUGO_DRAFT:" nil t)
+            (end-of-line)
+            (insert (format "\n#+HUGO_DATE: %s" date))))))
+
+    ;; Add/update HUGO_TAGS
+    (let ((tags (save-excursion
+                  (goto-char (point-min))
+                  (when (re-search-forward "^#\\+filetags:[ \t]+\\(.*\\)$" nil t)
+                    (let ((filetags (match-string-no-properties 1)))
+                      (string-join
+                       (split-string (string-trim filetags) ":" t)
+                       " "))))))
+      (when tags
+        (goto-char (point-min))
+        (if (re-search-forward "^#\\+HUGO_TAGS:" nil t)
+            (progn
+              (beginning-of-line)
+              (kill-line)
+              (insert (format "#+HUGO_TAGS: %s" tags)))
+          (goto-char (point-min))
+          (when (re-search-forward "^#\\+HUGO_DATE:" nil t)
+            (end-of-line)
+            (insert (format "\n#+HUGO_TAGS: %s" tags)))))))
+
+  ;; Save if modified
+  (when (buffer-modified-p)
+    (save-buffer)))
+#+end_src
+
+***** Export Functions
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun denote-hugo-export-current ()
+  "Export current Denote note to Hugo markdown.
+Ensures Hugo metadata exists and is properly formatted before export."
+  (interactive)
+  (when (and buffer-file-name
+             (string-prefix-p (expand-file-name denote-directory) buffer-file-name))
+    ;; Ensure metadata is correct before exporting
+    (denote-hugo--ensure-metadata)
+    (org-hugo-export-to-md)))
+
+(defun denote-hugo-export-all ()
+  "Export all Denote notes to Hugo markdown.
+Ensures Hugo metadata exists for all notes before export."
+  (interactive)
+  (let* ((denote-dir (expand-file-name denote-directory))
+         (files (directory-files denote-dir t "\\.org$"))
+         (index-file (expand-file-name "index.org" denote-dir))
+         (publishable-files
+          (seq-filter
+           (lambda (f)
+             (and (string-match-p "^[0-9]\\{8\\}T[0-9]\\{6\\}" (file-name-nondirectory f))
+                  (not (member (file-name-nondirectory f) '("index.org" "all-notes.org" "search.org")))
+                  (not (with-temp-buffer
+                         (insert-file-contents f)
+                         (goto-char (point-min))
+                         (re-search-forward "^#\\+filetags:.*:private:" nil t)))))
+           files)))
+
+    ;; Export all regular notes
+    (dolist (file publishable-files)
+      (with-current-buffer (find-file-noselect file)
+        (denote-hugo--ensure-metadata)
+        (org-hugo-export-to-md)
+        (kill-buffer)))
+
+    ;; Export index.org to _index.md (homepage)
+    (when (file-exists-p index-file)
+      (with-current-buffer (find-file-noselect index-file)
+        (org-hugo-export-to-md)
+        (kill-buffer)))
+
+    (message "Exported %d notes + homepage to Hugo" (length publishable-files))))
+#+end_src
+
+***** Keybindings
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(map! :leader
+      (:prefix ("d" . "denote")
+       ;; Publishing commands
+       :desc "Publish (one-command)" "p" #'denote-hugo-publish-all
+       :desc "Export current note" "P" #'denote-hugo-export-current
+       :desc "Update index" "u" #'denote-hugo-update-index
+       :desc "Sync metadata" "m" #'denote-hugo--sync-metadata
+       :desc "Toggle auto-export" "a" #'denote-hugo-toggle-auto-export))
+#+end_src
+
+**** Digital Garden Publishing
+Configuration for automatic Hugo publishing with minimal friction.
+
+**Work in Public Philosophy**:
+- ALL notes are published by default (including drafts, WIP, incomplete thoughts)
+- NO gatekeeping, NO "ready to publish" gates
+- ONLY exclusion: :private: tag for truly personal notes
+- Embrace imperfection: rough notes are valuable and publishable
+- Share the process, not just the finished product
+
+This configuration ensures zero friction between writing and publishing.
+
+***** Auto-add Hugo Metadata on Save
+Automatically add Hugo front matter on first save (lets Denote generate its metadata first).
+Note: This is now handled by denote-hugo--ensure-metadata which is called during export.
+We keep a simpler version here just to add basic metadata on save.
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun denote-hugo--add-front-matter ()
+  "Add basic Hugo front matter to current Denote note if missing."
+  (when (and buffer-file-name
+             (string-prefix-p (expand-file-name denote-directory) buffer-file-name)
+             (string-match-p "^[0-9]\\{8\\}T[0-9]\\{6\\}" (file-name-nondirectory buffer-file-name)))
+    (save-excursion
+      (goto-char (point-min))
+      ;; Only add if Hugo metadata doesn't exist (check UPPERCASE)
+      (unless (re-search-forward "^#\\+HUGO_BASE_DIR:" nil t)
+        (goto-char (point-min))
+        ;; Find the end of existing Denote metadata
+        (when (re-search-forward "^#\\+identifier:" nil t)
+          (forward-line 1)
+          ;; Insert Hugo metadata (CAPITALIZED for ox-hugo compatibility)
+          (let* ((date (save-excursion
+                        (goto-char (point-min))
+                        (when (re-search-forward "^#\\+date:[ \t]+\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)" nil t)
+                          (match-string-no-properties 1))))
+                 (tags (save-excursion
+                        (goto-char (point-min))
+                        (when (re-search-forward "^#\\+filetags:[ \t]+\\(.*\\)$" nil t)
+                          (let ((filetags (match-string-no-properties 1)))
+                            ;; Convert :tag1:tag2: to space-separated list
+                            (string-join
+                             (split-string (string-trim filetags) ":" t)
+                             " "))))))
+            (insert "#+HUGO_BASE_DIR: ~/denote/blog\n")
+            (insert "#+HUGO_SECTION: ./\n")
+            (insert "#+HUGO_DRAFT: false\n")
+            (when date
+              (insert (format "#+HUGO_DATE: %s\n" date)))
+            (when tags
+              (insert (format "#+HUGO_TAGS: %s\n" tags)))))))))
+
+;; Hook to add Hugo metadata before saving (if missing)
+(defun denote-hugo--add-metadata-before-save ()
+  "Add Hugo metadata before save if it's missing."
+  (denote-hugo--add-front-matter))
+
+(add-hook 'before-save-hook #'denote-hugo--add-metadata-before-save)
+#+end_src
+
+***** Sync Hugo Metadata on Rename
+Automatically sync Hugo metadata when Denote metadata changes.
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun denote-hugo--sync-metadata ()
+  "Sync Hugo metadata with Denote metadata in current buffer."
+  (interactive)
+  (when (and buffer-file-name
+             (string-prefix-p (expand-file-name denote-directory) buffer-file-name))
+    (save-excursion
+      (let* ((title (save-excursion
+                     (goto-char (point-min))
+                     (when (re-search-forward "^#\\+title:[ \t]+\\(.*\\)$" nil t)
+                       (match-string-no-properties 1))))
+             (date (save-excursion
+                    (goto-char (point-min))
+                    (when (re-search-forward "^#\\+date:[ \t]+\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)" nil t)
+                      (match-string-no-properties 1))))
+             (tags (save-excursion
+                    (goto-char (point-min))
+                    (when (re-search-forward "^#\\+filetags:[ \t]+\\(.*\\)$" nil t)
+                      (let ((filetags (match-string-no-properties 1)))
+                        ;; Convert :tag1:tag2: to space-separated list
+                        (string-join
+                         (split-string (string-trim filetags) ":" t)
+                         " "))))))
+
+        ;; Update HUGO_DATE (capitalized for ox-hugo)
+        (when date
+          (goto-char (point-min))
+          (if (re-search-forward "^#\\+HUGO_DATE:.*$" nil t)
+              (replace-match (format "#+HUGO_DATE: %s" date))
+            ;; Add if missing
+            (goto-char (point-min))
+            (when (re-search-forward "^#\\+HUGO_BASE_DIR:" nil t)
+              (forward-line 2)
+              (insert (format "#+HUGO_DATE: %s\n" date)))))
+
+        ;; Update HUGO_TAGS (capitalized for ox-hugo)
+        (when tags
+          (goto-char (point-min))
+          (if (re-search-forward "^#\\+HUGO_TAGS:.*$" nil t)
+              (replace-match (format "#+HUGO_TAGS: %s" tags))
+            ;; Add if missing
+            (goto-char (point-min))
+            (when (re-search-forward "^#\\+HUGO_DATE:" nil t)
+              (forward-line 1)
+              (insert (format "#+HUGO_TAGS: %s\n" tags)))))))))
+
+;; Hook to sync metadata after Denote rename operations
+(add-hook 'denote-after-rename-file-hook #'denote-hugo--sync-metadata)
+#+end_src
+
+***** Auto-Export on Save (Optional)
+Toggle automatic export to Hugo on every save.
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defvar denote-hugo-auto-export-on-save nil
+  "When non-nil, automatically export to Hugo on save.")
+
+(defun denote-hugo--maybe-export ()
+  "Export current note to Hugo if auto-export is enabled."
+  (when (and denote-hugo-auto-export-on-save
+             buffer-file-name
+             (string-prefix-p (expand-file-name denote-directory) buffer-file-name)
+             (string-match-p "^[0-9]\\{8\\}T[0-9]\\{6\\}" (file-name-nondirectory buffer-file-name)))
+    (denote-hugo-export-current)))
+
+(defun denote-hugo-toggle-auto-export ()
+  "Toggle automatic export to Hugo on save."
+  (interactive)
+  (setq denote-hugo-auto-export-on-save (not denote-hugo-auto-export-on-save))
+  (if denote-hugo-auto-export-on-save
+      (progn
+        (add-hook 'after-save-hook #'denote-hugo--maybe-export nil t)
+        (message "✓ Auto-export enabled: notes will export to Hugo on save"))
+    (progn
+      (remove-hook 'after-save-hook #'denote-hugo--maybe-export t)
+      (message "✗ Auto-export disabled"))))
+#+end_src
+
+***** One-Command Publish
+Single command to update index and export all notes.
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun denote-hugo-publish-all ()
+  "One-command publish: sync all metadata, update index, export all to Hugo."
+  (interactive)
+  (message "Publishing all notes...")
+
+  ;; Step 1: Sync metadata for all notes
+  (let* ((denote-dir (expand-file-name denote-directory))
+         (files (directory-files denote-dir t "^[0-9]\\{8\\}T[0-9]\\{6\\}.*\\.org$"))
+         (count 0))
+
+    (dolist (file files)
+      (with-current-buffer (find-file-noselect file)
+        (denote-hugo--sync-metadata)
+        (when (buffer-modified-p)
+          (save-buffer))
+        (kill-buffer))
+      (setq count (1+ count)))
+
+    (message "Synced metadata for %d notes..." count))
+
+  ;; Step 2: Update index
+  (denote-hugo-update-index)
+  (message "Updated index.org...")
+
+  ;; Step 3: Export all to Hugo
+  (denote-hugo-export-all)
+  (message "✓ Published all notes to Hugo!"))
+#+end_src
+
+*** Wiki
+Experimental digital garden setup using built-in Org mode + org-id for unbreakable links.
+Separate from Denote workflow, focused on working in public with Hugo + Little Ocean theme.
+
+**** org-id Setup
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; org-id: Unbreakable links using unique IDs
+(after! org
+  ;; Auto-create IDs for all headings when storing link
+  (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+
+  ;; Store IDs in the note file itself (not separate database)
+  (setq org-id-track-globally t)
+  (setq org-id-locations-file (expand-file-name ".org-id-locations" org-directory))
+
+  ;; ID format: timestamp-based for sortability
+  (setq org-id-method 'ts)
+
+  ;; Update ID locations on startup
+  (org-id-update-id-locations))
+#+end_src
+
+**** Consult Integration
+***** Find/Create Notes with Preview
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Find or create wiki notes with consult preview
+(defun wiki/find-note ()
+  "Find or create a wiki note with live preview."
+  (interactive)
+  (let* ((default-directory org-directory)
+         (files (directory-files org-directory nil "\\.org$"))
+         (choice (consult--read
+                  files
+                  :prompt "Wiki note: "
+                  :category 'file
+                  :state (consult--file-preview)
+                  :require-match nil)))
+    (if (member choice files)
+        (find-file (expand-file-name choice org-directory))
+      ;; Create new note
+      (let ((new-file (if (string-suffix-p ".org" choice)
+                          choice
+                        (concat choice ".org"))))
+        (find-file (expand-file-name new-file org-directory))
+        (when (= (buffer-size) 0)
+          (insert (format "#+title: %s\n#+date: [%s]\n\n"
+                         (file-name-sans-extension new-file)
+                         (format-time-string "%Y-%m-%d %a %H:%M")))
+          (org-id-get-create))))))
+#+end_src
+
+***** Search Notes
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Search wiki notes with consult-ripgrep
+(defun wiki/search ()
+  "Search all wiki notes with live preview."
+  (interactive)
+  (consult-ripgrep org-directory))
+#+end_src
+
+**** ID-based Linking
+***** Insert File Link
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Insert ID-based link to file
+(defun wiki/insert-link ()
+  "Insert an org-id link to a file or heading."
+  (interactive)
+  (let* ((default-directory org-directory)
+         (file (consult--read
+                (directory-files org-directory nil "\\.org$")
+                :prompt "Link to file: "
+                :category 'file
+                :state (consult--file-preview))))
+    (with-current-buffer (find-file-noselect (expand-file-name file org-directory))
+      (let ((id (org-id-get-create)))
+        (org-store-link nil)
+        (org-insert-link)))))
+#+end_src
+
+***** Insert Heading Link
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Insert ID-based link to heading
+(defun wiki/insert-heading-link ()
+  "Insert an org-id link to a specific heading."
+  (interactive)
+  (org-id-goto)
+  (org-store-link nil)
+  (other-window -1)
+  (org-insert-link))
+#+end_src
+
+**** Backlinks
+***** Show Backlinks
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Find backlinks to current note by searching for its ID
+(defun wiki/backlinks ()
+  "Show all notes that link to the current note."
+  (interactive)
+  (let ((id (org-id-get)))
+    (if id
+        (progn
+          (consult-ripgrep org-directory (regexp-quote id)))
+      (message "No ID found for current entry. Create one with org-id-get-create."))))
+#+end_src
+
+**** ox-hugo Link Export
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Export org-id links to Hugo-compatible relative links
+(after! ox-hugo
+  (defun org-hugo-link--org-id-to-path (link)
+    "Convert org-id LINK to Hugo-compatible path."
+    (let* ((id (org-element-property :path link))
+           (file (org-id-find-id-file id)))
+      (when file
+        (let* ((basename (file-name-sans-extension (file-name-nondirectory file)))
+               (title (with-current-buffer (find-file-noselect file)
+                        (or (org-get-title) basename))))
+          (cons (format "/notes/%s" basename) title)))))
+
+  ;; Hook into ox-hugo link export
+  (defun wiki/ox-hugo-link (link desc info)
+    "Export org-id links for Hugo."
+    (let ((type (org-element-property :type link)))
+      (when (string= type "id")
+        (let ((path-title (org-hugo-link--org-id-to-path link)))
+          (when path-title
+            (format "[%s](%s)" (or desc (cdr path-title)) (car path-title)))))))
+
+  (advice-add 'org-hugo-link :before-until #'wiki/ox-hugo-link))
+#+end_src
+
+**** Auto-commit and Sync
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Auto-commit wiki changes on save
+(defvar wiki/auto-sync-enabled nil
+  "Enable auto-commit and push for wiki notes.")
+
+(defun wiki/git-sync ()
+  "Commit and push wiki changes."
+  (interactive)
+  (let ((default-directory org-directory))
+    (when (file-directory-p ".git")
+      (async-shell-command
+       (format "cd '%s' && git add -A && git commit -m 'Update: %s' && git push"
+               org-directory
+               (format-time-string "%Y-%m-%d %H:%M:%S"))
+       "*wiki-git-sync*"))))
+
+(defun wiki/auto-sync-on-save ()
+  "Auto-sync wiki after saving if in wiki directory."
+  (when (and wiki/auto-sync-enabled
+             buffer-file-name
+             (string-prefix-p (expand-file-name org-directory) buffer-file-name)
+             (string-suffix-p ".org" buffer-file-name))
+    (wiki/git-sync)))
+
+(defun wiki/toggle-auto-sync ()
+  "Toggle auto-sync for wiki notes."
+  (interactive)
+  (setq wiki/auto-sync-enabled (not wiki/auto-sync-enabled))
+  (if wiki/auto-sync-enabled
+      (progn
+        (add-hook 'after-save-hook #'wiki/auto-sync-on-save)
+        (message "✓ Wiki auto-sync enabled"))
+    (progn
+      (remove-hook 'after-save-hook #'wiki/auto-sync-on-save)
+      (message "✗ Wiki auto-sync disabled"))))
+#+end_src
+
+**** Keybindings
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Wiki commands under SPC W prefix (capital W to avoid window command conflict)
+(map! :leader
+      (:prefix-map ("W" . "wiki")
+       :desc "Find/create note" "f" #'wiki/find-note
+       :desc "Search notes" "s" #'wiki/search
+       :desc "Insert link" "l" #'wiki/insert-link
+       :desc "Insert heading link" "h" #'wiki/insert-heading-link
+       :desc "Show backlinks" "b" #'wiki/backlinks
+       :desc "Create ID" "i" #'org-id-get-create
+       :desc "Go to ID" "g" #'org-id-goto
+       :desc "Git sync" "p" #'wiki/git-sync
+       :desc "Toggle auto-sync" "a" #'wiki/toggle-auto-sync))
+#+end_src
 
 *** Projectile
 **** Add Projects
@@ -7048,8 +7375,8 @@ It would show up something like this instead:
 ***** Key Binds
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (map! :leader :desc "Claude Code" "e" #'claude-code-transient)
-      ;; (:prefix-map ("e" . "Claude")
-      ;;  :desc "Start" "e" #'claude-code-transient))
+;; (:prefix-map ("e" . "Claude")
+;;  :desc "Start" "e" #'claude-code-transient))
 #+end_src
 *** Pulsar
 Pulse highlight line on demand or after running select functions
@@ -7102,3 +7429,16 @@ Pulse highlight line on demand or after running select functions
   (add-hook 'consult-after-jump-hook #'pulsar-recenter-top)
   (add-hook 'consult-after-jump-hook #'pulsar-reveal-entry))
 #+end_src
+*** Mason
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package mason
+  :ensure t
+  :config
+  (mason-ensure)
+  ;; or
+  :hook
+  (after-init-hook . mason-ensure))
+#+end_src
+
+
