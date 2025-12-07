@@ -6036,10 +6036,6 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
-
-;; Suppress byte-compile warnings from third-party packages
-;; This silences warnings about old code style in ox-hugo and other packages
-(setq byte-compile-warnings nil)
 #+end_src
 
 *** User Information
@@ -7185,10 +7181,10 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
   (setq org-id-locations-file (expand-file-name ".org-id-locations" org-directory))
 
   ;; ID format: timestamp-based for sortability
-  (setq org-id-method 'ts)
+  (setq org-id-method 'ts))
 
-  ;; Update ID locations on startup
-  (org-id-update-id-locations))
+;; Note: org-id-update-id-locations is slow - only run manually when needed
+;; Run M-x org-id-update-id-locations if links stop working
 #+end_src
 
 **** Consult Integration
