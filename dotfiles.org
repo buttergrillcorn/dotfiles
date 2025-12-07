@@ -7256,30 +7256,43 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 
 ***** Insert Heading Link
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Insert ID-based link to heading across all wiki files
 (defun wiki/insert-heading-link ()
-  "Insert an org-id link to a heading across all wiki files. Uses selected text as link description if region is active."
+  "Use Consult to select a heading across all Org files in `org-directory`.
+Insert an org-id link to the selected heading.
+If region is active, its text becomes the link description."
   (interactive)
   (let* ((default-directory org-directory)
+         ;; All .org files in your notes directory
+         (org-files (directory-files-recursively org-directory "\\.org$"))
+         ;; Live preview heading selector
+         (marker (consult-org-heading "Select heading: " org-files))
+         (origin-buffer (current-buffer))
+         (origin-pos (point))
          (description (when (use-region-p)
-                        (buffer-substring-no-properties (region-beginning) (region-end))))
-         ;; Get all org files and open them in background
-         (org-files (directory-files org-directory t "\\.org$"))
-         (buffers (mapcar #'find-file-noselect org-files))
-         ;; Collect all headings from all buffers
-         (heading-marker (consult-org-heading nil buffers))
-         (id (save-excursion
-               (with-current-buffer (marker-buffer heading-marker)
-                 (goto-char (marker-position heading-marker))
-                 (org-id-get-create))))
-         (title (or description
-                    (save-excursion
-                      (with-current-buffer (marker-buffer heading-marker)
-                        (goto-char (marker-position heading-marker))
-                        (org-get-heading t t t t))))))
-    (when (use-region-p)
-      (delete-region (region-beginning) (region-end)))
-    (insert (format "[[id:%s][%s]]" id title))))
+                        (buffer-substring-no-properties
+                         (region-beginning) (region-end))))
+         id heading-text)
+
+    ;; Jump to heading to get ID, but do not disturb window layout
+    (save-window-excursion
+      (switch-to-buffer (marker-buffer marker))
+      (goto-char marker)
+      (org-back-to-heading t)
+
+      ;; Ensure the heading has an ID
+      (setq id (org-id-get-create))
+
+      ;; Get clean heading text for default description
+      (setq heading-text (org-get-heading t t t t)))
+
+    ;; Return to original buffer and insert link
+    (with-current-buffer origin-buffer
+      (goto-char origin-pos)
+      (when (use-region-p)
+        (delete-region (region-beginning) (region-end)))
+      (insert (format "[[id:%s][%s]]"
+                      id
+                      (or description heading-text))))))
 #+end_src
 
 **** Backlinks
