@@ -6036,6 +6036,9 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
+
+;; Suppress byte-compile warnings from third-party packages
+(setq byte-compile-warnings '(not obsolete))
 #+end_src
 
 *** User Information
@@ -7300,18 +7303,19 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 **** Auto-commit and Sync
 ***** Configuration
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Auto-commit wiki changes on save
-(defvar wiki/auto-sync-enabled nil
+;; Auto-commit wiki changes on save (enabled by default)
+(defvar wiki/auto-sync-enabled t
   "Enable auto-commit and push for wiki notes.")
 
 (defun wiki/git-sync ()
   "Commit and push wiki changes."
   (interactive)
-  (let ((default-directory org-directory))
+  (let* ((wiki-dir (expand-file-name org-directory))
+         (default-directory wiki-dir))
     (when (file-directory-p ".git")
       (async-shell-command
        (format "cd '%s' && git add -A && git commit -m 'Update: %s' && git push"
-               org-directory
+               wiki-dir
                (format-time-string "%Y-%m-%d %H:%M:%S"))
        "*wiki-git-sync*"))))
 
@@ -7334,6 +7338,9 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
     (progn
       (remove-hook 'after-save-hook #'wiki/auto-sync-on-save)
       (message "✗ Wiki auto-sync disabled"))))
+
+;; Enable auto-sync by default
+(add-hook 'after-save-hook #'wiki/auto-sync-on-save)
 #+end_src
 
 **** Keybindings
