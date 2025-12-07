@@ -7263,10 +7263,12 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
   (let* ((default-directory org-directory)
          (description (when (use-region-p)
                         (buffer-substring-no-properties (region-beginning) (region-end))))
-         ;; Open all org files in background so consult-org-heading can search them
+         ;; Temporarily add all wiki files to agenda so consult-org-heading searches them
          (org-files (directory-files org-directory t "\\.org$"))
-         (buffers (mapcar #'find-file-noselect org-files))
-         (marker (consult-org-heading))
+         (org-agenda-files org-files)
+         ;; Use prefix arg to search agenda files (C-u C-u behavior)
+         (current-prefix-arg '(16))
+         (marker (call-interactively #'consult-org-heading))
          (id (save-excursion
                (with-current-buffer (marker-buffer marker)
                  (goto-char (marker-position marker))
