@@ -7317,18 +7317,23 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 **** File-level IDs
 ***** Add File ID
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Add org-id to first heading of file
+;; Add org-id to current or first heading
 (defun wiki/add-file-id ()
-  "Add org-id to the first heading in the file."
+  "Add org-id to current heading, or first heading if not on one."
   (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    ;; Find first heading
-    (if (re-search-forward "^\\* " nil t)
-        (progn
-          (beginning-of-line)
-          (org-id-get-create))
-      (message "No heading found. Create a heading first."))))
+  (cond
+   ;; If on a heading, add ID here
+   ((org-at-heading-p)
+    (org-id-get-create))
+   ;; Otherwise, find first heading and add ID there
+   (t
+    (save-excursion
+      (goto-char (point-min))
+      (if (re-search-forward "^\\* " nil t)
+          (progn
+            (beginning-of-line)
+            (org-id-get-create))
+        (message "No heading found. Create a heading first."))))))
 #+end_src
 
 **** ox-hugo Link Export
