@@ -7394,7 +7394,7 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
               ;; Actual error
               (t
                (message "✗ Wiki sync failed - see *wiki-git-sync* buffer")
-               (display-buffer "*wiki-git-sync*"))))))))))))
+               (display-buffer "*wiki-git-sync*"))))))))))
 
 (defun wiki/auto-sync-on-save ()
   "Auto-sync wiki after saving if in wiki directory."
