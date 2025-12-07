@@ -7257,23 +7257,35 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 ***** Insert Heading Link
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (defun wiki/insert-heading-link ()
-  "Insert an org-id link to a heading across all wiki files using ripgrep. Uses selected text as link description if region is active."
+  "Insert an org-id link to a heading across all wiki files. Uses selected text as link description if region is active."
   (interactive)
   (let* ((default-directory org-directory)
          (description (when (use-region-p)
                         (buffer-substring-no-properties (region-beginning) (region-end))))
-         ;; Use consult-ripgrep with initial pattern to find org headings
-         (consult-ripgrep-args (concat consult-ripgrep-args " --max-depth=1 -g '*.org'"))
-         (selected (consult-ripgrep org-directory "^\\* "))
-         ;; Parse the selected result (format: "file:line:content")
-         (parts (and selected (split-string selected ":")))
-         (file (and parts (expand-file-name (car parts) org-directory)))
-         (line (and parts (string-to-number (cadr parts))))
+         ;; Collect all headings from all org files
+         (headings
+          (let ((result nil))
+            (dolist (file (directory-files org-directory t "\\.org$"))
+              (with-current-buffer (find-file-noselect file)
+                (save-excursion
+                  (goto-char (point-min))
+                  (while (re-search-forward org-outline-regexp nil t)
+                    (let* ((heading (org-get-heading t t t t))
+                           (file-name (file-name-nondirectory buffer-file-name))
+                           (line (line-number-at-pos))
+                           (display (format "%-40s [%s:%d]" heading file-name line)))
+                      (push (list display file line) result))))))
+            (nreverse result)))
+         ;; Prompt user to select a heading
+         (selection (completing-read "Heading: " headings nil t))
+         (selected-data (assoc selection headings))
+         (file (nth 1 selected-data))
+         (line (nth 2 selected-data))
          (id nil)
          (title nil))
 
     (when file
-      ;; Jump to the heading and get/create ID
+      ;; Navigate to heading and get/create ID
       (save-excursion
         (with-current-buffer (find-file-noselect file)
           (goto-char (point-min))
