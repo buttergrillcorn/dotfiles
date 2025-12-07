@@ -6038,7 +6038,8 @@ Extensible text editor and integrated development environment built on Emacs.
 ;; sync' after modifying this file!
 
 ;; Suppress byte-compile warnings from third-party packages
-(setq byte-compile-warnings '(not obsolete))
+;; This silences warnings about old code style in ox-hugo and other packages
+(setq byte-compile-warnings nil)
 #+end_src
 
 *** User Information
