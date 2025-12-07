@@ -5777,7 +5777,6 @@ Extensible text editor and integrated development environment built on Emacs.
        ;;  +icons
        ;;  +childframe)
        (vertico           ; the search engine of the future
-        +childframe
         +icons)
 
        :ui
@@ -5795,7 +5794,7 @@ Extensible text editor and integrated development environment built on Emacs.
        nav-flash         ; blink cursor line after big motions
        ;; neotree           ; a project drawer, like NERDTree for vim
        ophints           ; highlight the region an operation acts on
-       (popup +all)   ; tame sudden yet inevitable temporary windows
+       popup   ; tame sudden yet inevitable temporary windows
        ;; tabs              ; a tab bar for Emacs
        (treemacs          ; a project drawer, like neotree but cooler
         +lsp)
@@ -5841,7 +5840,6 @@ Extensible text editor and integrated development environment built on Emacs.
 
        :checkers
        (syntax              ; tasing you for every semicolon you forget
-        +childframe
         +flymake
         +icons)
        (spell +aspell) ; tasing you for misspelling mispelling
@@ -7213,7 +7211,7 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
           (insert (format "#+title: %s\n#+date: [%s]\n\n"
                          (file-name-sans-extension new-file)
                          (format-time-string "%Y-%m-%d %a %H:%M")))
-          (org-id-get-create))))))
+          (wiki/add-file-id))))))
 #+end_src
 
 ***** Search Notes
@@ -7230,30 +7228,41 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Insert ID-based link to file
 (defun wiki/insert-link ()
-  "Insert an org-id link to a file or heading."
+  "Insert an org-id link to a file."
   (interactive)
   (let* ((default-directory org-directory)
          (file (consult--read
                 (directory-files org-directory nil "\\.org$")
                 :prompt "Link to file: "
                 :category 'file
-                :state (consult--file-preview))))
-    (with-current-buffer (find-file-noselect (expand-file-name file org-directory))
-      (let ((id (org-id-get-create)))
-        (org-store-link nil)
-        (org-insert-link)))))
+                :state (consult--file-preview)))
+         (full-path (expand-file-name file org-directory))
+         (id (with-current-buffer (find-file-noselect full-path)
+               (save-excursion
+                 (goto-char (point-min))
+                 (org-id-get-create))))
+         (title (with-current-buffer (find-file-noselect full-path)
+                  (or (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
+                      (file-name-sans-extension file)))))
+    (insert (format "[[id:%s][%s]]" id title))))
 #+end_src
 
 ***** Insert Heading Link
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Insert ID-based link to heading
 (defun wiki/insert-heading-link ()
-  "Insert an org-id link to a specific heading."
+  "Insert an org-id link to a specific heading with consult."
   (interactive)
-  (org-id-goto)
-  (org-store-link nil)
-  (other-window -1)
-  (org-insert-link))
+  (let* ((marker (consult-org-heading))
+         (id (save-excursion
+               (with-current-buffer (marker-buffer marker)
+                 (goto-char (marker-position marker))
+                 (org-id-get-create))))
+         (title (save-excursion
+                  (with-current-buffer (marker-buffer marker)
+                    (goto-char (marker-position marker))
+                    (org-get-heading t t t t)))))
+    (insert (format "[[id:%s][%s]]" id title))))
 #+end_src
 
 **** Backlinks
@@ -7268,6 +7277,22 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
         (progn
           (consult-ripgrep org-directory (regexp-quote id)))
       (message "No ID found for current entry. Create one with org-id-get-create."))))
+#+end_src
+
+**** File-level IDs
+***** Add File ID
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Add org-id at file level (before first heading)
+(defun wiki/add-file-id ()
+  "Add org-id property at file level (before first heading)."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    ;; Skip to just before first heading or end of file
+    (if (re-search-forward "^\\*" nil t)
+        (beginning-of-line)
+      (goto-char (point-max)))
+    (org-id-get-create)))
 #+end_src
 
 **** ox-hugo Link Export
@@ -7305,16 +7330,25 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
   "Enable auto-commit and push for wiki notes.")
 
 (defun wiki/git-sync ()
-  "Commit and push wiki changes."
+  "Commit and push wiki changes silently (only show buffer on error)."
   (interactive)
   (let* ((wiki-dir (expand-file-name org-directory))
          (default-directory wiki-dir))
     (when (file-directory-p ".git")
-      (async-shell-command
-       (format "cd '%s' && git add -A && git commit -m 'Update: %s' && git push"
-               wiki-dir
-               (format-time-string "%Y-%m-%d %H:%M:%S"))
-       "*wiki-git-sync*"))))
+      (let ((proc (start-process
+                   "wiki-git-sync"
+                   "*wiki-git-sync*"
+                   "sh" "-c"
+                   (format "git add -A && git commit -m 'Update: %s' && git push"
+                           (format-time-string "%Y-%m-%d %H:%M:%S")))))
+        (set-process-sentinel
+         proc
+         (lambda (process event)
+           (if (zerop (process-exit-status process))
+               (message "✓ Wiki synced successfully")
+             (progn
+               (message "✗ Wiki sync failed - see *wiki-git-sync* buffer")
+               (display-buffer "*wiki-git-sync*")))))))))
 
 (defun wiki/auto-sync-on-save ()
   "Auto-sync wiki after saving if in wiki directory."
@@ -7355,7 +7389,8 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
        :desc "Backlinks" "b" #'wiki/backlinks
        :desc "Goto ID" "g" #'org-id-goto
        :desc "Insert heading link" "h" #'wiki/insert-heading-link
-       :desc "Create ID" "i" #'org-id-get-create
+       :desc "Create ID (heading)" "i" #'org-id-get-create
+       :desc "Add file ID" "F" #'wiki/add-file-id
        :desc "Insert ID link" "I" #'wiki/insert-link
        :desc "Git sync (push)" "p" #'wiki/git-sync
        :desc "Toggle auto-sync" "A" #'wiki/toggle-auto-sync))
