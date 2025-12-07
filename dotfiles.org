@@ -7262,33 +7262,30 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
   (let* ((default-directory org-directory)
          (description (when (use-region-p)
                         (buffer-substring-no-properties (region-beginning) (region-end))))
-         ;; Use consult--grep to search for org headings with ripgrep
-         (selected (consult--grep
-                    "Heading: "
-                    #'consult--ripgrep-make-builder
-                    org-directory
-                    "^\\* "  ;; Search for lines starting with "* " (org headings)
-                    nil))
+         ;; Use consult-ripgrep with initial pattern to find org headings
+         (consult-ripgrep-args (concat consult-ripgrep-args " --max-depth=1 -g '*.org'"))
+         (selected (consult-ripgrep org-directory "^\\* "))
          ;; Parse the selected result (format: "file:line:content")
-         (parts (split-string selected ":"))
-         (file (expand-file-name (car parts) org-directory))
-         (line (string-to-number (cadr parts)))
+         (parts (and selected (split-string selected ":")))
+         (file (and parts (expand-file-name (car parts) org-directory)))
+         (line (and parts (string-to-number (cadr parts))))
          (id nil)
          (title nil))
 
-    ;; Jump to the heading and get/create ID
-    (save-excursion
-      (with-current-buffer (find-file-noselect file)
-        (goto-char (point-min))
-        (forward-line (1- line))
-        (org-back-to-heading t)
-        (setq id (org-id-get-create))
-        (setq title (org-get-heading t t t t))))
+    (when file
+      ;; Jump to the heading and get/create ID
+      (save-excursion
+        (with-current-buffer (find-file-noselect file)
+          (goto-char (point-min))
+          (forward-line (1- line))
+          (org-back-to-heading t)
+          (setq id (org-id-get-create))
+          (setq title (org-get-heading t t t t))))
 
-    ;; Insert the link
-    (when (use-region-p)
-      (delete-region (region-beginning) (region-end)))
-    (insert (format "[[id:%s][%s]]" id (or description title)))))
+      ;; Insert the link
+      (when (use-region-p)
+        (delete-region (region-beginning) (region-end)))
+      (insert (format "[[id:%s][%s]]" id (or description title))))))
 #+end_src
 
 **** Backlinks
