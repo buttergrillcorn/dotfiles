@@ -7256,27 +7256,26 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 
 ***** Insert Heading Link
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Insert ID-based link to heading
+;; Insert ID-based link to heading across all wiki files
 (defun wiki/insert-heading-link ()
   "Insert an org-id link to a heading across all wiki files. Uses selected text as link description if region is active."
   (interactive)
   (let* ((default-directory org-directory)
          (description (when (use-region-p)
                         (buffer-substring-no-properties (region-beginning) (region-end))))
-         ;; Temporarily add all wiki files to agenda so consult-org-heading searches them
+         ;; Get all org files and open them in background
          (org-files (directory-files org-directory t "\\.org$"))
-         (org-agenda-files org-files)
-         ;; Use prefix arg to search agenda files (C-u C-u behavior)
-         (current-prefix-arg '(16))
-         (marker (call-interactively #'consult-org-heading))
+         (buffers (mapcar #'find-file-noselect org-files))
+         ;; Collect all headings from all buffers
+         (heading-marker (consult-org-heading nil buffers))
          (id (save-excursion
-               (with-current-buffer (marker-buffer marker)
-                 (goto-char (marker-position marker))
+               (with-current-buffer (marker-buffer heading-marker)
+                 (goto-char (marker-position heading-marker))
                  (org-id-get-create))))
          (title (or description
                     (save-excursion
-                      (with-current-buffer (marker-buffer marker)
-                        (goto-char (marker-position marker))
+                      (with-current-buffer (marker-buffer heading-marker)
+                        (goto-char (marker-position heading-marker))
                         (org-get-heading t t t t))))))
     (when (use-region-p)
       (delete-region (region-beginning) (region-end)))
