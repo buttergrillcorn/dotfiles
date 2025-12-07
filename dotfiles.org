@@ -7338,18 +7338,23 @@ Separate from Denote workflow, focused on working in public with Hugo + Little O
 
 **** Keybindings
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-;; Wiki commands under SPC W prefix (capital W to avoid window command conflict)
+;; Remap org-capture from SPC n n to SPC n x (to make room for wiki)
 (map! :leader
-      (:prefix-map ("W" . "wiki")
-       :desc "Find/create note" "f" #'wiki/find-note
-       :desc "Search notes" "s" #'wiki/search
-       :desc "Insert link" "l" #'wiki/insert-link
+      :desc "Org capture" "n x" #'org-capture
+      :desc "Org capture goto" "n X" #'org-capture-goto-target)
+
+;; Wiki commands under SPC n prefix
+(map! :leader
+      (:prefix ("n" . "notes")
+       :desc "Find/create note" "n" #'wiki/find-note
+       :desc "Search notes (grep)" "G" #'wiki/search
+       :desc "Backlinks" "b" #'wiki/backlinks
+       :desc "Goto ID" "g" #'org-id-goto
        :desc "Insert heading link" "h" #'wiki/insert-heading-link
-       :desc "Show backlinks" "b" #'wiki/backlinks
        :desc "Create ID" "i" #'org-id-get-create
-       :desc "Go to ID" "g" #'org-id-goto
-       :desc "Git sync" "p" #'wiki/git-sync
-       :desc "Toggle auto-sync" "a" #'wiki/toggle-auto-sync))
+       :desc "Insert ID link" "I" #'wiki/insert-link
+       :desc "Git sync (push)" "p" #'wiki/git-sync
+       :desc "Toggle auto-sync" "A" #'wiki/toggle-auto-sync))
 #+end_src
 
 *** Projectile
