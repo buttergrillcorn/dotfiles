@@ -1,0 +1,518 @@
+#+TITLE: Doom Emacs Configuration
+#+AUTHOR: James
+#+PROPERTY: header-args :mkdirp yes :noweb yes
+#+STARTUP: overview
+
+* Doom Emacs
+Extensible text editor and integrated development environment built on Emacs.
+
+** init.el
+#+begin_src elisp :tangle packages/doom/.config/doom/init.el
+;;; init.el -*- lexical-binding: t; -*-
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  DO NOT EDIT DIRECTLY, THIS FILE IS AUTO-GENERATED WITH ORG-BABEL-TANGLE!  ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; This file controls what Doom modules are enabled and what order they load
+;; in. Remember to run 'doom sync' after modifying it!
+
+;; NOTE Press 'SPC h d h' (or 'C-h d h' for non-vim users) to access Doom's
+;;      documentation. There you'll find a "Module Index" link where you'll find
+;;      a comprehensive list of Doom's modules and what flags they support.
+
+;; NOTE Move your cursor over a module's name (or its flags) and press 'K' (or
+;;      'C-c c k' for non-vim users) to view its documentation. This works on
+;;      flags as well (those symbols that start with a plus).
+;;
+;;      Alternatively, press 'gd' (or 'C-c c d') on a module to browse its
+;;      directory (for easy access to its source code).
+
+(doom! :input
+       ;;bidi              ; (tfel ot) thgir etirw uoy gnipleh
+       chinese
+       ;;japanese
+       ;;layout            ; auie,ctsrnm is the superior home row
+
+       :completion
+       ;; company           ; the ultimate code completion backend
+       ;; (helm              ; the *other* search engine for love and life
+       ;;  +icons
+       ;;  +fuzzy)
+       ;;ido               ; the other *other* search engine...
+       ;; (ivy              ; a search engine for love and life
+       ;;  +fuzzy
+       ;;  +icons
+       ;;  +childframe)
+       (vertico           ; the search engine of the future
+        +icons)
+
+       :ui
+       ;;deft              ; notational velocity for Emacs
+       doom              ; what makes DOOM look the way it does
+       doom-dashboard    ; a nifty splash screen for Emacs
+       doom-quit         ; DOOM quit-message prompts when you quit Emacs
+       (emoji +unicode)  ; 🙂
+       hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
+       hydra
+       indent-guides     ; highlighted indent columns
+       ligatures         ; ligatures and symbols to make your code pretty again
+       ;;minimap           ; show a map of the code on the side
+       modeline          ; snazzy, Atom-inspired modeline, plus API
+       nav-flash         ; blink cursor line after big motions
+       ;; neotree           ; a project drawer, like NERDTree for vim
+       ophints           ; highlight the region an operation acts on
+       popup   ; tame sudden yet inevitable temporary windows
+       ;; tabs              ; a tab bar for Emacs
+       (treemacs          ; a project drawer, like neotree but cooler
+        +lsp)
+       unicode           ; extended unicode support for various languages
+       (vc-gutter +pretty) ; vcs diff in the fringe
+       ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
+       window-select     ; visually switch windows
+       workspaces        ; tab emulation, persistence & separate workspaces
+       zen               ; distraction-free coding or writing
+
+       :editor
+       (evil +everywhere); come to the dark side, we have cookies
+       file-templates    ; auto-snippets for empty files
+       fold              ; (nigh) universal code folding
+       (format  ; automated prettiness
+        +onsave
+        +lsp)
+       ;; god               ; run Emacs commands without modifier keys
+       ;; lispy             ; vim for lisp, for people who don't like vim
+       ;; multiple-cursors  ; editing in many places at once
+       ;; objed             ; text object editing for the innocent
+       parinfer          ; turn lisp into python, sort of
+       rotate-text       ; cycle region at point between text candidates
+       snippets          ; my elves. They type so I don't have to
+       word-wrap         ; soft wrapping with language-aware indent
+
+       :emacs
+       (dired             ; making dired pretty [functional]
+        +icon
+        +dirvish)
+       electric          ; smarter, keyword-based electric-indent
+       (ibuffer         ; interactive buffer management
+        +icons)
+       tramp
+       undo              ; persistent, smarter undo for your inevitable mistakes
+       vc                ; version-control and Emacs, sitting in a tree
+
+       :term
+       ;; eshell            ; the elisp shell that works everywhere
+       ;; shell             ; simple shell REPL for Emacs
+       ;; term              ; basic terminal emulator for Emacs
+       vterm             ; the best terminal emulation in Emacs
+
+       :checkers
+       (syntax              ; tasing you for every semicolon you forget
+        +flymake
+        +icons)
+       (spell +aspell) ; tasing you for misspelling mispelling
+       ;;grammar           ; tasing grammar mistake every you make
+
+       :tools
+       ;;ansible
+       ;;biblio            ; Writes a PhD for you (citation needed)
+       ;;collab            ; buffers with friends
+       ;;debugger          ; FIXME stepping through code, to help you add bugs
+       ;;direnv
+       ;;docker
+       ;;editorconfig      ; let someone else argue about tabs vs spaces
+       ;;ein               ; tame Jupyter notebooks with emacs
+       (eval +overlay)     ; run code, run (also, repls)
+       ;; gist              ; interacting with github gists
+       (lookup              ; navigate your code and its documentation
+        +dictionary)
+       (lsp               ; M-x vscode
+        +peek)
+       magit             ; a git porcelain for Emacs
+       make              ; run make tasks from Emacs
+       ;;pass              ; password manager for nerds
+       pdf               ; pdf enhancements
+       ;;prodigy           ; FIXME managing external services & code builders
+       rgb               ; creating color strings
+       ;;taskrunner        ; taskrunner for all your projects
+       ;;terraform         ; infrastructure as code
+       ;;tmux              ; an API for interacting with tmux
+       tree-sitter       ; syntax and parsing, sitting in a tree...
+       ;;upload            ; map local to remote projects via ssh/ftp
+
+       :os
+       (:if IS-MAC macos)  ; improve compatibility with macOS
+       tty               ; improve the terminal Emacs experience
+
+       :lang
+       ;;agda              ; types of types of types of types...
+       ;;beancount         ; mind the GAAP
+       ;;(cc +lsp)         ; C > C++ == 1
+       ;;clojure           ; java with a lisp
+       ;; common-lisp       ; if you've seen one lisp, you've seen them all
+       ;;coq               ; proofs-as-programs
+       ;;crystal           ; ruby at the speed of c
+       ;;csharp            ; unity, .NET, and mono shenanigans
+       ;;data              ; config/data formats
+       ;;(dart +flutter)   ; paint ui and not much else
+       ;;dhall
+       ;;elixir            ; erlang done right
+       ;;elm               ; care for a cup of TEA?
+       emacs-lisp        ; drown in parentheses
+       ;;erlang            ; an elegant language for a more civilized age
+       ;;ess               ; emacs speaks statistics
+       ;;factor
+       ;;faust             ; dsp, but you get to keep your soul
+       ;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)
+       ;;fsharp            ; ML stands for Microsoft's Language
+       ;;fstar             ; (dependent) types and (monadic) effects and Z3
+       ;;gdscript          ; the language you waited for
+       ;;(go +lsp)         ; the hipster dialect
+       ;;(graphql +lsp)    ; Give queries a REST
+       ;;(haskell +lsp)    ; a language that's lazier than I am
+       ;;hy                ; readability of scheme w/ speed of python
+       ;;idris             ; a language you can depend on
+       (json              ; At least it ain't XML
+        +lsp)
+       ;;(java +lsp)       ; the poster child for carpal tunnel syndrome
+       (javascript        ; all(hope(abandon(ye(who(enter(here))))))
+        +lsp
+        +tree-sitter)
+       ;;julia             ; a better, faster MATLAB
+       ;;kotlin            ; a better, slicker Java(Script)
+       (latex             ; writing papers in Emacs has never been so fun
+        +cdlatex
+        +lsp)
+       ;;lean              ; for folks with too much to prove
+       ;;ledger            ; be audit you can be
+       (lua               ; one-based indices? one-based indices
+        +lsp
+        +tree-sitter
+        +fennel)
+       (markdown          ; writing docs for people to ignore
+        +grip
+        +tree-sitter)
+       ;;nim               ; python + lisp at the speed of c
+       ;; nix               ; I hereby declare "nix geht mehr!"
+       ;;ocaml             ; an objective camel
+       (org              ; organize your plain life in plain text
+        +dragndrop
+        +hugo
+        +noter
+        +pandoc
+        +pomodoro
+        +present
+        +pretty)
+       ;;php               ; perl's insecure younger brother
+       ;;plantuml          ; diagrams for confusing people more
+       ;;purescript        ; javascript, but functional
+       (python            ; beautiful is better than ugly
+        +lsp
+        +tree-sitter)
+       ;; qt                ; the 'cutest' gui framework ever
+       ;;racket            ; a DSL for DSLs
+       ;;raku              ; the artist formerly known as perl6
+       ;;rest              ; Emacs as a REST client
+       ;;rst               ; ReST in peace
+       ;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
+       (rust
+        +lsp
+        +tree-sitter)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       ;;scala             ; java, but good
+       ;;(scheme +guile)   ; a fully conniving family of lisps
+       (sh                ; she sells {ba,z,fi}sh shells on the C xor
+        +lsp)
+       ;;sml
+       ;;solidity          ; do you need a blockchain? No.
+       ;;swift             ; who asked for emoji variables?
+       ;;terra             ; Earth and Moon in alignment for performance.
+       (web               ; the tubes
+        +lsp
+        +tree-sitter)
+       (yaml              ; JSON, but readable
+        +lsp
+        +tree-sitter)
+       ;;zig               ; C, but simpler
+
+       :email
+       ;; (mu4e +org +gmail)
+       ;;notmuch
+       ;;(wanderlust +gmail)
+
+       :app
+       calendar
+       ;;emms
+       everywhere        ; *leave* Emacs!? You must be joking
+       ;;irc               ; how neckbeards socialize
+       ;;(rss +org)        ; emacs as an RSS reader
+       ;;twitter           ; twitter client https://twitter.com/vnought
+
+       :config
+       ;; literate
+       (default +bindings +smartparens))
+#+end_src
+
+** packages.el
+#+begin_src elisp :tangle packages/doom/.config/doom/packages.el
+;; no-byte-compile: t; -*-
+;;; $DOOMDIR/packages.el
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  DO NOT EDIT DIRECTLY, THIS FILE IS AUTO-GENERATED WITH ORG-BABEL-TANGLE!  ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; To install a package with Doom you must declare them here and run 'doom sync'
+;; on the command line, then restart Emacs for the changes to take effect -- or
+;; use 'M-x doom/reload'.
+
+;; Orgmode
+(package! org-autolist)
+(package! org-appear)
+(package! org-auto-tangle)
+
+;; Claude Code
+(package! inheritenv
+  :recipe (:host github :repo "purcell/inheritenv"))
+(package! claude-code
+  :recipe (:host github :repo "stevemolitor/claude-code.el"))
+
+;; Pulsar
+(package! pulsar)
+
+;; Mason
+(package! mason)
+#+end_src
+
+** config.el
+*** Header
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  DO NOT EDIT DIRECTLY, THIS FILE IS AUTO-GENERATED WITH ORG-BABEL-TANGLE!  ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
+#+end_src
+
+*** Wiki (external config)
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Load wiki workflow from separate tangled file to keep this config lean.
+(let ((wiki-file (expand-file-name "wiki.el" doom-user-dir)))
+  (when (file-exists-p wiki-file)
+    (load! "wiki")))
+#+end_src
+
+*** User Information
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq user-full-name "James"
+      user-mail-address "jamesyuli@outlook.com")
+#+end_src
+
+*** UI
+**** Font
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq doom-font (font-spec :family "Sarasa Term SC Nerd" :size 16 :weight 'Regular)
+      doom-variable-pitch-font (font-spec :family "Noto Sans CJK SC" :size 16)
+      doom-unicode-font (font-spec :family "Symbols Nerd Font Mono" :size 16))
+#+end_src
+
+**** Theme
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq doom-theme 'doom-dark+)
+#+end_src
+**** Line Numbers
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq display-line-numbers-type 'relative)
+#+end_src
+*** Misc
+**** Touchpad Scrolling Fix
+#+begin_src elisp :tangle no
+;; enable pixel-precise scrolling
+(when (fboundp 'pixel-scroll-precision-mode)
+  (pixel-scroll-precision-mode 1))
+;; optional: reduce jumpiness from mouse-wheel settings
+;; (setq mouse-wheel-scroll-amount '(0.01)   ; fraction of window (or use pixel values)
+;;       mouse-wheel-progressive-speed nil
+;;       mouse-wheel-follow-mouse t)
+#+end_src
+*** Key Binds
+#+begin_src elisp :tangle no
+;; (map! "C-h" 'switch-to-prev-buffer)
+;; (map! "C-l" 'switch-to-next-buffer)
+;; (map! "C-S-l" 'recenter-top-bottom)
+#+end_src
+
+*** Which Key
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; (setq which-key-idle-delay 0.2)
+(setq auto-save-visited-interval 15)
+(auto-save-visited-mode +1)
+
+(map! :after which-key
+      :map which-key-mode-map
+      "C-n" #'which-key-show-next-page-no-cycle
+      "C-n" #'which-key-show-next-page-no-cycle)
+
+#+end_src
+
+#+RESULTS:
+
+*** Org Mode
+
+**** Basic
+
+***** Directory
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq org-directory "~/wiki/")
+#+end_src
+
+***** Babel
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '(
+     (elisp . t)
+     (python . t)
+     (conf-toml . t)
+     (rust . t)
+     )))
+#+end_src
+
+***** Appearance
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (setq org-hide-emphasis-markers t)
+  (setq org-pretty-entities t))
+#+end_src
+
+***** Pomodoro
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq org-pomodoro-length 30)
+#+end_src
+
+**** Agenda
+
+***** Directory
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (setq org-agenda-files '("~/wiki")))
+#+end_src
+
+**** Extension Packages
+
+***** Auto List
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(add-hook 'org-mode-hook
+          (lambda () (org-autolist-mode)))
+#+end_src
+
+***** Org Appear
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (add-hook 'org-mode-hook 'org-appear-mode))
+#+end_src
+
+***** Org Auto Tangle
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (add-hook 'org-mode-hook 'org-auto-tangle-mode))
+#+end_src
+
+***** Safe List
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq org-auto-tangle-babel-safelist '(
+                                       "~/example.org"
+                                       "~/example2.org"
+                                       ))
+#+end_src
+
+*** Projectile
+**** Add Projects
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; (projectile-add-known-project "~/org")
+(projectile-add-known-project "~/wiki")
+(projectile-add-known-project "~/stow")
+#+end_src
+*** Claude Code
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package! claude-code
+  :after inheritenv
+  :config
+  (setq claude-code-terminal-backend 'vterm)
+  (claude-code-mode)
+  :bind
+  (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode)))
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(map! :leader :desc "Claude Code" "e" #'claude-code-transient)
+;; (:prefix-map ("e" . "Claude")
+;;  :desc "Start" "e" #'claude-code-transient))
+#+end_src
+*** Pulsar
+Pulse highlight line on demand or after running select functions
+**** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package! pulsar
+  :config
+  (require 'pulsar)
+
+  ;; Check the default value of `pulsar-pulse-functions'.  That is where
+  ;; you add more commands that should cause a pulse after they are
+  ;; invoked
+
+  (setq pulsar-pulse t)
+  (setq pulsar-delay 0.055)
+  (setq pulsar-iterations 10)
+  (setq pulsar-face 'pulsar-magenta)
+  (setq pulsar-highlight-face 'pulsar-yellow)
+
+  (pulsar-global-mode 1)
+
+  ;; OR use the local mode for select mode hooks
+
+  (dolist (hook '(org-mode-hook elisp-mode-hook))
+    (add-hook hook #'pulsar-mode))
+
+  ;; pulsar does not define any key bindings.  This is just a sample that
+  ;; respects the key binding conventions.  Evaluate:
+  ;;
+  ;;     (info "(elisp) Key Binding Conventions")
+  ;;
+  ;; The author uses C-x l for `pulsar-pulse-line' and C-x L for
+  ;; `pulsar-highlight-line'.
+  ;;
+  ;; You can replace `pulsar-highlight-line' with the command
+  ;; `pulsar-highlight-dwim'.
+  ;; (let ((map global-map))
+  ;;   (define-key map (kbd "C-c h p") #'pulsar-pulse-line)
+  ;;   (define-key map (kbd "C-c h h") #'pulsar-highlight-line))
+
+  ;; Use pulsar with next-error
+  (add-hook 'next-error-hook #'pulsar-pulse-line)
+
+  ;; Use pulsar in the minibuffer
+  (add-hook 'minibuffer-setup-hook #'pulsar-pulse-line-blue)
+
+  ;; Use pulsar with other packages
+
+  ;;; integration with the `consult' package:
+  (add-hook 'consult-after-jump-hook #'pulsar-recenter-top)
+  (add-hook 'consult-after-jump-hook #'pulsar-reveal-entry))
+#+end_src
+*** Mason
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package mason
+  :ensure t
+  :config
+  (mason-ensure)
+  ;; or
+  :hook
+  (after-init-hook . mason-ensure))
+#+end_src

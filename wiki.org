@@ -1,0 +1,888 @@
+#+TITLE: Wiki Workflow
+#+PROPERTY: header-args :tangle packages/doom/.config/doom/wiki.el :mkdirp yes
+#+STARTUP: overview
+
+* Wiki
+Simple wiki workflow with ID-based links, Hugo export, search, and git sync for ~/wiki.
+
+** Core
+#+begin_src elisp
+(require 'consult)
+(require 'org-id)
+(require 'subr-x)
+
+;; Root directory for wiki notes
+(setq org-directory "~/wiki/")
+
+;; org-id: use IDs everywhere, store locations inside wiki
+(after! org
+  (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+  (setq org-id-track-globally t)
+  (setq org-id-locations-file (expand-file-name ".org-id-locations" org-directory))
+  (setq org-id-method 'ts))
+
+(defun wiki//in-wiki-buffer-p (&optional file)
+  "Return non-nil when FILE (or current buffer) lives inside `org-directory`."
+  (let* ((target (or file buffer-file-name))
+         (root (file-name-as-directory (expand-file-name org-directory))))
+    (and target (string-prefix-p root (expand-file-name target)))))
+
+(defun wiki//slugify (s)
+  "Slugify string S for Hugo anchors."
+  (thread-last s
+    (downcase)
+    (replace-regexp-in-string "[^a-z0-9-]" "-")
+    (replace-regexp-in-string "--+" "-")
+    (replace-regexp-in-string "\\`-\\|-\\'" "")))
+
+(defun wiki//ensure-heading-id ()
+  "Create or return an ID for the current heading and persist it."
+  (let ((id (org-id-get-create)))
+    (when (and (buffer-file-name) (wiki//in-wiki-buffer-p))
+      (org-id-update-id-locations (list (buffer-file-name))))
+    id))
+#+end_src
+
+** Navigation & Search
+#+begin_src elisp
+(defun wiki/find-note ()
+  "Find or create a wiki note with preview."
+  (interactive)
+  (let* ((default-directory org-directory)
+         (files (directory-files org-directory nil "\\.org$"))
+         (choice (consult--read files
+                                :prompt "Wiki note: "
+                                :category 'file
+                                :state (consult--file-preview)
+                                :require-match nil)))
+    (if (member choice files)
+        (find-file (expand-file-name choice org-directory))
+      (let ((new-file (if (string-suffix-p ".org" choice)
+                          choice
+                        (concat choice ".org"))))
+        (find-file (expand-file-name new-file org-directory))
+        (when (= (buffer-size) 0)
+          (insert (format "#+title: %s\n#+date: [%s]\n\n"
+                          (file-name-sans-extension new-file)
+                          (format-time-string "%Y-%m-%d %a %H:%M")))
+          (wiki//ensure-heading-id))))))
+
+(defun wiki/search ()
+  "Search wiki notes with consult-ripgrep."
+  (interactive)
+  (let* ((default-directory (file-name-as-directory (expand-file-name org-directory)))
+         (consult-ripgrep-args
+          (concat "rg --null --line-number --color=never --max-columns=1000 "
+                  "--smart-case --hidden --no-heading --line-buffered "
+                  "--glob '*.org' --glob '!.git' --")))
+    (consult-ripgrep org-directory)))
+#+end_src
+
+** Linking
+#+begin_src elisp
+(defun wiki/insert-link ()
+  "Insert an org-id link to a file (first heading)."
+  (interactive)
+  (let* ((default-directory org-directory)
+         (description (when (use-region-p)
+                        (buffer-substring-no-properties (region-beginning) (region-end))))
+         (file (consult--read
+                (directory-files org-directory nil "\\.org$")
+                :prompt "Link to file: "
+                :category 'file
+                :state (consult--file-preview))))
+    (when file
+      (let* ((full-path (expand-file-name file org-directory))
+             (id (with-current-buffer (find-file-noselect full-path)
+                   (save-excursion
+                     (goto-char (point-min))
+                     (if (re-search-forward "^\\* " nil t)
+                         (progn (beginning-of-line) (wiki//ensure-heading-id))
+                       (error "No heading found in %s" file)))))
+             (title (or description
+                        (with-current-buffer (find-file-noselect full-path)
+                          (or (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
+                              (file-name-sans-extension file))))))
+        (when (use-region-p)
+          (delete-region (region-beginning) (region-end)))
+        (insert (format "[[id:%s][%s]]" id title))))))
+
+(defun wiki//prompt-for-heading (file)
+  "Prompt for a heading in FILE and return its line number."
+  (with-current-buffer (find-file-noselect file)
+    (let ((headings nil))
+      (save-excursion
+        (goto-char (point-min))
+        (while (re-search-forward org-outline-regexp nil t)
+          (let* ((heading (org-get-heading t t t t))
+                 (line (line-number-at-pos)))
+            (push (cons heading line) headings))))
+      (setq headings (nreverse headings))
+      (when headings
+        (let* ((selection (consult--read headings
+                                         :prompt "Heading: "
+                                         :category 'consult-location
+                                         :require-match t
+                                         :sort nil
+                                         :state (lambda (action cand)
+                                                  (when (eq action 'preview)
+                                                    (let ((line-num (cdr (assoc cand headings))))
+                                                      (when line-num
+                                                        (consult--preview-at-point
+                                                         (consult--position-marker (find-file-noselect file) line-num 0)))))))))
+          (when selection
+            (cdr (assoc selection headings))))))))
+
+(defun wiki/insert-heading-link ()
+  "Insert an org-id link to a heading in a wiki file."
+  (interactive)
+  (let* ((default-directory org-directory)
+         (description (when (use-region-p)
+                        (buffer-substring-no-properties (region-beginning) (region-end))))
+         (selected-file-path (consult--read
+                              (directory-files org-directory nil "\\.org$")
+                              :prompt "Link to file: "
+                              :category 'file
+                              :state (consult--file-preview))))
+    (when selected-file-path
+      (let* ((line-number (wiki//prompt-for-heading selected-file-path)))
+        (when line-number
+          (let* ((heading-data
+                  (save-window-excursion
+                    (with-current-buffer (find-file selected-file-path)
+                      (goto-char (point-min))
+                      (forward-line (1- line-number))
+                      (org-back-to-heading t)
+                      (cons (wiki//ensure-heading-id) (org-get-heading t t t t)))))
+                 (id (car heading-data))
+                 (title (cdr heading-data)))
+            (when (use-region-p)
+              (delete-region (region-beginning) (region-end)))
+            (insert (format "[[id:%s][%s]]" id (or description title)))))))))
+
+(defun wiki/backlinks ()
+  "Show all notes that link to the current note with context."
+  (interactive)
+  (let ((id (org-id-get)))
+    (if id
+        (let* ((default-directory (file-name-as-directory (expand-file-name org-directory)))
+               (consult-ripgrep-args
+                "rg --null --line-number --color=never --max-columns=1000 --smart-case --hidden --no-heading --line-buffered -A 2 -B 2 --glob *.org --glob !.git --glob !.site"))
+          (consult-ripgrep org-directory (regexp-quote id)))
+      (message "No ID found for current entry. Create one with org-id-get-create."))))
+
+(defun wiki/add-file-id ()
+  "Add org-id to current heading, or first heading if not on one."
+  (interactive)
+  (if (org-at-heading-p)
+      (wiki//ensure-heading-id)
+    (save-excursion
+      (goto-char (point-min))
+      (if (re-search-forward "^\\* " nil t)
+          (progn (beginning-of-line) (wiki//ensure-heading-id))
+        (message "No heading found. Create a heading first.")))))
+#+end_src
+
+** Graph Visualization
+#+begin_src elisp
+(defun wiki//collect-all-ids ()
+  "Collect all org-IDs in wiki notes. Returns alist of (ID . FILE)."
+  (let ((ids nil)
+        (files (wiki/hugo--org-files)))
+    (dolist (file files)
+      (with-current-buffer (find-file-noselect file)
+        (org-with-point-at (point-min)
+          (while (re-search-forward "^[. ]*:ID:[ \t]+\\(\\S-+\\)" nil t)
+            (let ((id (match-string-no-properties 1)))
+              (push (cons id file) ids))))))
+    ids))
+
+(defun wiki//count-id-references (id)
+  "Count how many times ID is referenced in wiki notes."
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory)))
+        (count 0))
+    (with-temp-buffer
+      (call-process "rg" nil t nil
+                    "--count"
+                    "--glob" "*.org"
+                    "--glob" "!.git"
+                    "--glob" "!.site"
+                    (regexp-quote id)
+                    org-directory)
+      (goto-char (point-min))
+      (while (re-search-forward ":\\([0-9]+\\)$" nil t)
+        (setq count (+ count (string-to-number (match-string 1))))))
+    count))
+
+(defun wiki//get-all-link-counts ()
+  "Return alist of (FILE . LINK-COUNT) for all wiki notes."
+  (let ((files (wiki/hugo--org-files))
+        (counts nil))
+    (dolist (file files)
+      (with-temp-buffer
+        (insert-file-contents file)
+        (let ((link-count (how-many "\\[\\[id:" (point-min) (point-max))))
+          (push (cons file link-count) counts))))
+    (sort counts (lambda (a b) (> (cdr a) (cdr b))))))
+
+(defun wiki/graph-orphans ()
+  "Find orphan notes (notes with no incoming or outgoing links)."
+  (interactive)
+  (let* ((all-ids (wiki//collect-all-ids))
+         (files (wiki/hugo--org-files))
+         (orphans nil))
+    (dolist (file files)
+      (let* ((id (car (rassoc file all-ids)))
+             (incoming (if id (wiki//count-id-references id) 0))
+             (outgoing 0))
+        (with-temp-buffer
+          (insert-file-contents file)
+          (setq outgoing (how-many "\\[\\[id:" (point-min) (point-max))))
+        (when (and (= incoming 0) (= outgoing 0))
+          (push file orphans))))
+    (if orphans
+        (let ((choice (consult--read
+                       (mapcar (lambda (f)
+                                 (file-name-nondirectory f))
+                               orphans)
+                       :prompt "Orphan notes (no links in/out): "
+                       :category 'file
+                       :sort nil)))
+          (when choice
+            (find-file (expand-file-name choice org-directory))))
+      (message "No orphan notes found! All notes are connected."))))
+
+(defun wiki/graph-hubs ()
+  "Show hub notes (most frequently linked notes)."
+  (interactive)
+  (let* ((all-ids (wiki//collect-all-ids))
+         (hub-data nil))
+    (dolist (id-file all-ids)
+      (let* ((id (car id-file))
+             (file (cdr id-file))
+             (count (wiki//count-id-references id)))
+        (when (> count 1)  ; Only count if referenced more than once
+          (push (cons file count) hub-data))))
+    (setq hub-data (sort hub-data (lambda (a b) (> (cdr a) (cdr b)))))
+    (if hub-data
+        (let* ((formatted (mapcar (lambda (item)
+                                    (format "%s (%d links)"
+                                            (file-name-nondirectory (car item))
+                                            (cdr item)))
+                                  hub-data))
+               (choice (consult--read formatted
+                                      :prompt "Hub notes (most linked): "
+                                      :category 'file
+                                      :sort nil)))
+          (when choice
+            (string-match "^\\(.*\\) (\\([0-9]+\\) links)$" choice)
+            (let ((filename (match-string 1 choice)))
+              (find-file (expand-file-name filename org-directory)))))
+      (message "No hub notes found yet. Keep building your graph!"))))
+
+(defun wiki/graph-stats ()
+  "Toggle wiki graph statistics buffer."
+  (interactive)
+  (let ((buf-name "*Wiki Graph Stats*"))
+    (if (get-buffer-window buf-name)
+        ;; Buffer is visible, close it
+        (progn
+          (delete-windows-on buf-name)
+          (kill-buffer buf-name)
+          (message "Graph stats closed"))
+      ;; Buffer not visible, generate and display it
+      (let* ((files (wiki/hugo--org-files))
+             (total-files (length files))
+             (all-ids (wiki//collect-all-ids))
+             (total-links 0)
+             (link-counts (wiki//get-all-link-counts))
+             (orphans 0))
+        ;; Count total links
+        (dolist (item link-counts)
+          (setq total-links (+ total-links (cdr item))))
+        ;; Count orphans
+        (dolist (file files)
+          (let* ((id (car (rassoc file all-ids)))
+                 (incoming (if id (wiki//count-id-references id) 0))
+                 (outgoing (cdr (assoc file link-counts))))
+            (when (and (= incoming 0) (or (null outgoing) (= outgoing 0)))
+              (setq orphans (1+ orphans)))))
+        (with-current-buffer (get-buffer-create buf-name)
+          (erase-buffer)
+          (insert (format "Wiki Graph Statistics\n"))
+          (insert (format "═════════════════════\n\n"))
+          (insert (format "Total notes: %d\n" total-files))
+          (insert (format "Total links: %d\n" total-links))
+          (insert (format "Avg links per note: %.1f\n"
+                          (if (> total-files 0)
+                              (/ (float total-links) total-files)
+                            0)))
+          (insert (format "Orphan notes: %d (%.1f%%)\n\n"
+                          orphans
+                          (if (> total-files 0)
+                              (* 100.0 (/ (float orphans) total-files))
+                            0)))
+          (insert "Top 10 Most Connected Notes:\n")
+          (insert "─────────────────────────────\n")
+          (let ((top-10 (seq-take link-counts 10)))
+            (dolist (item top-10)
+              (insert (format "• %s: %d outgoing links\n"
+                              (file-name-nondirectory (car item))
+                              (cdr item)))))
+          (insert "\n\nPress 'q' to close this buffer")
+          (org-mode)
+          (local-set-key (kbd "q") (lambda () (interactive)
+                                      (delete-windows-on buf-name)
+                                      (kill-buffer buf-name)))
+          (goto-char (point-min))
+          (setq buffer-read-only t)
+          (display-buffer (current-buffer)))))))
+#+end_src
+
+** Hugo Front Matter & Export
+#+begin_src elisp
+(defvar wiki/hugo-base-dir (expand-file-name ".site" org-directory)
+  "Root directory of the Hugo site that consumes wiki exports.")
+
+(defvar wiki/hugo-section ""
+  "Hugo section to export wiki pages into (empty string means content root).")
+
+(defvar wiki/hugo-link-prefix "/"
+  "Prefix for generated wiki links. Use \"/\" for absolute-from-site-root (default) or \"\" for relative.")
+
+(defun wiki/hugo--ensure-front-matter ()
+  "Ensure wiki org files have Hugo front matter."
+  (when (and buffer-file-name
+             (string-suffix-p ".org" buffer-file-name)
+             (wiki//in-wiki-buffer-p)
+             (not wiki/hugo--exporting)
+             (not (string-match-p "/\\.site/" buffer-file-name))
+             (not (string-match-p "/\\.git/" buffer-file-name)))
+    (save-excursion
+      (let* ((case-fold-search t)
+             (updated nil)
+             (date (progn
+                     (goto-char (point-min))
+                     (when (re-search-forward "^#\\+date:[ \t]+\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)" nil t)
+                       (match-string-no-properties 1))))
+             (tags (progn
+                     (goto-char (point-min))
+                     (when (re-search-forward "^#\\+filetags:[ \t]+\\(.*\\)$" nil t)
+                       (string-join
+                        (split-string (string-trim (match-string-no-properties 1)) ":" t)
+                        " "))))
+            (export-name (file-name-sans-extension (file-name-nondirectory buffer-file-name))))
+
+        ;; Add date if missing
+        (unless date
+          (let ((org-date (format-time-string "[%Y-%m-%d %a]")))
+            (goto-char (point-min))
+            (let ((insert-pos (point-min)))
+              (while (looking-at "^#\\+")
+                (setq insert-pos (line-end-position))
+                (forward-line 1))
+              (goto-char insert-pos)
+              (unless (bolp) (insert "\n"))
+              (insert (format "#+date: %s\n" org-date))
+              (setq date (substring org-date 1 11))
+              (setq updated t))))
+
+        ;; Remove old Hugo keywords (will regenerate)
+        (goto-char (point-min))
+        (while (re-search-forward "^#\\+HUGO_.*$" nil t)
+          (setq updated t)
+          (delete-region (line-beginning-position) (1+ (line-end-position)))
+          (goto-char (point-at-bol)))
+        (goto-char (point-min))
+        (while (re-search-forward "^#\\+EXPORT_FILE_NAME:.*$" nil t)
+          (setq updated t)
+          (delete-region (line-beginning-position) (1+ (line-end-position)))
+          (goto-char (point-at-bol)))
+
+        ;; Insert Hugo front matter
+        (goto-char (point-min))
+        (let ((insert-pos (point-min)))
+          (while (looking-at "^#\\+")
+            (setq insert-pos (line-end-position))
+            (forward-line 1))
+          (goto-char insert-pos)
+          (unless (bolp) (insert "\n"))
+          (let ((block ""))
+            (setq block (concat block (format "#+HUGO_BASE_DIR: %s\n" wiki/hugo-base-dir)))
+            (setq block (concat block (format "#+HUGO_SECTION: %s\n" wiki/hugo-section)))
+            (setq block (concat block "#+HUGO_DRAFT: false\n"))
+            (when date
+              (setq block (concat block (format "#+HUGO_DATE: %s\n" date))))
+            (when tags
+              (setq block (concat block (format "#+HUGO_TAGS: %s\n" tags))))
+            (when export-name
+              (setq block (concat block (format "#+EXPORT_FILE_NAME: %s\n" export-name))))
+            (insert block)
+            (unless (looking-at "\n") (insert "\n"))
+            (while (looking-at "\n\n+") (replace-match "\n"))
+            (setq updated t)))
+
+      (when updated
+        (message "Updated Hugo front matter for %s" (buffer-name)))))))
+
+(defun wiki//enable-hugo-front-matter ()
+  "Attach wiki Hugo metadata hook locally for org buffers in wiki directory."
+  (when (and buffer-file-name
+             (string-suffix-p ".org" buffer-file-name)
+             (wiki//in-wiki-buffer-p))
+    (add-hook 'before-save-hook #'wiki/hugo--ensure-front-matter nil t)))
+(add-hook 'org-mode-hook #'wiki//enable-hugo-front-matter)
+
+(defun wiki/hugo--org-files ()
+  "Return all wiki org files (excluding .site/ and VCS dirs)."
+  (let* ((root (file-name-as-directory (expand-file-name org-directory)))
+         (default-directory root))
+    (seq-filter
+     (lambda (f)
+       (and (string-suffix-p ".org" f)
+            (not (string-match-p "/\\.site/" f))
+            (not (string-match-p "/\\.git/" f))))
+     (directory-files-recursively root "\\.org$"))))
+
+(defvar wiki/hugo--exporting nil
+  "Internal flag to prevent recursive export on save.")
+
+(defun wiki/hugo--save-buffer-sans-hook ()
+  "Save current buffer without running the front-matter hook."
+  (let ((before-save-hook (remove #'wiki/hugo--ensure-front-matter before-save-hook)))
+    (save-buffer)))
+
+(defun wiki/hugo-export-current ()
+  "Export current wiki note to Hugo markdown."
+  (interactive)
+  (if (wiki//in-wiki-buffer-p)
+      (let ((wiki/hugo--exporting t)
+            (orig-default-directory default-directory)
+            (orig-buffer (current-buffer)))
+        (save-window-excursion
+          (save-current-buffer
+            (let ((wiki/hugo--exporting nil))
+              (wiki/hugo--ensure-front-matter))
+            (wiki/hugo--save-buffer-sans-hook)
+            (let ((default-directory org-directory))
+              (org-hugo-export-to-md)))
+          (when (buffer-live-p orig-buffer)
+            (set-buffer orig-buffer))
+          (setq default-directory orig-default-directory)))
+    (user-error "Not in a wiki note")))
+
+(defun wiki/hugo-export-all ()
+  "Export all wiki notes to Hugo markdown without disrupting your current buffer."
+  (interactive)
+  (let ((files (wiki/hugo--org-files))
+        (count 0)
+        (orig-default-directory default-directory)
+        (orig-buffer (current-buffer))
+        (opened-buffers nil)
+        (wconfig (current-window-configuration)))
+    (unwind-protect
+        (save-current-buffer
+          (let ((wiki/hugo--exporting t))
+            (dolist (file files)
+              (let ((buf (find-file-noselect file)))
+                (unless (eq buf orig-buffer)
+                  (push buf opened-buffers))
+                (with-current-buffer buf
+                  (let ((wiki/hugo--exporting nil))
+                    (wiki/hugo--ensure-front-matter))
+                  (wiki/hugo--save-buffer-sans-hook)
+                  (let ((default-directory org-directory)
+                        (org-hugo-base-directory wiki/hugo-base-dir)
+                        (org-hugo-default-section-directory wiki/hugo-section))
+                    (org-hugo-export-to-md))
+                  (setq count (1+ count)))))))
+      (dolist (buf opened-buffers)
+        (when (buffer-live-p buf)
+          (kill-buffer buf)))
+      (when (window-configuration-p wconfig)
+        (set-window-configuration wconfig))
+      (when (buffer-live-p orig-buffer)
+        (set-buffer orig-buffer))
+      (setq default-directory orig-default-directory))
+    (message "Exported %d wiki notes to Hugo" count)))
+
+(defvar wiki/hugo-auto-export-on-save t
+  "When non-nil, export wiki notes to Hugo on save.")
+
+(defun wiki/hugo-toggle-auto-export ()
+  "Toggle automatic Hugo export for wiki notes."
+  (interactive)
+  (setq wiki/hugo-auto-export-on-save (not wiki/hugo-auto-export-on-save))
+  (message "Wiki Hugo auto-export %s"
+           (if wiki/hugo-auto-export-on-save "enabled" "disabled")))
+
+(defun wiki//maybe-export-on-save ()
+  "Export current wiki note when auto-export is enabled."
+  (when (and wiki/hugo-auto-export-on-save
+             (wiki//in-wiki-buffer-p)
+             (not wiki/hugo--exporting))
+    (wiki/hugo-export-current)))
+(add-hook 'after-save-hook #'wiki//maybe-export-on-save)
+
+(after! ox-hugo
+  (defun org-hugo-link--org-id-to-path (link)
+    "Convert org-id LINK to Hugo-compatible path with anchors for heading links."
+    (let* ((id (org-element-property :path link))
+           (location (org-id-find id)))
+      (when location
+        (let* ((marker (cond ((markerp location) location)
+                             ((consp location)
+                              (let ((file (car location))
+                                    (line (cdr location)))
+                                (with-current-buffer (find-file-noselect file)
+                                  (goto-char (point-min))
+                                  (forward-line (1- line))
+                                  (point-marker))))))
+               path title)
+          (when marker
+            (with-current-buffer (marker-buffer marker)
+              (save-excursion
+                (goto-char (marker-position marker))
+                (org-back-to-heading t)
+                (let* ((buffer-file-name (buffer-file-name))
+                       (basename (file-name-sans-extension (file-name-nondirectory buffer-file-name)))
+                       (export-name (or (car (cdr (assoc "EXPORT_FILE_NAME"
+                                                         (org-collect-keywords '("EXPORT_FILE_NAME")))))
+                                        basename))
+                       (export-name-down (downcase export-name))
+                       ;; Hugo renders pages at /slugified-name/; treat README/_index/index as site root.
+                       (page-path (wiki//slugify export-name))
+                       (heading-text (org-element-property :raw-value (org-element-at-point)))
+                       (slug (when heading-text (wiki//slugify heading-text)))
+                       (base-path (if (member export-name-down '("readme" "_index" "index"))
+                                      (or wiki/hugo-link-prefix "/")
+                                    (concat (or wiki/hugo-link-prefix "/") page-path "/"))))
+                  (setq path (if slug (concat base-path "#" slug) base-path))
+                  (setq title (or heading-text
+                                  (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
+                                  export-name))))))
+          (when (and path title)
+            (cons path title))))))
+
+  (defun wiki/ox-hugo-link (link desc info)
+    "Export org-id links for Hugo."
+    (let ((type (org-element-property :type link)))
+      (when (string= type "id")
+        (let ((path-title (org-hugo-link--org-id-to-path link)))
+          (when (consp path-title)
+            (format "[%s](%s)" (or desc (cdr path-title)) (car path-title)))))))
+
+  (advice-add 'org-hugo-link :override #'wiki/ox-hugo-link))
+#+end_src
+
+** Git Sync
+#+begin_src elisp
+;; Robust multi-device git sync with pull/push/conflict handling
+(defvar wiki/auto-sync-enabled t
+  "Enable auto-commit and push for wiki notes.")
+
+(defvar wiki/git-sync--in-progress nil
+  "Non-nil when a git sync operation is in progress (prevents concurrent syncs).")
+
+(defvar wiki/git-sync--last-sync-time nil
+  "Time of last successful sync.")
+
+(defvar wiki/git-sync-timer nil
+  "Timer for periodic background sync.")
+
+(defvar wiki/git-sync-interval (* 15 60)
+  "Interval in seconds for periodic sync (default: 15 minutes).")
+
+(defvar wiki/git-sync-idle-interval (* 5 60)
+  "Idle time in seconds before syncing (default: 5 minutes).")
+
+(defun wiki/git-sync--is-git-repo-p ()
+  "Return non-nil if wiki directory is a git repository."
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (file-directory-p ".git")))
+
+(defun wiki/git-sync--has-changes-p ()
+  "Return non-nil if there are uncommitted changes in wiki directory."
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (not (string-empty-p
+          (string-trim
+           (shell-command-to-string "git status --porcelain"))))))
+
+(defun wiki/git-sync--has-remote-p ()
+  "Return non-nil if wiki repository has a remote configured."
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (not (string-empty-p
+          (string-trim
+           (shell-command-to-string "git remote"))))))
+
+(defun wiki/git-sync--is-merge-in-progress-p ()
+  "Return non-nil if a merge/rebase is in progress."
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (or (file-exists-p (expand-file-name ".git/MERGE_HEAD" default-directory))
+        (file-exists-p (expand-file-name ".git/rebase-merge" default-directory))
+        (file-exists-p (expand-file-name ".git/rebase-apply" default-directory)))))
+
+(defun wiki/git-pull ()
+  "Pull changes from remote wiki repository."
+  (interactive)
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (unless (wiki/git-sync--is-git-repo-p)
+      (user-error "Wiki directory is not a git repository"))
+    (when (wiki/git-sync--is-merge-in-progress-p)
+      (user-error "Merge/rebase in progress. Resolve conflicts first"))
+    (when wiki/git-sync--in-progress
+      (user-error "Git sync already in progress"))
+
+    (setq wiki/git-sync--in-progress t)
+    (message "Pulling wiki changes...")
+
+    (let ((proc (start-process
+                 "wiki-git-pull"
+                 "*wiki-git-sync*"
+                 "sh" "-c"
+                 "git pull --rebase")))
+      (set-process-sentinel
+       proc
+       (lambda (process event)
+         (setq wiki/git-sync--in-progress nil)
+         (let ((output (with-current-buffer "*wiki-git-sync*" (buffer-string))))
+           (cond
+            ((zerop (process-exit-status process))
+             (message "✓ Wiki pulled successfully")
+             (setq wiki/git-sync--last-sync-time (current-time)))
+            ((string-match-p "Already up to date\\|Already up-to-date" output)
+             (message "✓ Wiki already up to date"))
+            ((string-match-p "CONFLICT" output)
+             (message "✗ Merge conflict detected - see *wiki-git-sync* buffer")
+             (display-buffer "*wiki-git-sync*"))
+            (t
+             (message "✗ Wiki pull failed - see *wiki-git-sync* buffer")
+             (display-buffer "*wiki-git-sync*")))))))))
+
+(defun wiki/git-sync ()
+  "Full sync: pull, commit, and push wiki changes."
+  (interactive)
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (unless (wiki/git-sync--is-git-repo-p)
+      (user-error "Wiki directory is not a git repository"))
+    (when (wiki/git-sync--is-merge-in-progress-p)
+      (user-error "Merge/rebase in progress. Resolve conflicts first"))
+    (when wiki/git-sync--in-progress
+      (message "Git sync already in progress, skipping...")
+      (cl-return-from wiki/git-sync))
+
+    (setq wiki/git-sync--in-progress t)
+    (message "Syncing wiki...")
+
+    (let* ((has-remote (wiki/git-sync--has-remote-p))
+           (commit-msg (format "Update: %s" (format-time-string "%Y-%m-%d %H:%M:%S")))
+           (sync-command
+            (if has-remote
+                (format "git pull --rebase && git add -A && git diff-index --quiet HEAD || git commit -m '%s' && git push"
+                        commit-msg)
+              ;; No remote: just commit locally
+              (format "git add -A && git diff-index --quiet HEAD || git commit -m '%s'"
+                      commit-msg))))
+
+      (let ((proc (start-process
+                   "wiki-git-sync"
+                   "*wiki-git-sync*"
+                   "sh" "-c"
+                   sync-command)))
+        (set-process-sentinel
+         proc
+         (lambda (process event)
+           (setq wiki/git-sync--in-progress nil)
+           (let ((output (with-current-buffer "*wiki-git-sync*" (buffer-string))))
+             (cond
+              ((zerop (process-exit-status process))
+               (message "✓ Wiki synced successfully")
+               (setq wiki/git-sync--last-sync-time (current-time)))
+              ((string-match-p "nothing to commit\\|no changes added to commit\\|Nothing to do" output)
+               (message "✓ Wiki up to date (no changes)"))
+              ((string-match-p "CONFLICT" output)
+               (message "✗ Merge conflict detected - see *wiki-git-sync* buffer")
+               (display-buffer "*wiki-git-sync*"))
+              ((string-match-p "Could not resolve host\\|Failed to connect\\|Connection refused" output)
+               (message "✗ Wiki sync failed (offline?) - changes committed locally"))
+              (t
+               (message "✗ Wiki sync failed - see *wiki-git-sync* buffer")
+               (display-buffer "*wiki-git-sync*"))))))))))
+
+(defun wiki/auto-sync-on-save ()
+  "Auto-sync wiki after saving if in wiki directory."
+  (when (and wiki/auto-sync-enabled
+             buffer-file-name
+             (wiki//in-wiki-buffer-p)
+             (not wiki/git-sync--in-progress))
+    (run-with-idle-timer 2 nil #'wiki/git-sync)))
+
+(defun wiki/toggle-auto-sync ()
+  "Toggle auto-sync for wiki notes."
+  (interactive)
+  (setq wiki/auto-sync-enabled (not wiki/auto-sync-enabled))
+  (if wiki/auto-sync-enabled
+      (progn
+        (add-hook 'after-save-hook #'wiki/auto-sync-on-save)
+        (message "✓ Wiki auto-sync enabled"))
+    (progn
+      (remove-hook 'after-save-hook #'wiki/auto-sync-on-save)
+      (message "✗ Wiki auto-sync disabled"))))
+
+(defun wiki/git-sync--periodic ()
+  "Periodic sync function (runs in background)."
+  (when (and wiki/auto-sync-enabled
+             (not wiki/git-sync--in-progress)
+             (wiki/git-sync--is-git-repo-p))
+    (wiki/git-sync)))
+
+(defun wiki/git-sync-start-timer ()
+  "Start periodic background sync timer."
+  (interactive)
+  (when wiki/git-sync-timer
+    (cancel-timer wiki/git-sync-timer))
+  (setq wiki/git-sync-timer
+        (run-with-timer wiki/git-sync-interval
+                        wiki/git-sync-interval
+                        #'wiki/git-sync--periodic))
+  (message "✓ Wiki periodic sync enabled (every %d minutes)"
+           (/ wiki/git-sync-interval 60)))
+
+(defun wiki/git-sync-stop-timer ()
+  "Stop periodic background sync timer."
+  (interactive)
+  (when wiki/git-sync-timer
+    (cancel-timer wiki/git-sync-timer)
+    (setq wiki/git-sync-timer nil)
+    (message "✗ Wiki periodic sync disabled")))
+
+;; Enable auto-sync and periodic sync by default
+(add-hook 'after-save-hook #'wiki/auto-sync-on-save)
+(add-hook 'emacs-startup-hook #'wiki/git-pull)
+(add-hook 'emacs-startup-hook #'wiki/git-sync-start-timer)
+#+end_src
+
+** Git Conflict Resolution
+#+begin_src elisp
+(defun wiki/git-conflict-files ()
+  "List files with merge conflicts."
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (unless (wiki/git-sync--is-git-repo-p)
+      (user-error "Wiki directory is not a git repository"))
+    (let ((conflicts (split-string
+                      (string-trim
+                       (shell-command-to-string
+                        "git diff --name-only --diff-filter=U"))
+                      "\n" t)))
+      conflicts)))
+
+(defun wiki/git-resolve-conflicts ()
+  "Interactively resolve git conflicts in wiki notes."
+  (interactive)
+  (let ((conflicts (wiki/git-conflict-files)))
+    (if (null conflicts)
+        (message "No conflicts found!")
+      (let* ((default-directory (file-name-as-directory (expand-file-name org-directory)))
+             (choice (consult--read conflicts
+                                    :prompt "Resolve conflict in file: "
+                                    :category 'file
+                                    :sort nil)))
+        (when choice
+          (find-file (expand-file-name choice org-directory))
+          (goto-char (point-min))
+          (when (search-forward "<<<<<<< " nil t)
+            (goto-char (match-beginning 0))
+            (smerge-mode 1)
+            (message "Use 'n' for next conflict, 'p' for previous, 'RET' to keep current, 'a' to keep all, 'b' to keep base")))))))
+
+(defun wiki/git-abort-merge ()
+  "Abort current merge/rebase operation."
+  (interactive)
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (unless (wiki/git-sync--is-git-repo-p)
+      (user-error "Wiki directory is not a git repository"))
+    (unless (wiki/git-sync--is-merge-in-progress-p)
+      (user-error "No merge/rebase in progress"))
+    (when (yes-or-no-p "Abort merge/rebase? This will discard conflict resolution progress. ")
+      (cond
+       ((file-exists-p (expand-file-name ".git/MERGE_HEAD" default-directory))
+        (shell-command "git merge --abort")
+        (message "Merge aborted"))
+       ((or (file-exists-p (expand-file-name ".git/rebase-merge" default-directory))
+            (file-exists-p (expand-file-name ".git/rebase-apply" default-directory)))
+        (shell-command "git rebase --abort")
+        (message "Rebase aborted"))))))
+
+(defun wiki/git-continue-merge ()
+  "Continue merge/rebase after resolving conflicts."
+  (interactive)
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (unless (wiki/git-sync--is-git-repo-p)
+      (user-error "Wiki directory is not a git repository"))
+    (unless (wiki/git-sync--is-merge-in-progress-p)
+      (user-error "No merge/rebase in progress"))
+    (let ((conflicts (wiki/git-conflict-files)))
+      (if conflicts
+          (user-error "Still have unresolved conflicts in: %s" (string-join conflicts ", "))
+        (cond
+         ((file-exists-p (expand-file-name ".git/MERGE_HEAD" default-directory))
+          (shell-command "git add -A && git commit --no-edit")
+          (message "Merge completed!"))
+         ((or (file-exists-p (expand-file-name ".git/rebase-merge" default-directory))
+              (file-exists-p (expand-file-name ".git/rebase-apply" default-directory)))
+          (shell-command "git add -A && git rebase --continue")
+          (message "Rebase continued!")))))))
+
+(defun wiki/git-status ()
+  "Show git status for wiki repository."
+  (interactive)
+  (let ((default-directory (file-name-as-directory (expand-file-name org-directory))))
+    (unless (wiki/git-sync--is-git-repo-p)
+      (user-error "Wiki directory is not a git repository"))
+    (let ((status (shell-command-to-string "git status")))
+      (with-current-buffer (get-buffer-create "*Wiki Git Status*")
+        (erase-buffer)
+        (insert status)
+        (diff-mode)
+        (goto-char (point-min))
+        (display-buffer (current-buffer))))))
+#+end_src
+
+** Keybindings
+#+begin_src elisp
+;; Remap org-capture from SPC n n to SPC n x (to make room for wiki)
+(map! :leader
+      :desc "Org capture" "n x" #'org-capture
+      :desc "Org capture goto" "n X" #'org-capture-goto-target)
+
+;; Wiki commands under SPC n prefix
+(map! :leader
+      (:prefix ("n" . "notes")
+       :desc "Find/create note" "n" #'wiki/find-note
+       :desc "Search notes" "s" #'wiki/search
+       :desc "Backlinks" "b" #'wiki/backlinks
+       :desc "Insert heading link" "h" #'wiki/insert-heading-link
+       :desc "Create ID (heading)" "i" #'org-id-get-create
+       :desc "Add file ID" "I" #'wiki/add-file-id
+       :desc "Insert file link" "l" #'wiki/insert-link
+       ;; Graph visualization
+       (:prefix ("g" . "graph")
+        :desc "Graph statistics" "s" #'wiki/graph-stats
+        :desc "Find orphan notes" "o" #'wiki/graph-orphans
+        :desc "Show hub notes" "h" #'wiki/graph-hubs)
+       ;; Hugo export
+       :desc "Export current note (Hugo)" "e" #'wiki/hugo-export-current
+       :desc "Export all notes (Hugo)" "E" #'wiki/hugo-export-all
+       :desc "Toggle auto-export (Hugo)" "A" #'wiki/hugo-toggle-auto-export
+       ;; Git sync
+       :desc "Git pull" "P" #'wiki/git-pull
+       :desc "Git sync (pull + commit + push)" "p" #'wiki/git-sync
+       :desc "Git status" "S" #'wiki/git-status
+       :desc "Toggle auto-sync" "G" #'wiki/toggle-auto-sync
+       :desc "Start periodic sync timer" "T" #'wiki/git-sync-start-timer
+       :desc "Stop periodic sync timer" "t" #'wiki/git-sync-stop-timer
+       ;; Git conflict resolution (avoid nested prefix, use direct keys)
+       :desc "Resolve conflicts" "C" #'wiki/git-resolve-conflicts
+       :desc "Continue merge/rebase" "M" #'wiki/git-continue-merge
+       :desc "Abort merge/rebase" "X" #'wiki/git-abort-merge))
+#+end_src

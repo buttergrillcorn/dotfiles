@@ -5735,3 +5735,1217 @@ case "$WM" in
 esac
 #+end_src
 
+* Doom Emacs
+Extensible text editor and integrated development environment built on Emacs.
+
+** init.el
+#+begin_src elisp :tangle packages/doom/.config/doom/init.el
+;;; init.el -*- lexical-binding: t; -*-
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  DO NOT EDIT DIRECTLY, THIS FILE IS AUTO-GENERATED WITH ORG-BABEL-TANGLE!  ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; This file controls what Doom modules are enabled and what order they load
+;; in. Remember to run 'doom sync' after modifying it!
+
+;; NOTE Press 'SPC h d h' (or 'C-h d h' for non-vim users) to access Doom's
+;;      documentation. There you'll find a "Module Index" link where you'll find
+;;      a comprehensive list of Doom's modules and what flags they support.
+
+;; NOTE Move your cursor over a module's name (or its flags) and press 'K' (or
+;;      'C-c c k' for non-vim users) to view its documentation. This works on
+;;      flags as well (those symbols that start with a plus).
+;;
+;;      Alternatively, press 'gd' (or 'C-c c d') on a module to browse its
+;;      directory (for easy access to its source code).
+
+(doom! :input
+       ;;bidi              ; (tfel ot) thgir etirw uoy gnipleh
+       chinese
+       ;;japanese
+       ;;layout            ; auie,ctsrnm is the superior home row
+
+       :completion
+       ;; company           ; the ultimate code completion backend
+       ;; (helm              ; the *other* search engine for love and life
+       ;;  +icons
+       ;;  +fuzzy)
+       ;;ido               ; the other *other* search engine...
+       ;; (ivy              ; a search engine for love and life
+       ;;  +fuzzy
+       ;;  +icons
+       ;;  +childframe)
+       (vertico           ; the search engine of the future
+        +icons)
+
+       :ui
+       ;;deft              ; notational velocity for Emacs
+       doom              ; what makes DOOM look the way it does
+       doom-dashboard    ; a nifty splash screen for Emacs
+       doom-quit         ; DOOM quit-message prompts when you quit Emacs
+       (emoji +unicode)  ; 🙂
+       hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
+       hydra
+       indent-guides     ; highlighted indent columns
+       ligatures         ; ligatures and symbols to make your code pretty again
+       ;;minimap           ; show a map of the code on the side
+       modeline          ; snazzy, Atom-inspired modeline, plus API
+       nav-flash         ; blink cursor line after big motions
+       ;; neotree           ; a project drawer, like NERDTree for vim
+       ophints           ; highlight the region an operation acts on
+       (popup +defaults)   ; tame sudden yet inevitable temporary windows
+       ;; tabs              ; a tab bar for Emacs
+       treemacs          ; a project drawer, like neotree but cooler
+       unicode           ; extended unicode support for various languages
+       ;; (vc-gutter +pretty) ; vcs diff in the fringe
+       ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
+       window-select     ; visually switch windows
+       ;; workspaces        ; tab emulation, persistence & separate workspaces
+       zen               ; distraction-free coding or writing
+
+       :editor
+       (evil +everywhere); come to the dark side, we have cookies
+       file-templates    ; auto-snippets for empty files
+       fold              ; (nigh) universal code folding
+       (format  ; automated prettiness
+        +onsave
+        +lsp)
+       ;; god               ; run Emacs commands without modifier keys
+       ;; lispy             ; vim for lisp, for people who don't like vim
+       ;; multiple-cursors  ; editing in many places at once
+       ;; objed             ; text object editing for the innocent
+       ;; parinfer          ; turn lisp into python, sort of
+       ;; rotate-text       ; cycle region at point between text candidates
+       snippets          ; my elves. They type so I don't have to
+       word-wrap         ; soft wrapping with language-aware indent
+
+       :emacs
+       (dired             ; making dired pretty [functional]
+        +icon
+        +dirvish)
+       electric          ; smarter, keyword-based electric-indent
+       (ibuffer         ; interactive buffer management
+        +icons)
+       tramp
+       undo              ; persistent, smarter undo for your inevitable mistakes
+       vc                ; version-control and Emacs, sitting in a tree
+
+       :term
+       ;; eshell            ; the elisp shell that works everywhere
+       ;; shell             ; simple shell REPL for Emacs
+       ;; term              ; basic terminal emulator for Emacs
+       vterm             ; the best terminal emulation in Emacs
+
+       :checkers
+       syntax              ; tasing you for every semicolon you forget
+       (spell +aspell) ; tasing you for misspelling mispelling
+       ;;grammar           ; tasing grammar mistake every you make
+
+       :tools
+       ;;ansible
+       ;;biblio            ; Writes a PhD for you (citation needed)
+       ;;collab            ; buffers with friends
+       ;;debugger          ; FIXME stepping through code, to help you add bugs
+       ;;direnv
+       ;;docker
+       ;;editorconfig      ; let someone else argue about tabs vs spaces
+       ;;ein               ; tame Jupyter notebooks with emacs
+       (eval +overlay)     ; run code, run (also, repls)
+       ;; gist              ; interacting with github gists
+       lookup              ; navigate your code and its documentation
+       (lsp               ; M-x vscode
+        +peek)
+       magit             ; a git porcelain for Emacs
+       make              ; run make tasks from Emacs
+       ;;pass              ; password manager for nerds
+       pdf               ; pdf enhancements
+       ;;prodigy           ; FIXME managing external services & code builders
+       rgb               ; creating color strings
+       ;;taskrunner        ; taskrunner for all your projects
+       ;;terraform         ; infrastructure as code
+       ;;tmux              ; an API for interacting with tmux
+       tree-sitter       ; syntax and parsing, sitting in a tree...
+       ;;upload            ; map local to remote projects via ssh/ftp
+
+       :os
+       (:if IS-MAC macos)  ; improve compatibility with macOS
+       tty               ; improve the terminal Emacs experience
+
+       :lang
+       ;;agda              ; types of types of types of types...
+       ;;beancount         ; mind the GAAP
+       ;;(cc +lsp)         ; C > C++ == 1
+       ;;clojure           ; java with a lisp
+       ;; common-lisp       ; if you've seen one lisp, you've seen them all
+       ;;coq               ; proofs-as-programs
+       ;;crystal           ; ruby at the speed of c
+       ;;csharp            ; unity, .NET, and mono shenanigans
+       ;;data              ; config/data formats
+       ;;(dart +flutter)   ; paint ui and not much else
+       ;;dhall
+       ;;elixir            ; erlang done right
+       ;;elm               ; care for a cup of TEA?
+       emacs-lisp        ; drown in parentheses
+       ;;erlang            ; an elegant language for a more civilized age
+       ;;ess               ; emacs speaks statistics
+       ;;factor
+       ;;faust             ; dsp, but you get to keep your soul
+       ;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)
+       ;;fsharp            ; ML stands for Microsoft's Language
+       ;;fstar             ; (dependent) types and (monadic) effects and Z3
+       ;;gdscript          ; the language you waited for
+       ;;(go +lsp)         ; the hipster dialect
+       ;;(graphql +lsp)    ; Give queries a REST
+       ;;(haskell +lsp)    ; a language that's lazier than I am
+       ;;hy                ; readability of scheme w/ speed of python
+       ;;idris             ; a language you can depend on
+       (json              ; At least it ain't XML
+        +lsp)
+       ;;(java +lsp)       ; the poster child for carpal tunnel syndrome
+       (javascript        ; all(hope(abandon(ye(who(enter(here))))))
+        +lsp
+        +tree-sitter)
+       ;;julia             ; a better, faster MATLAB
+       ;;kotlin            ; a better, slicker Java(Script)
+       (latex             ; writing papers in Emacs has never been so fun
+        +cdlatex
+        +lsp)
+       ;;lean              ; for folks with too much to prove
+       ;;ledger            ; be audit you can be
+       (lua               ; one-based indices? one-based indices
+        +lsp
+        +tree-sitter
+        +fennel)
+       (markdown          ; writing docs for people to ignore
+        +grip
+        +tree-sitter)
+       ;;nim               ; python + lisp at the speed of c
+       ;; nix               ; I hereby declare "nix geht mehr!"
+       ;;ocaml             ; an objective camel
+       (org              ; organize your plain life in plain text
+        +dragndrop
+        +hugo
+        +noter
+        +pandoc
+        +pomodoro
+        +present
+        +pretty)
+       ;;php               ; perl's insecure younger brother
+       ;;plantuml          ; diagrams for confusing people more
+       ;;purescript        ; javascript, but functional
+       (python            ; beautiful is better than ugly
+        +lsp
+        +tree-sitter)
+       ;; qt                ; the 'cutest' gui framework ever
+       ;;racket            ; a DSL for DSLs
+       ;;raku              ; the artist formerly known as perl6
+       ;;rest              ; Emacs as a REST client
+       ;;rst               ; ReST in peace
+       ;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
+       (rust
+        +lsp
+        +tree-sitter)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       ;;scala             ; java, but good
+       ;;(scheme +guile)   ; a fully conniving family of lisps
+       (sh                ; she sells {ba,z,fi}sh shells on the C xor
+        +lsp)
+       ;;sml
+       ;;solidity          ; do you need a blockchain? No.
+       ;;swift             ; who asked for emoji variables?
+       ;;terra             ; Earth and Moon in alignment for performance.
+       (web               ; the tubes
+        +lsp
+        +tree-sitter)
+       (yaml              ; JSON, but readable
+        +lsp
+        +tree-sitter)
+       ;;zig               ; C, but simpler
+
+       :email
+       ;; (mu4e +org +gmail)
+       ;;notmuch
+       ;;(wanderlust +gmail)
+
+       :app
+       calendar
+       ;;emms
+       everywhere        ; *leave* Emacs!? You must be joking
+       ;;irc               ; how neckbeards socialize
+       ;;(rss +org)        ; emacs as an RSS reader
+       ;;twitter           ; twitter client https://twitter.com/vnought
+
+       :config
+       ;; literate
+       (default +bindings +smartparens))
+#+end_src
+
+** packages.el
+#+begin_src elisp :tangle packages/doom/.config/doom/packages.el
+;; no-byte-compile: t; -*-
+;;; $DOOMDIR/packages.el
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  DO NOT EDIT DIRECTLY, THIS FILE IS AUTO-GENERATED WITH ORG-BABEL-TANGLE!  ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; To install a package with Doom you must declare them here and run 'doom sync'
+;; on the command line, then restart Emacs for the changes to take effect -- or
+;; use 'M-x doom/reload'.
+
+;; Orgmode
+(package! org-autolist)
+(package! org-appear)
+(package! org-auto-tangle)
+
+;; Denote
+(package! denote)
+(package! denote-menu)
+(package! denote-org)
+(package! denote-explore)
+(package! consult-denote)
+(package! denote-journal)
+
+;; Claude Code
+(package! inheritenv
+  :recipe (:host github :repo "purcell/inheritenv"))
+(package! claude-code
+  :recipe (:host github :repo "stevemolitor/claude-code.el"))
+
+;; Pulsar
+(package! pulsar)
+#+end_src
+
+** config.el
+*** Header
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  DO NOT EDIT DIRECTLY, THIS FILE IS AUTO-GENERATED WITH ORG-BABEL-TANGLE!  ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
+#+end_src
+
+*** User Information
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq user-full-name "James"
+      user-mail-address "jamesyuli@outlook.com")
+#+end_src
+
+*** UI
+**** Font
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq doom-font (font-spec :family "Sarasa Term SC Nerd" :size 16 :weight 'Regular)
+      doom-variable-pitch-font (font-spec :family "Noto Sans CJK SC" :size 16)
+      doom-unicode-font (font-spec :family "Symbols Nerd Font Mono" :size 16))
+#+end_src
+
+**** Theme
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq doom-theme 'modus-vivendi-tritanopia)
+#+end_src
+
+**** Line Numbers
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq display-line-numbers-type 'relative)
+#+end_src
+*** Misc
+**** Touchpad Scrolling Fix
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; enable pixel-precise scrolling
+(when (fboundp 'pixel-scroll-precision-mode)
+  (pixel-scroll-precision-mode 1))
+;; optional: reduce jumpiness from mouse-wheel settings
+;; (setq mouse-wheel-scroll-amount '(0.01)   ; fraction of window (or use pixel values)
+;;       mouse-wheel-progressive-speed nil
+;;       mouse-wheel-follow-mouse t)
+#+end_src
+*** Key Binds
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; (map! "C-h" 'switch-to-prev-buffer)
+;; (map! "C-l" 'switch-to-next-buffer)
+;; (map! "C-S-l" 'recenter-top-bottom)
+#+end_src
+
+*** Which Key
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; (setq which-key-idle-delay 0.2)
+(setq auto-save-visited-interval 15)
+(auto-save-visited-mode +1)
+#+end_src
+
+*** Org Mode
+
+**** Basic
+
+***** Directory
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq org-directory "~/denote")
+#+end_src
+
+***** Capture Template
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (setq org-capture-templates
+        `(("t" "Todo" entry (file "~/denote/meta/todo.org")
+           ". * TODO %U %?" :empty-lines-after 1)
+          ("i" "Inbox" entry (file "~/denote/meta/inbox.org")
+           ". * %t %?" :empty-lines-after 1)
+          ;; ("w" "Work" entry (file "~/org/work.org")
+          ;;  ". * %t %?  %(org-set-tags \"work\")" :empty-lines-after 1)
+          ;; ("j" "Journal" entry (file+datetree "~/org/journal.org")
+          ;;  ". * %?" :jump-to-captured t :time-prompt t)
+          )))
+#+end_src
+
+***** Babel
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '(
+     (elisp . t)
+     (python . t)
+     (conf-toml . t)
+     (rust . t)
+     )))
+#+end_src
+
+***** Appearance
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (setq org-hide-emphasis-markers t)
+  (setq org-pretty-entities t))
+#+end_src
+
+***** Pomodoro
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq org-pomodoro-length 30)
+#+end_src
+
+**** Agenda
+
+***** Directory
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (setq org-agenda-files '("~/denote" "~/denote/journal")))
+#+end_src
+
+**** Extension Packages
+
+***** Auto List
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(add-hook 'org-mode-hook
+          (lambda () (org-autolist-mode)))
+#+end_src
+
+***** Org Appear
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (add-hook 'org-mode-hook 'org-appear-mode))
+#+end_src
+
+***** Org Auto Tangle
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! org
+  (add-hook 'org-mode-hook 'org-auto-tangle-mode))
+#+end_src
+
+***** Safe List
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq org-auto-tangle-babel-safelist '(
+                                       "~/example.org"
+                                       "~/example2.org"
+                                       ))
+#+end_src
+
+*** Denote
+
+**** Core
+
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package! denote
+  :hook
+  (dired-mode . denote-dired-mode)
+  :config
+  (denote-rename-buffer-mode 1)
+  (setq denote-buffer-name-prefix "<NOTE> ")
+  (setq denote-rename-buffer-format "[%k] %t")
+  (setq denote-directory "~/denote")
+  (setq denote-known-keywords nil)
+  (setq denote-date-prompt-use-org-read-date t))
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(map! :leader
+      (:prefix-map ("d" . "denote")
+       :desc "new note" "n" #'denote
+       :desc "new note + date" "N" #'denote-date
+       ;; :desc "new note in subdir" "s" #'denote-subdirectory
+       :desc "list all notes" "D" #'denote-menu-list-notes
+       :desc "open/create note" "d" #'denote-open-or-create
+       :desc "find link" "l" #'denote-find-link
+       :desc "backlinks" "b" #'denote-backlinks
+       :desc "backlink for heading" "B" #'denote-org-link-to-heading
+       :desc "template" "t" #'denote-template
+       :desc "capture region" "c" #'denote-region
+       (:prefix ("i" . "insert")
+        :desc "insert/create link" "l" #'denote-link-or-create
+        :desc "insert/create link in bg" "L" #'denote-link-after-creating
+        :desc "insert front matter" "f" #'denote-add-front-matter
+        :desc "insert heading link" "h" #'denote-org-link-to-heading
+        :desc "insert link matching REGEXP" "r" #'denote-add-links
+        (:prefix ("d" . "dynamic blocks")
+         :desc "links" "l" #'denote-org-dblock-insert-links
+         :desc "backlinks" "b" #'denote-org-dblock-insert-backlinks
+         :desc "files" "f" #'denote-org-dblock-insert-files
+         :desc "missing links" "m" #'denote-org-dblock-insert-missing-links))
+       (:prefix ("r" . "rename")
+        :desc "rename note" "r" #'denote-rename-file
+        :desc "rename keyword" "k" #'denote-rename-file-keywords
+        :desc "rename signature" "s" #'denote-rename-file-signature
+        :desc "rename front matter" "f" #'denote-rename-file-using-front-matter
+        :desc "rename title" "t" #'denote-rename-file-title)))
+#+end_src
+
+**** Org
+
+***** Key Binds
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(map! :leader
+      (:prefix-map ("d" . "denote")
+       :desc "backlink for heading" "B" #'denote-org-link-to-heading
+       (:prefix ("i" . "insert")
+        :desc "insert heading link" "h" #'denote-org-link-to-heading
+        (:prefix ("d" . "dynamic blocks")
+         :desc "links" "l" #'denote-org-dblock-insert-links
+         :desc "backlinks" "b" #'denote-org-dblock-insert-backlinks
+         :desc "files" "f" #'denote-org-dblock-insert-files
+         :desc "missing links" "m" #'denote-org-dblock-insert-missing-links))))
+#+end_src
+
+**** Explore
+
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package! denote-explore
+  :after denote
+  :config
+  (require 'denote))
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! denote-explore
+  (map! :leader
+        (:prefix ("d" . "denote")
+                 (:prefix ("e" . "explore")
+                  :desc "network" "n" #'denote-explore-network
+                  :desc "network regenerate" "N" #'denote-explore-network-regenerate
+
+                  (:prefix ("c" . "count")
+                   :desc "notes" "n" #'denote-explore-count-notes
+                   :desc "keywords" "k" #'denote-explore-count-keywords)
+
+                  (:prefix ("b" . "bar chart")
+                   :desc "file types" "f" #'denote-explore-barchart-filetypes
+                   :desc "keywords" "k" #'denote-explore-barchart-keywords
+                   :desc "timeline" "t" #'denote-explore-barchart-timeline
+                   :desc "degree" "d" #'denote-explore-barchart-degree
+                   :desc "backlinks" "b" #'denote-explore-barchart-backlinks)
+
+                  (:prefix ("r" . "random walks")
+                   :desc "note" "n" #'denote-explore-random-note
+                   :desc "regex" "r" #'denote-explore-random-regex
+                   :desc "link" "l" #'denote-explore-random-link
+                   :desc "keyword" "k" #'denote-explore-random-keyword)
+
+                  (:prefix ("j" . "janitor")
+                   :desc "duplicate notes" "d" #'denote-explore-duplicate-notes
+                   :desc "duplicate notes(dired)" "D" #'denote-explore-duplicate-notes-dired
+                   :desc "missing links" "l" #'denote-explore-missing-links
+                   :desc "zero keywords" "z" #'denote-explore-zero-keywords
+                   :desc "single keywords" "k" #'denote-explore-single-keywords
+                   :desc "rename keywords" "r" #'denote-explore-rename-keywords
+                   :desc "sync metadata" "s" #'denote-explore-sync-metadata
+                   :desc "isolated files" "i" #'denote-explore-isolated-files)))))
+#+end_src
+
+***** Temporary Solution
+Temporary solution for "denote-id-regexp" being obsolete in the new version of Denote.
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! denote
+  (unless (boundp 'denote-id-regexp)
+    ;; Try to find the actual variable name in your denote version
+    (setq denote-id-regexp
+          (or (and (boundp 'denote-identifier-regexp) denote-identifier-regexp)
+              "[0-9]\\{8\\}T[0-9]\\{6\\}"))))  ; fallback pattern
+#+end_src
+
+**** Consult
+
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package! consult-denote
+  :config
+  (consult-denote-mode 1))
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(map! :leader
+      (:prefix-map ("d" . "denote")
+       :desc "Search notes" "s" #'consult-denote-find
+       :desc "Search notes w/grep" "S"
+       #'consult-denote-grep))
+#+end_src
+
+**** Journal
+
+***** Configuration
+#+begin_src elisp :tangle no
+(use-package! denote-journal
+  :after denote
+  :config
+  (setq denote-journal-title-format "%Y-%m-%d"))
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle no
+(map! :leader
+      (:prefix-map ("d" . "denote")
+       :desc "find/create journal" "j" #'denote-journal-new-or-existing-entry
+       :desc "find/create journal w/date" "J" #'(lambda ()
+                                                  (interactive)
+                                                  (let ((current-prefix-arg '(4)))
+                                                    (call-interactively #'denote-journal-new-or-existing-entry)))
+       (:prefix ("i" . "insert")
+        :desc "insert journal link" "j" #'denote-journal-link-or-create-entry
+        :desc "insert journal link w/date" "J" #'(lambda ()
+                                                   (interactive)
+                                                   (let ((current-prefix-arg '(4)))
+                                                     (call-interactively #'denote-journal-link-or-create-entry))))))
+#+end_src
+
+**** Git Sync
+Automatic git sync for denote notes directory. Commits and pushes changes on save with smart commit messages, conflict handling, and offline support.
+
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Denote Git Sync Configuration
+(defvar denote-git-auto-sync-enabled t
+  "Enable automatic git sync on save for denote files.")
+
+(defvar denote-git-directory (expand-file-name "~/denote")
+  "Path to the denote notes directory.")
+
+(defvar denote-git-remote-name "origin"
+  "Git remote name to sync with.")
+
+(defvar denote-git-branch "main"
+  "Git branch name to sync with.")
+
+(defvar denote-git-sync-in-progress nil
+  "Lock to prevent concurrent sync operations.")
+
+(defvar denote-git-periodic-sync-interval (* 15 60)
+  "Interval in seconds for periodic sync (default: 15 minutes).")
+
+(defvar denote-git-idle-sync-delay (* 5 60)
+  "Idle time in seconds before triggering sync (default: 5 minutes).")
+
+(defvar denote-git-periodic-timer nil
+  "Timer object for periodic sync.")
+
+(defvar denote-git-idle-timer nil
+  "Timer object for idle sync.")
+#+end_src
+
+***** Helper Functions
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Helper: Check if file is in denote directory
+(defun denote-in-denote-directory-p ()
+  "Return t if current buffer file is in denote directory."
+  (when buffer-file-name
+    (string-prefix-p (expand-file-name denote-git-directory)
+                     (expand-file-name buffer-file-name))))
+
+;; Helper: Check if git repository exists
+(defun denote-git-check-repo ()
+  "Check if denote directory is a git repository."
+  (let ((default-directory denote-git-directory))
+    (= 0 (call-process "git" nil nil nil "rev-parse" "--git-dir"))))
+
+;; Helper: Check internet connectivity
+(defun denote-git-check-connectivity ()
+  "Check if we can reach the git remote (basic connectivity test)."
+  (let ((default-directory denote-git-directory))
+    (= 0 (call-process "git" nil nil nil "ls-remote" "--exit-code" "-h" denote-git-remote-name))))
+
+;; Helper: Generate smart commit message
+(defun denote-git-format-commit-message ()
+  "Generate a commit message based on changed files and timestamp."
+  (let* ((default-directory denote-git-directory)
+         (timestamp (format-time-string "%Y-%m-%d %H:%M:%S"))
+         (status-output (shell-command-to-string "git status --short"))
+         (lines (split-string status-output "\n" t))
+         (changed-files (mapcar (lambda (line)
+                                  (if (string-match "^[AMD?]+ +\\(.+\\)$" line)
+                                      (file-name-nondirectory (match-string 1 line))
+                                    nil))
+                                lines))
+         (changed-files (delq nil changed-files))
+         (file-count (length changed-files)))
+    (cond
+     ((= file-count 0)
+      (format "Update notes: %s" timestamp))
+     ((= file-count 1)
+      (format "Update %s\n\n%s" (car changed-files) timestamp))
+     ((<= file-count 3)
+      (format "Update %s\n\n%s"
+              (mapconcat 'identity changed-files ", ")
+              timestamp))
+     (t
+      (format "Update %d notes\n\n%s" file-count timestamp)))))
+#+end_src
+
+***** Core Sync Function
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Core sync function with offline support
+(defun denote-git-sync (&optional quiet)
+  "Safely sync denote directory with git: pull, commit, and push.
+Handles conflicts and offline scenarios gracefully. If QUIET is non-nil, suppress messages."
+  (interactive)
+  (if denote-git-sync-in-progress
+      (unless quiet (message "Denote sync already in progress, skipping..."))
+    (setq denote-git-sync-in-progress t)
+    (let ((default-directory denote-git-directory))
+      (unless (denote-git-check-repo)
+        (setq denote-git-sync-in-progress nil)
+        (error "Denote directory is not a git repository: %s" denote-git-directory))
+
+      ;; Run sync asynchronously
+      (make-process
+       :name "denote-git-sync"
+       :buffer "*denote-git-sync*"
+       :command (list "sh" "-c"
+                      (format "cd '%s' && \
+# Safety check: ensure no merge/rebase in progress
+if [ -f .git/MERGE_HEAD ] || [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ]; then \
+  echo 'GIT_OPERATION_IN_PROGRESS'; \
+  exit 1; \
+fi && \
+# Try to fetch (test connectivity)
+if git fetch %s %s 2>&1; then \
+  echo 'ONLINE'; \
+  # Check for remote changes and merge
+  if ! git diff --quiet HEAD..%s/%s 2>&1; then \
+    if ! git merge --no-edit %s/%s 2>&1; then \
+      git merge --abort 2>&1; \
+      echo 'CONFLICT_DETECTED'; \
+      exit 1; \
+    fi; \
+  fi; \
+  # Check for local changes (modifications, deletions, additions)
+  if [ -z \"$(git status --porcelain)\" ]; then \
+    # No local changes, check for unpushed commits
+    if git log %s/%s..HEAD 2>&1 | grep -q 'commit'; then \
+      git push %s %s 2>&1 && echo 'PUSH_SUCCESS'; \
+    else \
+      echo 'NO_CHANGES'; \
+    fi; \
+  else \
+    # Has local changes (including deletions), commit and push
+    git add -A 2>&1 && \
+    git commit -m \"$(cat <<'COMMIT_MSG_EOF'\n%s\nCOMMIT_MSG_EOF\n)\" 2>&1 && \
+    git push %s %s 2>&1 && echo 'SYNC_SUCCESS'; \
+  fi; \
+else \
+  # Offline mode - commit locally only
+  echo 'OFFLINE'; \
+  if [ -n \"$(git status --porcelain)\" ]; then \
+    git add -A 2>&1 && \
+    git commit -m \"$(cat <<'COMMIT_MSG_EOF'\n%s\nCOMMIT_MSG_EOF\n)\" 2>&1 && \
+    echo 'OFFLINE_COMMIT_SUCCESS'; \
+  else \
+    echo 'OFFLINE_NO_CHANGES'; \
+  fi; \
+fi"
+                              denote-git-directory
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              (denote-git-format-commit-message)
+                              denote-git-remote-name
+                              denote-git-branch
+                              (denote-git-format-commit-message)))
+       :sentinel
+       (lambda (process event)
+         (setq denote-git-sync-in-progress nil)
+         (let ((output (with-current-buffer (process-buffer process)
+                         (buffer-string))))
+           (cond
+            ((string-match-p "GIT_OPERATION_IN_PROGRESS" output)
+             (unless quiet
+               (message "⚠ Denote sync: Git operation in progress, skipping...")))
+            ((string-match-p "CONFLICT_DETECTED" output)
+             (message "⚠ Denote sync: Merge conflict detected! Please resolve manually in %s"
+                      denote-git-directory)
+             (when (fboundp 'alert)
+               (alert (format "Merge conflict in denote notes!\n\nPlease open %s and resolve conflicts manually."
+                              denote-git-directory)
+                      :title "Denote Git Sync - Conflict"
+                      :severity 'high)))
+            ((string-match-p "SYNC_SUCCESS" output)
+             (unless quiet (message "✓ Denote notes synced successfully")))
+            ((string-match-p "PUSH_SUCCESS" output)
+             (unless quiet (message "✓ Denote notes pushed successfully")))
+            ((string-match-p "OFFLINE_COMMIT_SUCCESS" output)
+             (unless quiet (message "📴 Offline: Changes committed locally (will push when online)")))
+            ((string-match-p "OFFLINE_NO_CHANGES" output)
+             (unless quiet (message "📴 Offline: No changes to commit")))
+            ((string-match-p "NO_CHANGES" output)
+             (unless quiet (message "✓ Denote notes already in sync")))
+            ((string-match-p "fatal\\|error" output)
+             (unless quiet
+               (message "✗ Denote sync failed: %s"
+                        (car (split-string output "\n" t)))))
+            (t
+             (unless quiet (message "✗ Denote sync completed with unknown status"))))))))))
+#+end_src
+
+***** Auto-Save Hook
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Auto-sync on save hook
+(defun denote-git-auto-sync-on-save ()
+  "Automatically sync denote notes after saving if enabled."
+  (when (and denote-git-auto-sync-enabled
+             (denote-in-denote-directory-p))
+    (denote-git-sync t)))  ; t = quiet mode
+
+;; Add to after-save-hook
+(add-hook 'after-save-hook #'denote-git-auto-sync-on-save)
+#+end_src
+
+***** Startup Sync
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Sync on daemon startup
+(defun denote-git-startup-sync ()
+  "Sync denote notes when Emacs daemon starts."
+  (when (and (daemonp) denote-git-auto-sync-enabled)
+    (run-with-timer 2 nil (lambda () (denote-git-sync t)))))
+
+;; Add to after-init-hook for daemon startup
+(add-hook 'after-init-hook #'denote-git-startup-sync)
+#+end_src
+
+***** Periodic Sync Timer
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Start periodic sync timer
+(defun denote-git-start-periodic-sync ()
+  "Start periodic sync timer for denote notes."
+  (interactive)
+  (when denote-git-periodic-timer
+    (cancel-timer denote-git-periodic-timer))
+  (setq denote-git-periodic-timer
+        (run-at-time denote-git-periodic-sync-interval
+                     denote-git-periodic-sync-interval
+                     (lambda () (denote-git-sync t))))
+  (message "Denote periodic sync started (every %d minutes)"
+           (/ denote-git-periodic-sync-interval 60)))
+
+;; Stop periodic sync timer
+(defun denote-git-stop-periodic-sync ()
+  "Stop periodic sync timer for denote notes."
+  (interactive)
+  (when denote-git-periodic-timer
+    (cancel-timer denote-git-periodic-timer)
+    (setq denote-git-periodic-timer nil)
+    (message "Denote periodic sync stopped")))
+
+;; Start periodic sync automatically
+(denote-git-start-periodic-sync)
+#+end_src
+
+***** Idle Sync Timer
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Start idle sync timer
+(defun denote-git-start-idle-sync ()
+  "Start idle sync timer for denote notes."
+  (interactive)
+  (when denote-git-idle-timer
+    (cancel-timer denote-git-idle-timer))
+  (setq denote-git-idle-timer
+        (run-with-idle-timer denote-git-idle-sync-delay t
+                             (lambda () (denote-git-sync t))))
+  (message "Denote idle sync started (after %d minutes idle)"
+           (/ denote-git-idle-sync-delay 60)))
+
+;; Stop idle sync timer
+(defun denote-git-stop-idle-sync ()
+  "Stop idle sync timer for denote notes."
+  (interactive)
+  (when denote-git-idle-timer
+    (cancel-timer denote-git-idle-timer)
+    (setq denote-git-idle-timer nil)
+    (message "Denote idle sync stopped")))
+
+;; Start idle sync automatically
+(denote-git-start-idle-sync)
+#+end_src
+
+***** Keybindings and Toggle
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Toggle auto-sync
+(defun denote-git-toggle-auto-sync ()
+  "Toggle automatic git sync for denote notes."
+  (interactive)
+  (setq denote-git-auto-sync-enabled (not denote-git-auto-sync-enabled))
+  (if denote-git-auto-sync-enabled
+      (progn
+        (denote-git-start-periodic-sync)
+        (denote-git-start-idle-sync))
+    (progn
+      (denote-git-stop-periodic-sync)
+      (denote-git-stop-idle-sync)))
+  (message "Denote auto-sync %s"
+           (if denote-git-auto-sync-enabled "enabled" "disabled")))
+
+;; Keybindings
+(map! :leader
+      (:prefix-map ("d" . "denote")
+                   (:prefix ("g" . "git")
+                    :desc "Sync notes" "s" #'denote-git-sync
+                    :desc "Toggle auto-sync" "t" #'denote-git-toggle-auto-sync)))
+#+end_src
+
+**** Completion Formatting
+Custom functions to make the formatting of calling =denote-open-or-create= to be cleaner.
+It would show up something like this instead:
+|-----------------------------------------------------------------------------|
+| Find file: note t_                                                          |
+|-----------------------------------------------------------------------------|
+| [ 2003-09-01 ] note title                                 keyword1 keyword2 |
+|                                                                             |
+|-----------------------------------------------------------------------------|
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Simple denote completion formatting
+(defun my-format-denote-candidate (file)
+  "Format denote file for completion display with right-aligned keywords."
+  (when (string-match-p "[0-9]\\{8\\}T[0-9]\\{6\\}" file)
+    (let* ((full-path (expand-file-name file (denote-directory)))
+           (date-str (ignore-errors (denote-retrieve-filename-identifier full-path)))
+           (title (ignore-errors (denote-retrieve-filename-title full-path)))
+           (keywords (ignore-errors (denote-retrieve-filename-keywords full-path))))
+      (when date-str
+        (let* ((formatted-date (format "[ %s-%s-%s ]"
+                                       (substring date-str 0 4)
+                                       (substring date-str 4 6)
+                                       (substring date-str 6 8)))
+               (formatted-title (if title
+                                    (replace-regexp-in-string "-" " " title)
+                                  ""))
+               (formatted-keywords (cond
+                                    ((listp keywords)
+                                     (mapconcat (lambda (k) (replace-regexp-in-string "_" " " k)) keywords " "))
+                                    ((stringp keywords)
+                                     (replace-regexp-in-string "_" " " keywords))
+                                    (t "")))
+               ;; Calculate padding to right-align keywords dynamically
+               (left-part (format "%s %s" formatted-date formatted-title))
+               (window-width (window-width (minibuffer-window)))
+               (padding-needed (max 1 (- window-width (length left-part) (length formatted-keywords) 2)))
+               (padding (make-string padding-needed ?\s)))
+
+          (if (and formatted-keywords (not (string-empty-p formatted-keywords)))
+              (format "%s%s%s" left-part padding formatted-keywords)
+            left-part))))))
+
+;; Override the denote file prompt function
+(defun my-denote-file-prompt (&optional files-matching-regexp prompt-text no-require-match &rest _ignore)
+  "Custom denote file prompt with formatted display."
+  (let* ((files (denote-directory-files files-matching-regexp))
+         (file-alist (mapcar (lambda (file)
+                               (let* ((relative-file (denote-get-file-name-relative-to-denote-directory file))
+                                      (formatted (my-format-denote-candidate relative-file)))
+                                 (cons (or formatted relative-file) file)))
+                             files))
+         (choice (completing-read
+                  (or prompt-text "Select file: ")
+                  file-alist nil
+                  (unless no-require-match :require-match))))
+    (cdr (assoc choice file-alist))))
+
+;; Apply the override
+(advice-add 'denote-file-prompt :override #'my-denote-file-prompt)
+#+end_src
+**** Publishing
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(load (expand-file-name ".site/build.el" "~/denote"))
+
+(require 'ox-publish)
+
+(setq org-publish-project-alist
+      '(("oa-src"
+         :base-directory "~/denote/"
+         :base-extension "org"
+         :publishing-directory "~/denote/.site/public/"
+         :recursive nil
+         :publishing-function org-html-publish-to-html
+         :preparation-function my/org-generate-index    ; Index generation hook
+         :headline-levels 4
+         :auto-preamble t
+         :auto-postamble nil)
+        ;; static files
+        ("oa-static"
+         :base-directory "~/denote/.site/static/"
+         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|woff2\\|woff\\|ttf"
+         :publishing-directory "~/denote/.site/public/static/"
+         :recursive t
+         :publishing-function org-publish-attachment)
+        ;; search
+        ("search-index"
+         :base-directory "~/denote/"
+         :base-extension "org"
+         :publishing-directory "~/denote/.site/public/static/"
+         :completion-function my/generate-search-index
+         :publishing-function ignore)
+        ;; combine
+        ("oa" :components ("oa-src" "oa-static" "search-index"))))
+
+(setq org-publish-use-timestamps-flag nil)
+#+end_src
+***** Styling
+****** CSS and Scripts
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(after! ox-html
+  (setq org-html-head nil)
+  (setq org-html-head-extra
+        "<link rel=\"stylesheet\" href=\"static/style.css\" />
+<script src=\"static/search.js\"></script>
+<script src=\"static/theme-toggle.js\"></script>"))
+#+end_src
+****** Header
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq org-html-preamble
+      "<div class='back-home'>
+        <a href='index.html'>HOME</a>
+       </div>
+       <div class='search-container'>
+        <input id='search-box' type='text' placeholder='Type to search...'>
+        <div id='search-results'></div>
+       </div>")
+#+end_src
+****** Footer
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq org-html-postamble
+      "<button class='theme-toggle' aria-label='Toggle theme'></button>")
+#+end_src
+***** Testing
+#+begin_src elisp :tangle packages/doom/.config/doom/packages.el
+(package! simple-httpd)
+#+end_src
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(setq httpd-root "~/denote/.site/public")
+#+end_src
+***** Auto-generate
+****** Landing page - index.org
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun my/org-generate-index (&optional project)
+  "Auto-generate elements on index.org file for landing page."
+  (let* ((src-dir "~/denote/")
+         (index-file (expand-file-name "index.org" src-dir))
+         ;; Get all .org files except for index.org
+         (files (seq-filter
+                 (lambda (f)
+                   (and (string-match-p "\\.org$" f)
+                        (not (string-match-p "index.org$" f))))
+                 (directory-files src-dir t "\\.org$")))
+         ;; Sort by newest modification time
+         (sorted (seq-sort
+                  (lambda (a b)
+                    (time-less-p (nth 5 (file-attributes b))
+                                 (nth 5 (file-attributes a))))
+                  files))
+         ;; Take first 10
+         (recent (seq-take sorted 10)))
+    (with-temp-file index-file
+      (insert (format "%c+TITLE: ongoing archive\n" ?#))
+      (insert (format "%c+OPTIONS: toc:nil num:nil\n\n" ?#))
+      (insert "* Welcome\n")
+      (insert "A brief description of your site goes here.\n\n")
+      (insert "* Recent Notes\n")
+      (insert "The 10 most recently edited notes:\n\n")
+      (dolist (f recent)
+        (let ((fname (file-name-nondirectory f)))
+          (insert (format "- [[file:%s][%s]]\n"
+                          fname
+                          (file-name-base fname)))))
+      (insert "\n"))))
+#+end_src
+****** Search index - search-index.json
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun my/clean-org-content (content)
+  "Remove Org-mode syntax from CONTENT for search indexing."
+  (with-temp-buffer
+    (insert content)
+    (goto-char (point-min))
+
+    ;; Remove metadata lines (#+TITLE:, #+OPTIONS:, etc.)
+    (while (re-search-forward "^#\\+[A-Z_]+:.*\n" nil t)
+      (replace-match ""))
+
+    ;; Remove property drawers
+    (goto-char (point-min))
+    (while (re-search-forward "^:PROPERTIES:\n\\(?:.*\n\\)*?:END:\n" nil t)
+      (replace-match ""))
+
+    ;; Convert org links [[file:...][text]] to just text
+    (goto-char (point-min))
+    (while (re-search-forward "\\[\\[file:[^]]+\\]\\[\\([^]]+\\)\\]\\]" nil t)
+      (replace-match "\\1"))
+
+    ;; Convert simple links [[text]] to just text
+    (goto-char (point-min))
+    (while (re-search-forward "\\[\\[\\([^]]+\\)\\]\\]" nil t)
+      (replace-match "\\1"))
+
+    ;; Remove heading markers (* ** ***)
+    (goto-char (point-min))
+    (while (re-search-forward "^\\*+ " nil t)
+      (replace-match ""))
+
+    ;; Remove emphasis markers (*bold*, /italic/, =code=, ~verbatim~)
+    (goto-char (point-min))
+    (while (re-search-forward "[*=/~]\\([^*=/~\n]+\\)[*=/~]" nil t)
+      (replace-match "\\1"))
+
+    ;; Remove empty lines at start/end and normalize whitespace
+    (goto-char (point-min))
+    (while (re-search-forward "\n\n\n+" nil t)
+      (replace-match "\n\n"))
+
+    (string-trim (buffer-string))))
+
+(defun my/generate-search-index (project &optional force)
+  "Generate search-index.json for PROJECT."
+  (let* ((src-dir "~/denote/")
+         (files (directory-files src-dir t "\\.org$"))
+         (entries '()))
+
+    ;; Parse org files
+    (dolist (file files)
+      (with-temp-buffer
+        (insert-file-contents file)
+        (let* ((title (or (cadar (org-collect-keywords '("TITLE"))) "Untitled"))
+               (raw-content (buffer-string))
+               (clean-content (my/clean-org-content raw-content)))
+          (push `(("title" . ,title)
+                  ("content" . ,clean-content)
+                  ("file" . ,(concat (file-name-base file) ".html")))
+                entries))))
+
+    ;; Write output file
+    (let* ((pub-dir "~/denote/.site/public/static/")
+           (outfile (expand-file-name "search-index.json" pub-dir)))
+      (with-temp-buffer
+        (insert (json-encode entries))
+        (write-region (point-min) (point-max) outfile))
+      ;; Org publish expects non-nil return
+      outfile)))
+#+end_src
+***** Template 
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+
+#+end_src
+*** Projectile
+**** Add Projects
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; (projectile-add-known-project "~/org")
+(projectile-add-known-project "~/denote")
+;; (projectile-add-known-project "~/roam")
+(projectile-add-known-project "~/stow")
+#+end_src
+*** Claude Code
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package! claude-code
+  :after inheritenv
+  :config
+  (setq claude-code-terminal-backend 'vterm)
+  (claude-code-mode)
+  :bind
+  (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode)))
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(map! :leader :desc "Claude Code" "e" #'claude-code-transient)
+;; (:prefix-map ("e" . "Claude")
+;;  :desc "Start" "e" #'claude-code-transient))
+#+end_src
+*** Pulsar
+Pulse highlight line on demand or after running select functions
+**** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package! pulsar
+  :config
+  (require 'pulsar)
+
+  ;; Check the default value of `pulsar-pulse-functions'.  That is where
+  ;; you add more commands that should cause a pulse after they are
+  ;; invoked
+
+  (setq pulsar-pulse t)
+  (setq pulsar-delay 0.055)
+  (setq pulsar-iterations 10)
+  (setq pulsar-face 'pulsar-magenta)
+  (setq pulsar-highlight-face 'pulsar-yellow)
+
+  (pulsar-global-mode 1)
+
+  ;; OR use the local mode for select mode hooks
+
+  (dolist (hook '(org-mode-hook elisp-mode-hook))
+    (add-hook hook #'pulsar-mode))
+
+  ;; pulsar does not define any key bindings.  This is just a sample that
+  ;; respects the key binding conventions.  Evaluate:
+  ;;
+  ;;     (info "(elisp) Key Binding Conventions")
+  ;;
+  ;; The author uses C-x l for `pulsar-pulse-line' and C-x L for
+  ;; `pulsar-highlight-line'.
+  ;;
+  ;; You can replace `pulsar-highlight-line' with the command
+  ;; `pulsar-highlight-dwim'.
+  ;; (let ((map global-map))
+  ;;   (define-key map (kbd "C-c h p") #'pulsar-pulse-line)
+  ;;   (define-key map (kbd "C-c h h") #'pulsar-highlight-line))
+
+  ;; Use pulsar with next-error
+  (add-hook 'next-error-hook #'pulsar-pulse-line)
+
+  ;; Use pulsar in the minibuffer
+  (add-hook 'minibuffer-setup-hook #'pulsar-pulse-line-blue)
+
+  ;; Use pulsar with other packages
+
+  ;;; integration with the `consult' package:
+  (add-hook 'consult-after-jump-hook #'pulsar-recenter-top)
+  (add-hook 'consult-after-jump-hook #'pulsar-reveal-entry))
+#+end_src
+

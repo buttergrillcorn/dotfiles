@@ -1,0 +1,991 @@
+#+TITLE: Denote backup
+#+PROPERTY: header-args :tangle no
+
+*** Denote
+#+BEGIN_COMMENT
+
+**** Core
+
+***** Configuration
+#+begin_src elisp :tangle no
+(use-package! denote
+  :hook
+  (dired-mode . denote-dired-mode)
+  :config
+  (denote-rename-buffer-mode 1)
+  (setq denote-buffer-name-prefix "<NOTE> ")
+  (setq denote-rename-buffer-format "[%k] %t")
+  (setq denote-directory "~/denote")
+  (setq denote-known-keywords nil)
+  (setq denote-date-prompt-use-org-read-date t)
+
+  ;; Digital Garden: Publish by default
+  ;; Only use org files (default), exclude markdown
+  (setq denote-file-type 'org)
+
+  ;; Exclude Hugo content directory from Denote searches
+  (setq denote-allow-multiple-file-types nil)
+  (setq denote-excluded-directories-regexp "blog/content\\|blog/public"))
+
+;; denote-org provides heading links and backlinks functionality
+(use-package! denote-org
+  :after denote)
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle no
+(map! :leader
+      (:prefix-map ("d" . "denote")
+       :desc "new note" "n" #'denote
+       :desc "new note + date" "N" #'denote-date
+       ;; :desc "new note in subdir" "s" #'denote-subdirectory
+       :desc "list all notes" "D" #'denote-menu-list-notes
+       :desc "open/create note" "d" #'denote-open-or-create
+       :desc "find link" "l" #'denote-find-link
+       :desc "backlinks" "b" #'denote-backlinks
+       :desc "backlinks for heading" "B" #'denote-org-backlinks-for-heading
+       :desc "template" "t" #'denote-template
+       :desc "capture region" "c" #'denote-region
+       (:prefix ("i" . "insert")
+        :desc "insert/create link" "l" #'denote-link-or-create
+        :desc "insert/create link in bg" "L" #'denote-link-after-creating
+        :desc "insert front matter" "f" #'denote-add-front-matter
+        :desc "insert heading link" "h" #'denote-org-link-to-heading
+        :desc "insert link matching REGEXP" "r" #'denote-add-links
+        (:prefix ("d" . "dynamic blocks")
+         :desc "links" "l" #'denote-org-dblock-insert-links
+         :desc "backlinks" "b" #'denote-org-dblock-insert-backlinks
+         :desc "files" "f" #'denote-org-dblock-insert-files
+         :desc "missing links" "m" #'denote-org-dblock-insert-missing-links))
+       (:prefix ("r" . "rename")
+        :desc "rename note" "r" #'denote-rename-file
+        :desc "rename keyword" "k" #'denote-rename-file-keywords
+        :desc "rename signature" "s" #'denote-rename-file-signature
+        :desc "rename front matter" "f" #'denote-rename-file-using-front-matter
+        :desc "rename title" "t" #'denote-rename-file-title)))
+#+end_src
+
+**** Org
+;; Org-specific denote configuration moved to main keybindings above
+;; No duplicate keybindings needed here
+        
+**** Explore
+
+***** Configuration
+#+begin_src elisp :tangle no
+(use-package! denote-explore
+  :after denote
+  :config
+  (require 'denote))
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle no
+(after! denote-explore
+  (map! :leader
+        (:prefix ("d" . "denote")
+                 (:prefix ("e" . "explore")
+                  :desc "network" "n" #'denote-explore-network
+                  :desc "network regenerate" "N" #'denote-explore-network-regenerate
+
+                  (:prefix ("c" . "count")
+                   :desc "notes" "n" #'denote-explore-count-notes
+                   :desc "keywords" "k" #'denote-explore-count-keywords)
+
+                  (:prefix ("b" . "bar chart")
+                   :desc "file types" "f" #'denote-explore-barchart-filetypes
+                   :desc "keywords" "k" #'denote-explore-barchart-keywords
+                   :desc "timeline" "t" #'denote-explore-barchart-timeline
+                   :desc "degree" "d" #'denote-explore-barchart-degree
+                   :desc "backlinks" "b" #'denote-explore-barchart-backlinks)
+
+                  (:prefix ("r" . "random walks")
+                   :desc "note" "n" #'denote-explore-random-note
+                   :desc "regex" "r" #'denote-explore-random-regex
+                   :desc "link" "l" #'denote-explore-random-link
+                   :desc "keyword" "k" #'denote-explore-random-keyword)
+
+                  (:prefix ("j" . "janitor")
+                   :desc "duplicate notes" "d" #'denote-explore-duplicate-notes
+                   :desc "duplicate notes(dired)" "D" #'denote-explore-duplicate-notes-dired
+                   :desc "missing links" "l" #'denote-explore-missing-links
+                   :desc "zero keywords" "z" #'denote-explore-zero-keywords
+                   :desc "single keywords" "k" #'denote-explore-single-keywords
+                   :desc "rename keywords" "r" #'denote-explore-rename-keywords
+                   :desc "sync metadata" "s" #'denote-explore-sync-metadata
+                   :desc "isolated files" "i" #'denote-explore-isolated-files)))))
+#+end_src
+
+***** Temporary Solution
+Temporary solution for "denote-id-regexp" being obsolete in the new version of Denote.
+#+begin_src elisp :tangle no
+(after! denote
+  (unless (boundp 'denote-id-regexp)
+    ;; Try to find the actual variable name in your denote version
+    (setq denote-id-regexp
+          (or (and (boundp 'denote-identifier-regexp) denote-identifier-regexp)
+              "[0-9]\\{8\\}T[0-9]\\{6\\}"))))  ; fallback pattern
+#+end_src
+
+**** Consult
+
+***** Configuration
+#+begin_src elisp :tangle no
+(use-package! consult-denote
+  :config
+  (consult-denote-mode 1))
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle no
+(map! :leader
+      (:prefix-map ("d" . "denote")
+       :desc "Search notes" "s" #'consult-denote-find
+       :desc "Search notes w/grep" "S"
+       #'consult-denote-grep))
+#+end_src
+
+**** Journal
+
+***** Configuration
+#+begin_src elisp :tangle no
+(use-package! denote-journal
+  :after denote
+  :config
+  (setq denote-journal-title-format "%Y-%m-%d"))
+#+end_src
+
+***** Key Binds
+#+begin_src elisp :tangle no
+(map! :leader
+      (:prefix-map ("d" . "denote")
+       :desc "find/create journal" "j" #'denote-journal-new-or-existing-entry
+       :desc "find/create journal w/date" "J" #'(lambda ()
+                                                  (interactive)
+                                                  (let ((current-prefix-arg '(4)))
+                                                    (call-interactively #'denote-journal-new-or-existing-entry)))
+       (:prefix ("i" . "insert")
+        :desc "insert journal link" "j" #'denote-journal-link-or-create-entry
+        :desc "insert journal link w/date" "J" #'(lambda ()
+                                                   (interactive)
+                                                   (let ((current-prefix-arg '(4)))
+                                                     (call-interactively #'denote-journal-link-or-create-entry))))))
+#+end_src
+
+**** Git Sync
+Automatic git sync for denote notes directory. Commits and pushes changes on save with smart commit messages, conflict handling, and offline support.
+
+***** Configuration
+#+begin_src elisp :tangle no
+;; Denote Git Sync Configuration
+(defvar denote-git-auto-sync-enabled t
+  "Enable automatic git sync on save for denote files.")
+
+(defvar denote-git-directory (expand-file-name "~/denote")
+  "Path to the denote notes directory.")
+
+(defvar denote-git-remote-name "origin"
+  "Git remote name to sync with.")
+
+(defvar denote-git-branch "main"
+  "Git branch name to sync with.")
+
+(defvar denote-git-sync-in-progress nil
+  "Lock to prevent concurrent sync operations.")
+
+(defvar denote-git-periodic-sync-interval (* 15 60)
+  "Interval in seconds for periodic sync (default: 15 minutes).")
+
+(defvar denote-git-idle-sync-delay (* 5 60)
+  "Idle time in seconds before triggering sync (default: 5 minutes).")
+
+(defvar denote-git-periodic-timer nil
+  "Timer object for periodic sync.")
+
+(defvar denote-git-idle-timer nil
+  "Timer object for idle sync.")
+#+end_src
+
+***** Helper Functions
+#+begin_src elisp :tangle no
+;; Helper: Check if file is in denote directory
+(defun denote-in-denote-directory-p ()
+  "Return t if current buffer file is in denote directory."
+  (when buffer-file-name
+    (string-prefix-p (expand-file-name denote-git-directory)
+                     (expand-file-name buffer-file-name))))
+
+;; Helper: Check if git repository exists
+(defun denote-git-check-repo ()
+  "Check if denote directory is a git repository."
+  (let ((default-directory denote-git-directory))
+    (= 0 (call-process "git" nil nil nil "rev-parse" "--git-dir"))))
+
+;; Helper: Check internet connectivity
+(defun denote-git-check-connectivity ()
+  "Check if we can reach the git remote (basic connectivity test)."
+  (let ((default-directory denote-git-directory))
+    (= 0 (call-process "git" nil nil nil "ls-remote" "--exit-code" "-h" denote-git-remote-name))))
+
+;; Helper: Generate smart commit message
+(defun denote-git-format-commit-message ()
+  "Generate a commit message based on changed files and timestamp."
+  (let* ((default-directory denote-git-directory)
+         (timestamp (format-time-string "%Y-%m-%d %H:%M:%S"))
+         (status-output (shell-command-to-string "git status --short"))
+         (lines (split-string status-output "\n" t))
+         (changed-files (mapcar (lambda (line)
+                                  (if (string-match "^[AMD?]+ +\\(.+\\)$" line)
+                                      (file-name-nondirectory (match-string 1 line))
+                                    nil))
+                                lines))
+         (changed-files (delq nil changed-files))
+         (file-count (length changed-files)))
+    (cond
+     ((= file-count 0)
+      (format "Update notes: %s" timestamp))
+     ((= file-count 1)
+      (format "Update %s\n\n%s" (car changed-files) timestamp))
+     ((<= file-count 3)
+      (format "Update %s\n\n%s"
+              (mapconcat 'identity changed-files ", ")
+              timestamp))
+     (t
+      (format "Update %d notes\n\n%s" file-count timestamp)))))
+#+end_src
+
+***** Core Sync Function
+#+begin_src elisp :tangle no
+;; Core sync function with offline support
+(defun denote-git-sync (&optional quiet)
+  "Safely sync denote directory with git: pull, commit, and push.
+Handles conflicts and offline scenarios gracefully. If QUIET is non-nil, suppress messages."
+  (interactive)
+  (if denote-git-sync-in-progress
+      (unless quiet (message "Denote sync already in progress, skipping..."))
+    (setq denote-git-sync-in-progress t)
+    (let ((default-directory denote-git-directory))
+      (unless (denote-git-check-repo)
+        (setq denote-git-sync-in-progress nil)
+        (error "Denote directory is not a git repository: %s" denote-git-directory))
+
+      ;; Run sync asynchronously
+      (make-process
+       :name "denote-git-sync"
+       :buffer "*denote-git-sync*"
+       :command (list "sh" "-c"
+                      (format "cd '%s' && \
+# Safety check: ensure no merge/rebase in progress
+if [ -f .git/MERGE_HEAD ] || [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ]; then \
+  echo 'GIT_OPERATION_IN_PROGRESS'; \
+  exit 1; \
+fi && \
+# Try to fetch (test connectivity)
+if git fetch %s %s 2>&1; then \
+  echo 'ONLINE'; \
+  # Check for remote changes and merge
+  if ! git diff --quiet HEAD..%s/%s 2>&1; then \
+    if ! git merge --no-edit %s/%s 2>&1; then \
+      git merge --abort 2>&1; \
+      echo 'CONFLICT_DETECTED'; \
+      exit 1; \
+    fi; \
+  fi; \
+  # Check for local changes (modifications, deletions, additions)
+  if [ -z \"$(git status --porcelain)\" ]; then \
+    # No local changes, check for unpushed commits
+    if git log %s/%s..HEAD 2>&1 | grep -q 'commit'; then \
+      git push %s %s 2>&1 && echo 'PUSH_SUCCESS'; \
+    else \
+      echo 'NO_CHANGES'; \
+    fi; \
+  else \
+    # Has local changes (including deletions), commit and push
+    git add -A 2>&1 && \
+    git commit -m \"$(cat <<'COMMIT_MSG_EOF'\n%s\nCOMMIT_MSG_EOF\n)\" 2>&1 && \
+    git push %s %s 2>&1 && echo 'SYNC_SUCCESS'; \
+  fi; \
+else \
+  # Offline mode - commit locally only
+  echo 'OFFLINE'; \
+  if [ -n \"$(git status --porcelain)\" ]; then \
+    git add -A 2>&1 && \
+    git commit -m \"$(cat <<'COMMIT_MSG_EOF'\n%s\nCOMMIT_MSG_EOF\n)\" 2>&1 && \
+    echo 'OFFLINE_COMMIT_SUCCESS'; \
+  else \
+    echo 'OFFLINE_NO_CHANGES'; \
+  fi; \
+fi"
+                              denote-git-directory
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              denote-git-remote-name
+                              denote-git-branch
+                              (denote-git-format-commit-message)
+                              denote-git-remote-name
+                              denote-git-branch
+                              (denote-git-format-commit-message)))
+       :sentinel
+       (lambda (process event)
+         (setq denote-git-sync-in-progress nil)
+         (let ((output (with-current-buffer (process-buffer process)
+                         (buffer-string))))
+           (cond
+            ((string-match-p "GIT_OPERATION_IN_PROGRESS" output)
+             (unless quiet
+               (message "⚠ Denote sync: Git operation in progress, skipping...")))
+            ((string-match-p "CONFLICT_DETECTED" output)
+             (message "⚠ Denote sync: Merge conflict detected! Please resolve manually in %s"
+                      denote-git-directory)
+             (when (fboundp 'alert)
+               (alert (format "Merge conflict in denote notes!\n\nPlease open %s and resolve conflicts manually."
+                              denote-git-directory)
+                      :title "Denote Git Sync - Conflict"
+                      :severity 'high)))
+            ((string-match-p "SYNC_SUCCESS" output)
+             (unless quiet (message "✓ Denote notes synced successfully")))
+            ((string-match-p "PUSH_SUCCESS" output)
+             (unless quiet (message "✓ Denote notes pushed successfully")))
+            ((string-match-p "OFFLINE_COMMIT_SUCCESS" output)
+             (unless quiet (message "📴 Offline: Changes committed locally (will push when online)")))
+            ((string-match-p "OFFLINE_NO_CHANGES" output)
+             (unless quiet (message "📴 Offline: No changes to commit")))
+            ((string-match-p "NO_CHANGES" output)
+             (unless quiet (message "✓ Denote notes already in sync")))
+            ((string-match-p "fatal\\|error" output)
+             (unless quiet
+               (message "✗ Denote sync failed: %s"
+                        (car (split-string output "\n" t)))))
+            (t
+             (unless quiet (message "✗ Denote sync completed with unknown status"))))))))))
+#+end_src
+
+***** Auto-Save Hook
+#+begin_src elisp :tangle no
+;; Auto-sync on save hook
+(defun denote-git-auto-sync-on-save ()
+  "Automatically sync denote notes after saving if enabled."
+  (when (and denote-git-auto-sync-enabled
+             (denote-in-denote-directory-p))
+    (denote-git-sync t)))  ; t = quiet mode
+
+;; Add to after-save-hook
+(add-hook 'after-save-hook #'denote-git-auto-sync-on-save)
+#+end_src
+
+***** Startup Sync
+#+begin_src elisp :tangle no
+;; Sync on daemon startup
+(defun denote-git-startup-sync ()
+  "Sync denote notes when Emacs daemon starts."
+  (when (and (daemonp) denote-git-auto-sync-enabled)
+    (run-with-timer 2 nil (lambda () (denote-git-sync t)))))
+
+;; Add to after-init-hook for daemon startup
+(add-hook 'after-init-hook #'denote-git-startup-sync)
+#+end_src
+
+***** Periodic Sync Timer
+#+begin_src elisp :tangle no
+;; Start periodic sync timer
+(defun denote-git-start-periodic-sync ()
+  "Start periodic sync timer for denote notes."
+  (interactive)
+  (when denote-git-periodic-timer
+    (cancel-timer denote-git-periodic-timer))
+  (setq denote-git-periodic-timer
+        (run-at-time denote-git-periodic-sync-interval
+                     denote-git-periodic-sync-interval
+                     (lambda () (denote-git-sync t))))
+  (message "Denote periodic sync started (every %d minutes)"
+           (/ denote-git-periodic-sync-interval 60)))
+
+;; Stop periodic sync timer
+(defun denote-git-stop-periodic-sync ()
+  "Stop periodic sync timer for denote notes."
+  (interactive)
+  (when denote-git-periodic-timer
+    (cancel-timer denote-git-periodic-timer)
+    (setq denote-git-periodic-timer nil)
+    (message "Denote periodic sync stopped")))
+
+;; Start periodic sync automatically
+(denote-git-start-periodic-sync)
+#+end_src
+
+***** Idle Sync Timer
+#+begin_src elisp :tangle no
+;; Start idle sync timer
+(defun denote-git-start-idle-sync ()
+  "Start idle sync timer for denote notes."
+  (interactive)
+  (when denote-git-idle-timer
+    (cancel-timer denote-git-idle-timer))
+  (setq denote-git-idle-timer
+        (run-with-idle-timer denote-git-idle-sync-delay t
+                             (lambda () (denote-git-sync t))))
+  (message "Denote idle sync started (after %d minutes idle)"
+           (/ denote-git-idle-sync-delay 60)))
+
+;; Stop idle sync timer
+(defun denote-git-stop-idle-sync ()
+  "Stop idle sync timer for denote notes."
+  (interactive)
+  (when denote-git-idle-timer
+    (cancel-timer denote-git-idle-timer)
+    (setq denote-git-idle-timer nil)
+    (message "Denote idle sync stopped")))
+
+;; Start idle sync automatically
+(denote-git-start-idle-sync)
+#+end_src
+
+***** Keybindings and Toggle
+#+begin_src elisp :tangle no
+;; Toggle auto-sync
+(defun denote-git-toggle-auto-sync ()
+  "Toggle automatic git sync for denote notes."
+  (interactive)
+  (setq denote-git-auto-sync-enabled (not denote-git-auto-sync-enabled))
+  (if denote-git-auto-sync-enabled
+      (progn
+        (denote-git-start-periodic-sync)
+        (denote-git-start-idle-sync))
+    (progn
+      (denote-git-stop-periodic-sync)
+      (denote-git-stop-idle-sync)))
+  (message "Denote auto-sync %s"
+           (if denote-git-auto-sync-enabled "enabled" "disabled")))
+
+;; Keybindings
+(map! :leader
+      (:prefix-map ("d" . "denote")
+                   (:prefix ("g" . "git")
+                    :desc "Sync notes" "s" #'denote-git-sync
+                    :desc "Toggle auto-sync" "t" #'denote-git-toggle-auto-sync)))
+#+end_src
+
+**** Completion Formatting
+Custom functions to make the formatting of calling =denote-open-or-create= to be cleaner.
+It would show up something like this instead:
+|-----------------------------------------------------------------------------|
+| Find file: note t_                                                          |
+|-----------------------------------------------------------------------------|
+| [ 2003-09-01 ] note title                                 keyword1 keyword2 |
+|                                                                             |
+|-----------------------------------------------------------------------------|
+#+begin_src elisp :tangle no
+;; Simple denote completion formatting
+(defun my-format-denote-candidate (file)
+  "Format denote file for completion display with right-aligned keywords."
+  (when (string-match-p "[0-9]\\{8\\}T[0-9]\\{6\\}" file)
+    (let* ((full-path (expand-file-name file (denote-directory)))
+           (date-str (ignore-errors (denote-retrieve-filename-identifier full-path)))
+           (title (ignore-errors (denote-retrieve-filename-title full-path)))
+           (keywords (ignore-errors (denote-retrieve-filename-keywords full-path))))
+      (when date-str
+        (let* ((formatted-date (format "[ %s-%s-%s ]"
+                                       (substring date-str 0 4)
+                                       (substring date-str 4 6)
+                                       (substring date-str 6 8)))
+               (formatted-title (if title
+                                    (replace-regexp-in-string "-" " " title)
+                                  ""))
+               (formatted-keywords (cond
+                                    ((listp keywords)
+                                     (mapconcat (lambda (k) (replace-regexp-in-string "_" " " k)) keywords " "))
+                                    ((stringp keywords)
+                                     (replace-regexp-in-string "_" " " keywords))
+                                    (t "")))
+               ;; Calculate padding to right-align keywords dynamically
+               (left-part (format "%s %s" formatted-date formatted-title))
+               (window-width (window-width (minibuffer-window)))
+               (padding-needed (max 1 (- window-width (length left-part) (length formatted-keywords) 2)))
+               (padding (make-string padding-needed ?\s)))
+
+          (if (and formatted-keywords (not (string-empty-p formatted-keywords)))
+              (format "%s%s%s" left-part padding formatted-keywords)
+            left-part))))))
+
+;; Override the denote file prompt function
+(defun my-denote-file-prompt (&optional files-matching-regexp prompt-text no-require-match &rest _ignore)
+  "Custom denote file prompt with formatted display."
+  (let* ((files (denote-directory-files files-matching-regexp))
+         (file-alist (mapcar (lambda (file)
+                               (let* ((relative-file (denote-get-file-name-relative-to-denote-directory file))
+                                      (formatted (my-format-denote-candidate relative-file)))
+                                 (cons (or formatted relative-file) file)))
+                             files))
+         (choice (completing-read
+                  (or prompt-text "Select file: ")
+                  file-alist nil
+                  (unless no-require-match :require-match))))
+    (cdr (assoc choice file-alist))))
+
+;; Apply the override
+(advice-add 'denote-file-prompt :override #'my-denote-file-prompt)
+#+end_src
+**** Publishing
+***** Load Build Configuration
+Load the denote site build configuration when ox-publish is available.
+All publish settings are centralized in ~/denote/.site/build.el.
+#+begin_src elisp :tangle no
+(after! ox-publish
+  (let ((build-file (expand-file-name "~/denote/.site/build.el")))
+    (when (file-exists-p build-file)
+      (load-file build-file))))
+#+end_src
+***** Local Testing Server
+#+begin_src elisp :tangle no
+(package! simple-httpd)
+#+end_src
+#+begin_src elisp :tangle no
+(setq httpd-root "~/denote/.site/public")
+#+end_src
+
+**** Hugo Publishing (ox-hugo)
+Configuration for publishing Denote notes to Hugo using ox-hugo.
+
+***** Package
+#+begin_src elisp :tangle no
+(package! ox-hugo)
+#+end_src
+
+***** Configuration
+#+begin_src elisp :tangle no
+(use-package! ox-hugo
+  :after ox)
+#+end_src
+
+***** Update Index Function
+Function to update only the dynamic sections of index.org while preserving manual content.
+#+begin_src elisp :tangle no
+(defun denote-hugo-update-index ()
+  "Update dynamic sections of index.org (stats, random note, recent notes)."
+  (interactive)
+  (let* ((denote-dir (expand-file-name denote-directory))
+         (index-file (expand-file-name "index.org" denote-dir))
+         (files (directory-files denote-dir t "\\.org$"))
+         ;; Filter publishable files (exclude index.org, all-notes.org, search.org, private)
+         (publishable-files
+          (seq-filter
+           (lambda (f)
+             (and (string-match-p "^[0-9]\\{8\\}T[0-9]\\{6\\}" (file-name-nondirectory f))
+                  (not (with-temp-buffer
+                         (insert-file-contents f)
+                         (goto-char (point-min))
+                         (re-search-forward "^#\\+filetags:.*:private:" nil t)))))
+           files))
+         ;; Sort by modification time, newest first
+         (sorted-files (sort publishable-files
+                            (lambda (a b)
+                              (time-less-p (file-attribute-modification-time (file-attributes b))
+                                          (file-attribute-modification-time (file-attributes a))))))
+         ;; Get recent files (limit to 5)
+         (recent-files (seq-take sorted-files 5))
+         ;; Calculate statistics
+         (total-notes (length publishable-files))
+         (total-connections
+          (let ((count 0))
+            (dolist (file publishable-files)
+              (with-temp-buffer
+                (insert-file-contents file)
+                (goto-char (point-min))
+                (while (re-search-forward "\\[\\[denote:" nil t)
+                  (setq count (1+ count)))))
+            count))
+         ;; Random note
+         (random-note (when publishable-files
+                       (nth (random (length publishable-files)) publishable-files))))
+
+    ;; Read current index.org content
+    (with-temp-buffer
+      (insert-file-contents index-file)
+      (let ((content (buffer-string)))
+
+        ;; Update Statistics section
+        (setq content
+              (replace-regexp-in-string
+               "<!-- AUTO_GENERATED_START:STATS -->\\(.*?\\)<!-- AUTO_GENERATED_END:STATS -->"
+               (concat "<!-- AUTO_GENERATED_START:STATS -->\n"
+                      (format "*%d* notes • *%d* connections\n" total-notes total-connections)
+                      "<!-- AUTO_GENERATED_END:STATS -->")
+               content nil nil 1))
+
+        ;; Update Random Note section
+        (setq content
+              (replace-regexp-in-string
+               "<!-- AUTO_GENERATED_START:RANDOM -->\\(.*?\\)<!-- AUTO_GENERATED_END:RANDOM -->"
+               (concat "<!-- AUTO_GENERATED_START:RANDOM -->\n"
+                      (if random-note
+                          (let* ((filename (file-name-nondirectory random-note))
+                                 (title
+                                  (with-temp-buffer
+                                    (insert-file-contents random-note)
+                                    (goto-char (point-min))
+                                    (if (re-search-forward "^#\\+title: \\(.*\\)$" nil t)
+                                        (match-string 1)
+                                      "Untitled"))))
+                            (format "** Random Note\n[[file:%s][%s]]\n" filename title))
+                        "")
+                      "<!-- AUTO_GENERATED_END:RANDOM -->")
+               content nil nil 1))
+
+        ;; Update Recent Notes section
+        (setq content
+              (replace-regexp-in-string
+               "<!-- AUTO_GENERATED_START:RECENT -->\\(.*?\\)<!-- AUTO_GENERATED_END:RECENT -->"
+               (concat "<!-- AUTO_GENERATED_START:RECENT -->\n"
+                      "** Recent Notes\n"
+                      (mapconcat
+                       (lambda (file)
+                         (let* ((filename (file-name-nondirectory file))
+                                (title
+                                 (with-temp-buffer
+                                   (insert-file-contents file)
+                                   (goto-char (point-min))
+                                   (if (re-search-forward "^#\\+title: \\(.*\\)$" nil t)
+                                       (match-string 1)
+                                     "Untitled")))
+                                (tags
+                                 (with-temp-buffer
+                                   (insert-file-contents file)
+                                   (goto-char (point-min))
+                                   (if (re-search-forward "^#\\+filetags: \\(.*\\)$" nil t)
+                                       (match-string 1)
+                                     ""))))
+                           (format "- [[file:%s][%s]] %s" filename title tags)))
+                       recent-files
+                       "\n")
+                      "\n<!-- AUTO_GENERATED_END:RECENT -->")
+               content nil nil 1))
+
+        ;; Write back to file
+        (with-temp-file index-file
+          (insert content))))
+
+    (message "Index updated: %d notes, %d connections" total-notes total-connections)))
+#+end_src
+
+***** Ensure Hugo Metadata
+Helper function to ensure Hugo metadata exists and is CAPITALIZED before export.
+#+begin_src elisp :tangle no
+(defun denote-hugo--ensure-metadata ()
+  "Ensure Hugo metadata exists and is properly CAPITALIZED for ox-hugo.
+Adds missing metadata, fixes lowercase to uppercase, and saves the buffer."
+  (save-excursion
+    ;; Remove any lowercase Hugo keyword variants
+    (goto-char (point-min))
+    (while (re-search-forward "^#\\+hugo_\\(base_dir\\|section\\|date\\|tags\\|draft\\):" nil t)
+      (let ((key (match-string 1))
+            (line-start (line-beginning-position))
+            (line-end (line-end-position)))
+        ;; Get the value
+        (goto-char line-start)
+        (when (re-search-forward "^#\\+hugo_[^:]+:[ \t]*\\(.*\\)$" line-end t)
+          (let ((value (match-string 1)))
+            ;; Delete the lowercase line
+            (delete-region line-start (1+ line-end))
+            ;; We'll add uppercase version below
+            ))))
+
+    ;; Now ensure UPPERCASE metadata exists
+    (goto-char (point-min))
+    (unless (re-search-forward "^#\\+HUGO_BASE_DIR:" nil t)
+      (goto-char (point-min))
+      (when (re-search-forward "^#\\+identifier:" nil t)
+        (forward-line 1)
+        (insert "#+HUGO_BASE_DIR: ~/denote/blog\n")))
+
+    (goto-char (point-min))
+    (unless (re-search-forward "^#\\+HUGO_SECTION:" nil t)
+      (goto-char (point-min))
+      (when (re-search-forward "^#\\+HUGO_BASE_DIR:" nil t)
+        (forward-line 1)
+        (insert "#+HUGO_SECTION: ./\n")))
+
+    (goto-char (point-min))
+    (unless (re-search-forward "^#\\+HUGO_DRAFT:" nil t)
+      (goto-char (point-min))
+      (when (re-search-forward "^#\\+HUGO_SECTION:" nil t)
+        (end-of-line)
+        (insert "\n#+HUGO_DRAFT: false")))
+
+    ;; Add/update HUGO_DATE
+    (let ((date (save-excursion
+                  (goto-char (point-min))
+                  (when (re-search-forward "^#\\+date:[ \t]+\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)" nil t)
+                    (match-string-no-properties 1)))))
+      (when date
+        (goto-char (point-min))
+        (if (re-search-forward "^#\\+HUGO_DATE:" nil t)
+            (progn
+              (beginning-of-line)
+              (kill-line)
+              (insert (format "#+HUGO_DATE: %s" date)))
+          (goto-char (point-min))
+          (when (re-search-forward "^#\\+HUGO_DRAFT:" nil t)
+            (end-of-line)
+            (insert (format "\n#+HUGO_DATE: %s" date))))))
+
+    ;; Add/update HUGO_TAGS
+    (let ((tags (save-excursion
+                  (goto-char (point-min))
+                  (when (re-search-forward "^#\\+filetags:[ \t]+\\(.*\\)$" nil t)
+                    (let ((filetags (match-string-no-properties 1)))
+                      (string-join
+                       (split-string (string-trim filetags) ":" t)
+                       " "))))))
+      (when tags
+        (goto-char (point-min))
+        (if (re-search-forward "^#\\+HUGO_TAGS:" nil t)
+            (progn
+              (beginning-of-line)
+              (kill-line)
+              (insert (format "#+HUGO_TAGS: %s" tags)))
+          (goto-char (point-min))
+          (when (re-search-forward "^#\\+HUGO_DATE:" nil t)
+            (end-of-line)
+            (insert (format "\n#+HUGO_TAGS: %s" tags)))))))
+
+  ;; Save if modified
+  (when (buffer-modified-p)
+    (save-buffer)))
+#+end_src
+
+***** Export Functions
+#+begin_src elisp :tangle no
+(defun denote-hugo-export-current ()
+  "Export current Denote note to Hugo markdown.
+Ensures Hugo metadata exists and is properly formatted before export."
+  (interactive)
+  (when (and buffer-file-name
+             (string-prefix-p (expand-file-name denote-directory) buffer-file-name))
+    ;; Ensure metadata is correct before exporting
+    (denote-hugo--ensure-metadata)
+    (org-hugo-export-to-md)))
+
+(defun denote-hugo-export-all ()
+  "Export all Denote notes to Hugo markdown.
+Ensures Hugo metadata exists for all notes before export."
+  (interactive)
+  (let* ((denote-dir (expand-file-name denote-directory))
+         (files (directory-files denote-dir t "\\.org$"))
+         (index-file (expand-file-name "index.org" denote-dir))
+         (publishable-files
+          (seq-filter
+           (lambda (f)
+             (and (string-match-p "^[0-9]\\{8\\}T[0-9]\\{6\\}" (file-name-nondirectory f))
+                  (not (member (file-name-nondirectory f) '("index.org" "all-notes.org" "search.org")))
+                  (not (with-temp-buffer
+                         (insert-file-contents f)
+                         (goto-char (point-min))
+                         (re-search-forward "^#\\+filetags:.*:private:" nil t)))))
+           files)))
+
+    ;; Export all regular notes
+    (dolist (file publishable-files)
+      (with-current-buffer (find-file-noselect file)
+        (denote-hugo--ensure-metadata)
+        (org-hugo-export-to-md)
+        (kill-buffer)))
+
+    ;; Export index.org to _index.md (homepage)
+    (when (file-exists-p index-file)
+      (with-current-buffer (find-file-noselect index-file)
+        (org-hugo-export-to-md)
+        (kill-buffer)))
+
+    (message "Exported %d notes + homepage to Hugo" (length publishable-files))))
+#+end_src
+
+***** Keybindings
+#+begin_src elisp :tangle no
+(map! :leader
+      (:prefix ("d" . "denote")
+       ;; Publishing commands
+       :desc "Publish (one-command)" "p" #'denote-hugo-publish-all
+       :desc "Export current note" "P" #'denote-hugo-export-current
+       :desc "Update index" "u" #'denote-hugo-update-index
+       :desc "Sync metadata" "m" #'denote-hugo--sync-metadata
+       :desc "Toggle auto-export" "a" #'denote-hugo-toggle-auto-export))
+#+end_src
+
+**** Digital Garden Publishing
+Configuration for automatic Hugo publishing with minimal friction.
+
+**Work in Public Philosophy**:
+- ALL notes are published by default (including drafts, WIP, incomplete thoughts)
+- NO gatekeeping, NO "ready to publish" gates
+- ONLY exclusion: :private: tag for truly personal notes
+- Embrace imperfection: rough notes are valuable and publishable
+- Share the process, not just the finished product
+
+This configuration ensures zero friction between writing and publishing.
+
+***** Auto-add Hugo Metadata on Save
+Automatically add Hugo front matter on first save (lets Denote generate its metadata first).
+Note: This is now handled by denote-hugo--ensure-metadata which is called during export.
+We keep a simpler version here just to add basic metadata on save.
+#+begin_src elisp :tangle no
+(defun denote-hugo--add-front-matter ()
+  "Add basic Hugo front matter to current Denote note if missing."
+  (when (and buffer-file-name
+             (string-prefix-p (expand-file-name denote-directory) (expand-file-name buffer-file-name))
+             (string-match-p "^[0-9]\\{8\\}T[0-9]\\{6\\}" (file-name-nondirectory buffer-file-name)))
+    (save-excursion
+      (goto-char (point-min))
+      ;; Only add if Hugo metadata doesn't exist (check UPPERCASE)
+      (unless (re-search-forward "^#\\+HUGO_BASE_DIR:" nil t)
+        (goto-char (point-min))
+        ;; Find the end of existing Denote metadata
+        (when (re-search-forward "^#\\+identifier:" nil t)
+          (forward-line 1)
+          ;; Insert Hugo metadata (CAPITALIZED for ox-hugo compatibility)
+          (let* ((date (save-excursion
+                        (goto-char (point-min))
+                        (when (re-search-forward "^#\\+date:[ \t]+\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)" nil t)
+                          (match-string-no-properties 1))))
+                 (tags (save-excursion
+                        (goto-char (point-min))
+                        (when (re-search-forward "^#\\+filetags:[ \t]+\\(.*\\)$" nil t)
+                          (let ((filetags (match-string-no-properties 1)))
+                            ;; Convert :tag1:tag2: to space-separated list
+                            (string-join
+                             (split-string (string-trim filetags) ":" t)
+                             " "))))))
+            (insert "#+HUGO_BASE_DIR: ~/denote/blog\n")
+            (insert "#+HUGO_SECTION: ./\n")
+            (insert "#+HUGO_DRAFT: false\n")
+            (when date
+              (insert (format "#+HUGO_DATE: %s\n" date)))
+            (when tags
+              (insert (format "#+HUGO_TAGS: %s\n" tags)))))))))
+
+;; Hook to add Hugo metadata before saving (if missing)
+(defun denote-hugo--add-metadata-before-save ()
+  "Add Hugo metadata before save if it's missing."
+  (denote-hugo--add-front-matter))
+;; Disabled by default to avoid interfering with wiki workflow.
+#+end_src
+#+end_src
+
+***** Sync Hugo Metadata on Rename
+Automatically sync Hugo metadata when Denote metadata changes.
+#+begin_src elisp :tangle no
+(defun denote-hugo--sync-metadata ()
+  "Sync Hugo metadata with Denote metadata in current buffer."
+  (interactive)
+  (when (and buffer-file-name
+             (string-prefix-p (expand-file-name denote-directory) buffer-file-name))
+    (save-excursion
+      (let* ((title (save-excursion
+                     (goto-char (point-min))
+                     (when (re-search-forward "^#\\+title:[ \t]+\\(.*\\)$" nil t)
+                       (match-string-no-properties 1))))
+             (date (save-excursion
+                    (goto-char (point-min))
+                    (when (re-search-forward "^#\\+date:[ \t]+\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)" nil t)
+                      (match-string-no-properties 1))))
+             (tags (save-excursion
+                    (goto-char (point-min))
+                    (when (re-search-forward "^#\\+filetags:[ \t]+\\(.*\\)$" nil t)
+                      (let ((filetags (match-string-no-properties 1)))
+                        ;; Convert :tag1:tag2: to space-separated list
+                        (string-join
+                         (split-string (string-trim filetags) ":" t)
+                         " "))))))
+
+        ;; Update HUGO_DATE (capitalized for ox-hugo)
+        (when date
+          (goto-char (point-min))
+          (if (re-search-forward "^#\\+HUGO_DATE:.*$" nil t)
+              (replace-match (format "#+HUGO_DATE: %s" date))
+            ;; Add if missing
+            (goto-char (point-min))
+            (when (re-search-forward "^#\\+HUGO_BASE_DIR:" nil t)
+              (forward-line 2)
+              (insert (format "#+HUGO_DATE: %s\n" date)))))
+
+        ;; Update HUGO_TAGS (capitalized for ox-hugo)
+        (when tags
+          (goto-char (point-min))
+          (if (re-search-forward "^#\\+HUGO_TAGS:.*$" nil t)
+              (replace-match (format "#+HUGO_TAGS: %s" tags))
+            ;; Add if missing
+            (goto-char (point-min))
+            (when (re-search-forward "^#\\+HUGO_DATE:" nil t)
+              (forward-line 1)
+              (insert (format "#+HUGO_TAGS: %s\n" tags)))))))))
+
+;; Hook to sync metadata after Denote rename operations
+(add-hook 'denote-after-rename-file-hook #'denote-hugo--sync-metadata)
+#+end_src
+
+***** Auto-Export on Save (Optional)
+Toggle automatic export to Hugo on every save.
+#+begin_src elisp :tangle no
+(defvar denote-hugo-auto-export-on-save nil
+  "When non-nil, automatically export to Hugo on save.")
+
+(defun denote-hugo--maybe-export ()
+  "Export current note to Hugo if auto-export is enabled."
+  (when (and denote-hugo-auto-export-on-save
+             buffer-file-name
+             (string-prefix-p (expand-file-name denote-directory) buffer-file-name)
+             (string-match-p "^[0-9]\\{8\\}T[0-9]\\{6\\}" (file-name-nondirectory buffer-file-name)))
+    (denote-hugo-export-current)))
+
+(defun denote-hugo-toggle-auto-export ()
+  "Toggle automatic export to Hugo on save."
+  (interactive)
+  (setq denote-hugo-auto-export-on-save (not denote-hugo-auto-export-on-save))
+  (if denote-hugo-auto-export-on-save
+      (progn
+        (add-hook 'after-save-hook #'denote-hugo--maybe-export nil t)
+        (message "✓ Auto-export enabled: notes will export to Hugo on save"))
+    (progn
+      (remove-hook 'after-save-hook #'denote-hugo--maybe-export t)
+      (message "✗ Auto-export disabled"))))
+#+end_src
+
+***** One-Command Publish
+Single command to update index and export all notes.
+#+begin_src elisp :tangle no
+(defun denote-hugo-publish-all ()
+  "One-command publish: sync all metadata, update index, export all to Hugo."
+  (interactive)
+  (message "Publishing all notes...")
+
+  ;; Step 1: Sync metadata for all notes
+  (let* ((denote-dir (expand-file-name denote-directory))
+         (files (directory-files denote-dir t "^[0-9]\\{8\\}T[0-9]\\{6\\}.*\\.org$"))
+         (count 0))
+
+    (dolist (file files)
+      (with-current-buffer (find-file-noselect file)
+        (denote-hugo--sync-metadata)
+        (when (buffer-modified-p)
+          (save-buffer))
+        (kill-buffer))
+      (setq count (1+ count)))
+
+    (message "Synced metadata for %d notes..." count))
+
+  ;; Step 2: Update index
+  (denote-hugo-update-index)
+  (message "Updated index.org...")
+
+  ;; Step 3: Export all to Hugo
+  (denote-hugo-export-all)
+  (message "✓ Published all notes to Hugo!"))
+#+end_src
+
+#+END_COMMENT
+

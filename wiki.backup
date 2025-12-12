@@ -1,0 +1,563 @@
+*** Wiki
+Experimental digital garden setup using built-in Org mode + org-id for unbreakable links.
+Separate from Denote workflow, focused on working in public with Hugo + Little Ocean theme.
+
+**** org-id Setup
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(require 'consult)
+
+;; org-id: Unbreakable links using unique IDs
+(after! org
+  ;; Auto-create IDs for all headings when storing link
+  (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+
+  ;; Store IDs in the note file itself (not separate database)
+  (setq org-id-track-globally t)
+  (setq org-id-locations-file (expand-file-name ".org-id-locations" org-directory))
+
+  ;; ID format: timestamp-based for sortability
+  (setq org-id-method 'ts))
+
+;; Note: org-id-update-id-locations is slow - only run manually when needed
+;; Run M-x org-id-update-id-locations if links stop working
+#+end_src
+
+**** Consult Integration
+***** Find/Create Notes with Preview
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Find or create wiki notes with consult preview
+(defun wiki/find-note ()
+  "Find or create a wiki note with live preview."
+  (interactive)
+  (let* ((default-directory org-directory)
+         (files (directory-files org-directory nil "\\.org$"))
+         (choice (consult--read
+                  files
+                  :prompt "Wiki note: "
+                  :category 'file
+                  :state (consult--file-preview)
+                  :require-match nil)))
+    (if (member choice files)
+        (find-file (expand-file-name choice org-directory))
+      ;; Create new note
+      (let ((new-file (if (string-suffix-p ".org" choice)
+                          choice
+                        (concat choice ".org"))))
+        (find-file (expand-file-name new-file org-directory))
+        (when (= (buffer-size) 0)
+          (insert (format "#+title: %s\n#+date: [%s]\n\n"
+                         (file-name-sans-extension new-file)
+                         (format-time-string "%Y-%m-%d %a %H:%M")))
+          (wiki/add-file-id))))))
+#+end_src
+
+***** Search Notes
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Search wiki notes with consult-ripgrep
+(defun wiki/search ()
+  "Search org files in wiki root directory only."
+  (interactive)
+  (let* ((default-directory (file-name-as-directory (expand-file-name org-directory)))
+         ;; Search everything under the wiki root, but only return .org files
+         (consult-ripgrep-args
+          (concat "rg --null --line-number --color=never --max-columns=1000 "
+                  "--smart-case --hidden --no-heading --line-buffered "
+                  "--glob '*.org' --glob '!.git' --")))
+    (consult-ripgrep org-directory)))
+#+end_src
+
+**** ID-based Linking
+***** Helpers
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun wiki//in-wiki-buffer-p (&optional file)
+  "Return non-nil when FILE (or current buffer) lives inside `org-directory`."
+  (let* ((target (or file buffer-file-name))
+         (root (file-name-as-directory (expand-file-name org-directory))))
+    (and target
+         (string-prefix-p root (expand-file-name target)))))
+
+(defun wiki//ensure-heading-id ()
+  "Create or return an ID for the current heading and persist it to the ID database."
+  (let ((id (org-id-get-create)))
+    (when (and (buffer-file-name) (wiki//in-wiki-buffer-p))
+      ;; Keep .org-id-locations in sync so links resolve immediately.
+      (org-id-update-id-locations (list (buffer-file-name)))
+      (when (buffer-modified-p)
+        (save-buffer)))
+    id))
+#+end_src
+
+***** Insert File Link
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Insert ID-based link to file
+(defun wiki/insert-link ()
+  "Insert an org-id link to a file (first heading). Uses selected text as link description if region is active."
+  (interactive)
+  (let* ((default-directory org-directory)
+         (description (when (use-region-p)
+                        (buffer-substring-no-properties (region-beginning) (region-end))))
+         (file (consult--read
+                (directory-files org-directory nil "\\.org$")
+                :prompt "Link to file: "
+                :category 'file
+                :state (consult--file-preview))))
+    (when file
+      (let* ((full-path (expand-file-name file org-directory))
+             (id (with-current-buffer (find-file-noselect full-path)
+                   (save-excursion
+                     (goto-char (point-min))
+                     (if (re-search-forward "^\\* " nil t)
+                         (progn
+                           (beginning-of-line)
+                           (wiki//ensure-heading-id))
+                       (error "No heading found in %s. Create a heading first." file)))))
+             (title (or description
+                        (with-current-buffer (find-file-noselect full-path)
+                          (or (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
+                              (file-name-sans-extension file))))))
+        (when (use-region-p)
+          (delete-region (region-beginning) (region-end)))
+        (insert (format "[[id:%s][%s]]" id title))))))
+#+end_src
+
+***** Insert Heading Link
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun wiki//prompt-for-heading (file)
+  "Prompt for a heading in FILE and return the line number of the selected heading.
+Provides a preview of the heading in a temporary buffer."
+  (with-current-buffer (find-file-noselect file)
+    (let ((headings (let ((result nil))
+                      (save-excursion
+                        (goto-char (point-min))
+                        (while (re-search-forward org-outline-regexp nil t)
+                          (let* ((heading (org-get-heading t t t t))
+                                 (line (line-number-at-pos))
+                                 ;; Store the display string and the line number
+                                 (display (format "%s" heading)))
+                            (push (cons display line) result))))
+                      (nreverse result))))
+      (when headings
+        ;; Use a custom state lambda for preview
+        (let* ((preview-state
+                (lambda (action cand)
+                  (if (not (eq action 'preview))
+                      cand
+                    (when cand
+                      (let* ((line-num (cdr (assoc cand headings))))
+                        (when line-num
+                          (consult--preview-at-point
+                           (consult--position-marker (find-file-noselect file) line-num 0))))))))
+               (selection (consult--read headings
+                                         :prompt "Heading: "
+                                         :category 'consult-location
+                                         :require-match t
+                                         :sort nil
+                                         :state preview-state)))
+          ;; Return the line number associated with the selection
+          (when selection
+            (cdr (assoc selection headings))))))))
+
+(defun wiki/insert-heading-link ()
+  "Insert an org-id link to a heading in a wiki file.
+First prompts for a file, then for a heading within that file.
+Provides previews at both stages."
+  (interactive)
+  (let* ((default-directory org-directory)
+         (description (when (use-region-p)
+                        (buffer-substring-no-properties (region-beginning) (region-end))))
+         (selected-file-path (consult--read
+                              (directory-files org-directory nil "\.org$")
+                              :prompt "Link to file: "
+                              :category 'file
+                              :state (consult--file-preview))))
+    (when selected-file-path
+      (let* ((line-number (wiki//prompt-for-heading selected-file-path))) 
+        (when line-number
+          (let* ((heading-data
+                  (save-window-excursion
+                    (with-current-buffer (find-file selected-file-path)
+                      (goto-char (point-min))
+                      ;; Go to the line number (1- because forward-line is 0-indexed relative to current line)
+                      (forward-line (1- line-number))
+                      (org-back-to-heading t) ; Ensure point is at the start of the heading
+                      (cons (wiki//ensure-heading-id) (org-get-heading t t t t)))))
+                 (id (car heading-data))
+                 (title (cdr heading-data)))
+            (when (use-region-p)
+              (delete-region (region-beginning) (region-end)))
+            (insert (format "[[id:%s][%s]]" id (or description title)))))))))
+#+end_src
+
+**** Backlinks
+***** Show Backlinks
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Find backlinks to current note by searching for its ID
+(defun wiki/backlinks ()
+  "Show all notes that link to the current note."
+  (interactive)
+  (let ((id (org-id-get)))
+    (if id
+        (progn
+          (consult-ripgrep org-directory (regexp-quote id)))
+      (message "No ID found for current entry. Create one with org-id-get-create."))))
+#+end_src
+
+**** File-level IDs
+***** Add File ID
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Add org-id to current or first heading
+(defun wiki/add-file-id ()
+  "Add org-id to current heading, or first heading if not on one."
+  (interactive)
+  (cond
+   ;; If on a heading, add ID here
+   ((org-at-heading-p)
+    (wiki//ensure-heading-id))
+   ;; Otherwise, find first heading and add ID there
+   (t
+    (save-excursion
+      (goto-char (point-min))
+      (if (re-search-forward "^\\* " nil t)
+          (progn
+            (beginning-of-line)
+            (wiki//ensure-heading-id))
+        (message "No heading found. Create a heading first."))))))
+#+end_src
+
+**** Hugo Front Matter
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defvar wiki/hugo-base-dir (expand-file-name ".site" org-directory)
+  "Root directory of the Hugo site that consumes wiki exports.")
+
+(defvar wiki/hugo-section "notes"
+  "Hugo section to export wiki pages into (used for link generation and front matter).")
+
+;; Make ox-hugo default to the wiki site/section unless overridden per-file.
+(setq org-hugo-base-directory wiki/hugo-base-dir)
+(setq org-hugo-default-section-directory wiki/hugo-section)
+#+end_src
+
+***** Ensure Metadata
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun wiki/hugo--ensure-front-matter ()
+  "Ensure wiki files have Hugo-compatible front matter before saving."
+  (when (and (wiki//in-wiki-buffer-p)
+             (not wiki/hugo--exporting)) ; skip when exporting to avoid recursion
+    (save-excursion
+      (let* ((case-fold-search t)
+             (updated nil)
+             (date (progn
+                     (goto-char (point-min))
+                     (when (re-search-forward "^#\\+date:[ \t]+\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)" nil t)
+                       (match-string-no-properties 1))))
+             (tags (progn
+                     (goto-char (point-min))
+                     (when (re-search-forward "^#\\+filetags:[ \t]+\\(.*\\)$" nil t)
+                       (let ((filetags (match-string-no-properties 1)))
+                         (string-join
+                          (split-string (string-trim filetags) ":" t)
+                          " ")))))
+             (is-index (string-equal (file-name-nondirectory (or buffer-file-name "")) "README.org"))
+             (section (if is-index "/" wiki/hugo-section))
+             (export-name (when is-index "_index")))
+
+        ;; Ensure Org date exists; if missing, insert after title/keywords
+        (unless date
+          (let ((org-date (format-time-string "[%Y-%m-%d %a]")))
+            (goto-char (point-min))
+            (let ((insert-pos (point-min)))
+              (while (looking-at "^#\\+")
+                (setq insert-pos (line-end-position))
+                (forward-line 1))
+              (goto-char insert-pos)
+              (unless (bolp) (insert "\n"))
+              (insert (format "#+date: %s\n" org-date))
+              (setq date (substring org-date 1 11)) ; YYYY-MM-DD for Hugo
+              (setq updated t))))
+
+        ;; Remove existing Hugo block to reinsert in the right place
+        (goto-char (point-min))
+        (while (re-search-forward "^#\\+HUGO_.*$" nil t)
+          (setq updated t)
+          (delete-region (line-beginning-position) (1+ (line-end-position)))
+          (goto-char (point-at-bol)))
+        ;; For index, also remove any prior EXPORT_FILE_NAME so we write it once
+        (when is-index
+          (goto-char (point-min))
+          (while (re-search-forward "^#\\+EXPORT_FILE_NAME:.*$" nil t)
+            (setq updated t)
+            (delete-region (line-beginning-position) (1+ (line-end-position)))
+            (goto-char (point-at-bol))))
+
+        ;; Find insertion point: after leading Org keywords
+        (goto-char (point-min))
+        (let ((insert-pos (point-min)))
+          (while (looking-at "^#\\+")
+            (setq insert-pos (line-end-position))
+            (forward-line 1))
+          (goto-char insert-pos)
+          (unless (bolp) (insert "\n"))
+
+          ;; Build Hugo metadata block in desired order
+          (let ((block ""))
+            (setq block (concat block (format "#+HUGO_BASE_DIR: %s\n" wiki/hugo-base-dir)))
+            (setq block (concat block (format "#+HUGO_SECTION: %s\n" section)))
+            (setq block (concat block "#+HUGO_DRAFT: false\n"))
+            (when date
+              (setq block (concat block (format "#+HUGO_DATE: %s\n" date))))
+            (when tags
+              (setq block (concat block (format "#+HUGO_TAGS: %s\n" tags))))
+            (when export-name
+              (setq block (concat block (format "#+EXPORT_FILE_NAME: %s\n" export-name))))
+            (insert block)
+            ;; Ensure exactly one blank line after metadata
+            (unless (looking-at "\n") (insert "\n"))
+            (while (looking-at "\n\n+") (replace-match "\n"))
+            (setq updated t)))
+
+        (when updated
+          (message "Updated Hugo front matter for %s" (buffer-name)))))))
+
+(defun wiki//enable-hugo-front-matter ()
+  "Attach wiki Hugo metadata hook locally for org buffers."
+  (when (wiki//in-wiki-buffer-p)
+    (add-hook 'before-save-hook #'wiki/hugo--ensure-front-matter nil t)))
+
+(add-hook 'org-mode-hook #'wiki//enable-hugo-front-matter)
+#+end_src
+
+***** Export / Publish
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun wiki/hugo--org-files ()
+  "Return all wiki org files (excluding .site/ and VCS dirs)."
+  (let* ((root (file-name-as-directory (expand-file-name org-directory)))
+         (default-directory root))
+    (seq-filter
+     (lambda (f)
+       (and (string-suffix-p ".org" f)
+            (not (string-match-p "/\\.site/" f))
+            (not (string-match-p "/\\.git/" f))))
+     (directory-files-recursively root "\\.org$"))))
+
+(defun wiki/hugo--save-buffer-sans-hook ()
+  "Save current buffer without running before-save hooks."
+  (let ((before-save-hook (remove #'wiki/hugo--ensure-front-matter before-save-hook)))
+    (save-buffer)))
+
+(defun wiki/hugo-export-current ()
+  "Export current wiki note to Hugo markdown."
+  (interactive)
+  (if (wiki//in-wiki-buffer-p)
+      (let ((wiki/hugo--exporting t)
+            (org-hugo-base-directory wiki/hugo-base-dir)
+            (org-hugo-default-section-directory wiki/hugo-section)
+            (orig-default-directory default-directory)
+            (orig-buffer (current-buffer)))
+        (save-window-excursion
+          (save-current-buffer
+            (let ((wiki/hugo--exporting nil)) ; allow metadata updates even during export flow
+              (wiki/hugo--ensure-front-matter))
+            (wiki/hugo--save-buffer-sans-hook)
+            (let ((default-directory org-directory))
+              (org-hugo-export-to-md)))
+          ;; Restore original buffer/default-directory
+          (when (buffer-live-p orig-buffer)
+            (set-buffer orig-buffer))
+          (setq default-directory orig-default-directory)))
+    (user-error "Not in a wiki note")))
+
+(defun wiki/hugo-export-all ()
+  "Export all wiki notes to Hugo markdown."
+  (interactive)
+  (let ((files (wiki/hugo--org-files))
+        (count 0)
+        (org-hugo-base-directory wiki/hugo-base-dir)
+        (org-hugo-default-section-directory wiki/hugo-section)
+        (orig-default-directory default-directory)
+        (orig-buffer (current-buffer)))
+    (save-window-excursion
+      (save-current-buffer
+        (let ((wiki/hugo--exporting t))
+          (dolist (file files)
+            (with-current-buffer (find-file-noselect file)
+              (let ((wiki/hugo--exporting nil))
+                (wiki/hugo--ensure-front-matter))
+              (wiki/hugo--save-buffer-sans-hook)
+              (let ((default-directory org-directory))
+                (org-hugo-export-to-md))
+              (setq count (1+ count))
+              (kill-buffer))))))
+    ;; Restore original buffer/default-directory
+    (when (buffer-live-p orig-buffer)
+      (set-buffer orig-buffer))
+    (setq default-directory orig-default-directory)
+    (message "Exported %d wiki notes to Hugo" count)))
+
+(defvar wiki/hugo-auto-export-on-save t
+  "When non-nil, export wiki notes to Hugo on save.")
+
+(defvar wiki/hugo--exporting nil
+  "Internal flag to prevent recursive export on save.")
+
+(defun wiki//maybe-export-on-save ()
+  "Export current wiki note when auto-export is enabled."
+  (when (and wiki/hugo-auto-export-on-save
+             (wiki//in-wiki-buffer-p)
+             (not wiki/hugo--exporting))
+    (wiki/hugo-export-current)))
+
+(add-hook 'after-save-hook #'wiki//maybe-export-on-save)
+
+(defun wiki/hugo-toggle-auto-export ()
+  "Toggle automatic Hugo export for wiki notes."
+  (interactive)
+  (setq wiki/hugo-auto-export-on-save (not wiki/hugo-auto-export-on-save))
+  (message "Wiki Hugo auto-export %s"
+           (if wiki/hugo-auto-export-on-save "enabled" "disabled")))
+#+end_src
+
+**** ox-hugo Link Export
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(defun wiki//slugify (s)
+  "Slugify string S for Hugo anchors."
+  (thread-last s
+    (downcase)
+    (replace-regexp-in-string "[^a-z0-9-]" "-")
+    (replace-regexp-in-string "--+" "-")
+    (replace-regexp-in-string "\\`-\\|-\\'" "")))
+
+(after! ox-hugo
+  (defun org-hugo-link--org-id-to-path (link)
+    "Convert org-id LINK to Hugo-compatible path with anchors for heading links."
+    (let* ((id (org-element-property :path link))
+           (location (org-id-find id)))
+      (when location
+        (let* ((marker (cond ((markerp location) location)
+                             ((consp location)
+                              (let ((file (car location))
+                                    (line (cdr location)))
+                                (with-current-buffer (find-file-noselect file)
+                                  (goto-char (point-min))
+                                  (forward-line (1- line))
+                                  (point-marker))))))
+               path title)
+          (when marker
+            (with-current-buffer (marker-buffer marker)
+              (save-excursion
+                (goto-char (marker-position marker))
+                (org-back-to-heading t)
+                (let* ((buffer-file-name (buffer-file-name))
+                       (basename (file-name-sans-extension (file-name-nondirectory buffer-file-name)))
+                       (heading-text (org-element-property :raw-value (org-element-at-point)))
+                       (slug (when heading-text (wiki//slugify heading-text)))
+                        ;; README is exported as _index.md in site root
+                        (base-path (if (string= basename "README")
+                                       "/"
+                                     (format "/%s/%s" wiki/hugo-section basename))))
+                   (setq path (cond
+                               ((and base-path slug) (concat base-path "#" slug))
+                               (base-path base-path)
+                               (t nil)))
+                   (setq title (or heading-text
+                                   (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
+                                   basename))))))
+          (when (and path title)
+            (cons path title))))))
+
+  (defun wiki/ox-hugo-link (link desc info)
+    "Export org-id links for Hugo."
+    (let ((type (org-element-property :type link)))
+      (when (string= type "id")
+        (let ((path-title (org-hugo-link--org-id-to-path link)))
+          (when (consp path-title)
+            (format "[%s](%s)" (or desc (cdr path-title)) (car path-title)))))))
+
+  (advice-add 'org-hugo-link :override #'wiki/ox-hugo-link))
+#+end_src
+
+**** Auto-commit and Sync
+***** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Auto-commit wiki changes on save (enabled by default)
+(defvar wiki/auto-sync-enabled t
+  "Enable auto-commit and push for wiki notes.")
+
+(defun wiki/git-sync ()
+  "Commit and push wiki changes silently (only show buffer on error)."
+  (interactive)
+  (let* ((wiki-dir (expand-file-name org-directory))
+         (default-directory wiki-dir))
+    (when (file-directory-p ".git")
+      (let ((proc (start-process
+                   "wiki-git-sync"
+                   "*wiki-git-sync*"
+                   "sh" "-c"
+                   (format "git add -A && git commit -m 'Update: %s' && git push"
+                           (format-time-string "%Y-%m-%d %H:%M:%S")))))
+        (set-process-sentinel
+         proc
+         (lambda (process event)
+           (let ((output (with-current-buffer "*wiki-git-sync*" (buffer-string))))
+             (cond
+              ;; Success (exit code 0)
+              ((zerop (process-exit-status process))
+               (message "✓ Wiki synced successfully"))
+              ;; Nothing to commit is not an error
+              ((string-match-p "nothing to commit\\|no changes added to commit" output)
+               (message "✓ Wiki up to date (nothing to commit)"))
+              ;; Actual error
+              (t
+               (message "✗ Wiki sync failed - see *wiki-git-sync* buffer")
+               (display-buffer "*wiki-git-sync*"))))))))))
+
+(defun wiki/auto-sync-on-save ()
+  "Auto-sync wiki after saving if in wiki directory."
+  (when (and wiki/auto-sync-enabled
+             buffer-file-name
+             (string-prefix-p (file-name-as-directory (expand-file-name org-directory))
+                              (file-name-as-directory (expand-file-name buffer-file-name))))
+    (wiki/git-sync)))
+
+(defun wiki/toggle-auto-sync ()
+  "Toggle auto-sync for wiki notes."
+  (interactive)
+  (setq wiki/auto-sync-enabled (not wiki/auto-sync-enabled))
+  (if wiki/auto-sync-enabled
+      (progn
+        (add-hook 'after-save-hook #'wiki/auto-sync-on-save)
+        (message "✓ Wiki auto-sync enabled"))
+    (progn
+      (remove-hook 'after-save-hook #'wiki/auto-sync-on-save)
+      (message "✗ Wiki auto-sync disabled"))))
+
+;; Enable auto-sync by default
+(add-hook 'after-save-hook #'wiki/auto-sync-on-save)
+#+end_src
+
+**** Keybindings
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+;; Remap org-capture from SPC n n to SPC n x (to make room for wiki)
+(map! :leader
+      :desc "Org capture" "n x" #'org-capture
+      :desc "Org capture goto" "n X" #'org-capture-goto-target)
+
+;; Wiki commands under SPC n prefix
+(map! :leader
+      (:prefix ("n" . "notes")
+       :desc "Find/create note" "n" #'wiki/find-note
+       :desc "Search notes" "s" #'wiki/search
+       :desc "Backlinks" "b" #'wiki/backlinks
+       :desc "Insert heading link" "h" #'wiki/insert-heading-link
+       :desc "Create ID (heading)" "i" #'org-id-get-create
+       :desc "Add file ID" "I" #'wiki/add-file-id
+       :desc "Insert file link" "l" #'wiki/insert-link
+       :desc "Export current note (Hugo)" "e" #'wiki/hugo-export-current
+       :desc "Export all notes (Hugo)" "E" #'wiki/hugo-export-all
+       :desc "Toggle auto-export (Hugo)" "A" #'wiki/hugo-toggle-auto-export
+       :desc "Git sync (push)" "p" #'wiki/git-sync
+       :desc "Toggle auto-sync" "G" #'wiki/toggle-auto-sync))
+#+end_src
+

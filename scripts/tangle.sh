@@ -11,7 +11,7 @@ NC='\033[0m' # No Color
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
-ORG_FILE="$DOTFILES_DIR/dotfiles.org"
+ORG_FILES=("$DOTFILES_DIR/dotfiles.org" "$DOTFILES_DIR/doom.org" "$DOTFILES_DIR/wiki.org")
 
 # Print colored message
 print_msg() {
@@ -42,17 +42,20 @@ check_prerequisites() {
         exit 1
     fi
 
-    if [ ! -f "$ORG_FILE" ]; then
-        print_error "dotfiles.org not found at: $ORG_FILE"
-        exit 1
-    fi
+    for org_file in "${ORG_FILES[@]}"; do
+        if [ ! -f "$org_file" ]; then
+            print_error "Org file not found at: $org_file"
+            exit 1
+        fi
+    done
 
     print_success "Prerequisites check passed"
 }
 
 # Run tangle operation
 run_tangle() {
-    print_info "Tangling dotfiles.org..."
+    local org_file=$1
+    print_info "Tangling $org_file..."
 
     TEMP_OUTPUT=$(mktemp)
 
@@ -60,23 +63,23 @@ run_tangle() {
     if emacs --batch \
         --eval "(require 'org)" \
         --eval "(setq org-confirm-babel-evaluate nil)" \
-        --eval "(org-babel-tangle-file \"$ORG_FILE\")" \
+        --eval "(org-babel-tangle-file \"$org_file\")" \
         > "$TEMP_OUTPUT" 2>&1; then
 
         # Count tangled blocks
         TANGLED_COUNT=$(grep -c "Tangled" "$TEMP_OUTPUT" 2>/dev/null || echo "0")
 
         if [ "$TANGLED_COUNT" -gt 0 ]; then
-            print_success "Successfully tangled $TANGLED_COUNT code blocks"
+            print_success "Successfully tangled $TANGLED_COUNT code blocks from $org_file"
         else
-            print_warning "Tangle completed but no blocks were reported"
+            print_warning "Tangle completed for $org_file but no blocks were reported"
             print_info "Emacs output:"
             cat "$TEMP_OUTPUT"
         fi
 
         return 0
     else
-        print_error "Tangle operation failed!"
+        print_error "Tangle operation failed for $org_file!"
         print_info "Emacs output:"
         cat "$TEMP_OUTPUT"
         return 1
@@ -114,7 +117,14 @@ main() {
 
     check_prerequisites
 
-    if run_tangle; then
+    local all_successful=true
+    for org_file in "${ORG_FILES[@]}"; do
+        if ! run_tangle "$org_file"; then
+            all_successful=false
+        fi
+    done
+
+    if $all_successful; then
         echo ""
         verify_output
         echo ""
@@ -127,7 +137,7 @@ main() {
         return 0
     else
         echo ""
-        print_error "Tangle failed. Please check the errors above."
+        print_error "Tangle failed for one or more files. Please check the errors above."
         echo ""
         return 1
     fi
