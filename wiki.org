@@ -30,10 +30,10 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
 (defun wiki//slugify (s)
   "Slugify string S for Hugo anchors."
   (thread-last s
-    (downcase)
-    (replace-regexp-in-string "[^a-z0-9-]" "-")
-    (replace-regexp-in-string "--+" "-")
-    (replace-regexp-in-string "\\`-\\|-\\'" "")))
+               (downcase)
+               (replace-regexp-in-string "[^a-z0-9-]" "-")
+               (replace-regexp-in-string "--+" "-")
+               (replace-regexp-in-string "\\`-\\|-\\'" "")))
 
 (defun wiki//ensure-heading-id ()
   "Create or return an ID for the current heading and persist it."
@@ -65,7 +65,10 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
           (insert (format "#+title: %s\n#+date: [%s]\n\n"
                           (file-name-sans-extension new-file)
                           (format-time-string "%Y-%m-%d %a %H:%M")))
-          (wiki//ensure-heading-id))))))
+          (insert "* Content\n\n")
+          (forward-line -2)
+          (wiki//ensure-heading-id)
+          (goto-char (point-max)))))))
 
 (defun wiki/search ()
   "Search wiki notes with consult-ripgrep."
@@ -81,7 +84,7 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
 ** Linking
 #+begin_src elisp
 (defun wiki/insert-link ()
-  "Insert an org-id link to a file (first heading)."
+  "Insert an org-id link to a file (first heading). Create file if it doesn't exist."
   (interactive)
   (let* ((default-directory org-directory)
          (description (when (use-region-p)
@@ -90,22 +93,39 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
                 (directory-files org-directory nil "\\.org$")
                 :prompt "Link to file: "
                 :category 'file
-                :state (consult--file-preview))))
+                :state (consult--file-preview)
+                :require-match nil)))
     (when file
-      (let* ((full-path (expand-file-name file org-directory))
-             (id (with-current-buffer (find-file-noselect full-path)
-                   (save-excursion
-                     (goto-char (point-min))
-                     (if (re-search-forward "^\\* " nil t)
-                         (progn (beginning-of-line) (wiki//ensure-heading-id))
-                       (error "No heading found in %s" file)))))
-             (title (or description
-                        (with-current-buffer (find-file-noselect full-path)
-                          (or (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
-                              (file-name-sans-extension file))))))
-        (when (use-region-p)
-          (delete-region (region-beginning) (region-end)))
-        (insert (format "[[id:%s][%s]]" id title))))))
+      (let* ((file-with-ext (if (string-suffix-p ".org" file)
+                                file
+                              (concat file ".org")))
+             (full-path (expand-file-name file-with-ext org-directory))
+             (file-existed (file-exists-p full-path)))
+        ;; Create file if it doesn't exist
+        (unless file-existed
+          (with-current-buffer (find-file-noselect full-path)
+            (insert (format "#+title: %s\n#+date: [%s]\n\n"
+                            (file-name-sans-extension file-with-ext)
+                            (format-time-string "%Y-%m-%d %a %H:%M")))
+            (insert "* Content\n\n")
+            (forward-line -2)
+            (wiki//ensure-heading-id)
+            (save-buffer)
+            (message "Created new note: %s" file-with-ext)))
+        ;; Get ID and title
+        (let* ((id (with-current-buffer (find-file-noselect full-path)
+                     (save-excursion
+                       (goto-char (point-min))
+                       (if (re-search-forward "^\\* " nil t)
+                           (progn (beginning-of-line) (wiki//ensure-heading-id))
+                         (error "No heading found in %s" file-with-ext)))))
+               (title (or description
+                          (with-current-buffer (find-file-noselect full-path)
+                            (or (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
+                                (file-name-sans-extension file-with-ext))))))
+          (when (use-region-p)
+            (delete-region (region-beginning) (region-end)))
+          (insert (format "[[id:%s][%s]]" id title)))))))
 
 (defun wiki//prompt-for-heading (file)
   "Prompt for a heading in FILE and return its line number."
@@ -517,12 +537,15 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
            (if wiki/hugo-auto-export-on-save "enabled" "disabled")))
 
 (defun wiki//maybe-export-on-save ()
-  "Export current wiki note when auto-export is enabled."
+  "Export current wiki note when auto-export is enabled.
+Note: This is now handled by wiki/auto-sync-on-save for better coordination.
+Kept for backward compatibility if called manually."
   (when (and wiki/hugo-auto-export-on-save
              (wiki//in-wiki-buffer-p)
              (not wiki/hugo--exporting))
     (wiki/hugo-export-current)))
-(add-hook 'after-save-hook #'wiki//maybe-export-on-save)
+;; NOTE: Export is now handled in wiki/auto-sync-on-save for better coordination
+;; (add-hook 'after-save-hook #'wiki//maybe-export-on-save)
 
 (after! ox-hugo
   (defun org-hugo-link--org-id-to-path (link)
@@ -564,15 +587,20 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
           (when (and path title)
             (cons path title))))))
 
-  (defun wiki/ox-hugo-link (link desc info)
-    "Export org-id links for Hugo."
+  (defun wiki/ox-hugo-link (orig-fn link desc info)
+    "Export org-id links for Hugo, fall back to default for other link types."
     (let ((type (org-element-property :type link)))
-      (when (string= type "id")
-        (let ((path-title (org-hugo-link--org-id-to-path link)))
-          (when (consp path-title)
-            (format "[%s](%s)" (or desc (cdr path-title)) (car path-title)))))))
+      (if (string= type "id")
+          ;; Handle id: links specially
+          (let ((path-title (org-hugo-link--org-id-to-path link)))
+            (if (consp path-title)
+                (format "[%s](%s)" (or desc (cdr path-title)) (car path-title))
+              ;; If conversion failed, fall back to original function
+              (funcall orig-fn link desc info)))
+        ;; For all other link types, use the original function
+        (funcall orig-fn link desc info))))
 
-  (advice-add 'org-hugo-link :override #'wiki/ox-hugo-link))
+  (advice-add 'org-hugo-link :around #'wiki/ox-hugo-link))
 #+end_src
 
 ** Git Sync
@@ -667,28 +695,29 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
       (user-error "Wiki directory is not a git repository"))
     (when (wiki/git-sync--is-merge-in-progress-p)
       (user-error "Merge/rebase in progress. Resolve conflicts first"))
-    (when wiki/git-sync--in-progress
-      (message "Git sync already in progress, skipping...")
-      (cl-return-from wiki/git-sync))
+    (if wiki/git-sync--in-progress
+        (message "Git sync already in progress, skipping...")
+      (progn
+      (setq wiki/git-sync--in-progress t)
+      (message "Syncing wiki...")
 
-    (setq wiki/git-sync--in-progress t)
-    (message "Syncing wiki...")
+      (let* ((has-remote (wiki/git-sync--has-remote-p))
+             (commit-msg (format "Update: %s" (format-time-string "%Y-%m-%d %H:%M:%S")))
+             (wiki-path (file-name-as-directory (expand-file-name org-directory)))
+             (sync-command
+              (if has-remote
+                  ;; With remote: stage, commit, pull with autostash, push
+                  (format "cd '%s' && git add -A . && (git status --porcelain | grep -q . && git commit -m '%s' || true) && git pull --rebase --autostash && git push"
+                          wiki-path commit-msg)
+                ;; No remote: just commit locally
+                (format "cd '%s' && git add -A . && (git status --porcelain | grep -q . && git commit -m '%s' || echo 'Nothing to commit')"
+                        wiki-path commit-msg))))
 
-    (let* ((has-remote (wiki/git-sync--has-remote-p))
-           (commit-msg (format "Update: %s" (format-time-string "%Y-%m-%d %H:%M:%S")))
-           (sync-command
-            (if has-remote
-                (format "git pull --rebase && git add -A && git diff-index --quiet HEAD || git commit -m '%s' && git push"
-                        commit-msg)
-              ;; No remote: just commit locally
-              (format "git add -A && git diff-index --quiet HEAD || git commit -m '%s'"
-                      commit-msg))))
-
-      (let ((proc (start-process
-                   "wiki-git-sync"
-                   "*wiki-git-sync*"
-                   "sh" "-c"
-                   sync-command)))
+        (let ((proc (start-process
+                     "wiki-git-sync"
+                     "*wiki-git-sync*"
+                     "sh" "-c"
+                     sync-command)))
         (set-process-sentinel
          proc
          (lambda (process event)
@@ -707,15 +736,20 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
                (message "✗ Wiki sync failed (offline?) - changes committed locally"))
               (t
                (message "✗ Wiki sync failed - see *wiki-git-sync* buffer")
-               (display-buffer "*wiki-git-sync*"))))))))))
+               (display-buffer "*wiki-git-sync*"))))))))))))
 
 (defun wiki/auto-sync-on-save ()
-  "Auto-sync wiki after saving if in wiki directory."
+  "Auto-export and auto-sync wiki after saving if in wiki directory."
   (when (and wiki/auto-sync-enabled
              buffer-file-name
              (wiki//in-wiki-buffer-p)
              (not wiki/git-sync--in-progress))
-    (run-with-idle-timer 2 nil #'wiki/git-sync)))
+    ;; First, export to Hugo if auto-export is enabled
+    (when (and wiki/hugo-auto-export-on-save
+               (not wiki/hugo--exporting))
+      (wiki/hugo-export-current))
+    ;; Then sync to git after a delay to ensure export completes and file writes settle
+    (run-with-idle-timer 3 nil #'wiki/git-sync)))
 
 (defun wiki/toggle-auto-sync ()
   "Toggle auto-sync for wiki notes."
