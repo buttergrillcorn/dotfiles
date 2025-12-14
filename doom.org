@@ -44,6 +44,9 @@ Extensible text editor and integrated development environment built on Emacs.
        ;;  +fuzzy
        ;;  +icons
        ;;  +childframe)
+       (corfu
+        +icons
+        +orderless)
        (vertico           ; the search engine of the future
         +icons)
 
@@ -251,6 +254,7 @@ Extensible text editor and integrated development environment built on Emacs.
        ;; literate
        (default +bindings +smartparens))
 #+end_src
+** 
 
 ** packages.el
 #+begin_src elisp :tangle packages/doom/.config/doom/packages.el
@@ -320,7 +324,7 @@ Extensible text editor and integrated development environment built on Emacs.
 
 **** Theme
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(setq doom-theme 'doom-dark+)
+(setq doom-theme 'doom-gruvbox)
 #+end_src
 **** Line Numbers
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
@@ -375,10 +379,14 @@ Extensible text editor and integrated development environment built on Emacs.
    'org-babel-load-languages
    '(
      (elisp . t)
+     (emacs-lisp . t)
+     (lua . t)
+     (makefile . t)
+     (js . t)
+     (css . t)
+     (shell . t)
      (python . t)
-     (conf-toml . t)
-     (rust . t)
-     )))
+     (rust . t))))
 #+end_src
 
 ***** Appearance
@@ -459,52 +467,23 @@ Pulse highlight line on demand or after running select functions
 **** Configuration
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (use-package! pulsar
-  :config
-  (require 'pulsar)
-
-  ;; Check the default value of `pulsar-pulse-functions'.  That is where
-  ;; you add more commands that should cause a pulse after they are
-  ;; invoked
-
-  (setq pulsar-pulse t)
-  (setq pulsar-delay 0.055)
-  (setq pulsar-iterations 10)
-  (setq pulsar-face 'pulsar-magenta)
-  (setq pulsar-highlight-face 'pulsar-yellow)
-
+  :init
   (pulsar-global-mode 1)
-
-  ;; OR use the local mode for select mode hooks
-
-  (dolist (hook '(org-mode-hook elisp-mode-hook))
-    (add-hook hook #'pulsar-mode))
-
-  ;; pulsar does not define any key bindings.  This is just a sample that
-  ;; respects the key binding conventions.  Evaluate:
-  ;;
-  ;;     (info "(elisp) Key Binding Conventions")
-  ;;
-  ;; The author uses C-x l for `pulsar-pulse-line' and C-x L for
-  ;; `pulsar-highlight-line'.
-  ;;
-  ;; You can replace `pulsar-highlight-line' with the command
-  ;; `pulsar-highlight-dwim'.
-  ;; (let ((map global-map))
-  ;;   (define-key map (kbd "C-c h p") #'pulsar-pulse-line)
-  ;;   (define-key map (kbd "C-c h h") #'pulsar-highlight-line))
-
-  ;; Use pulsar with next-error
-  (add-hook 'next-error-hook #'pulsar-pulse-line)
-
-  ;; Use pulsar in the minibuffer
-  (add-hook 'minibuffer-setup-hook #'pulsar-pulse-line-blue)
-
-  ;; Use pulsar with other packages
-
-  ;;; integration with the `consult' package:
-  (add-hook 'consult-after-jump-hook #'pulsar-recenter-top)
-  (add-hook 'consult-after-jump-hook #'pulsar-reveal-entry))
+  :config
+  (setq pulsar-delay 0.1
+        pulsar-iterations 20
+        pulsar-face 'pulsar-yellow
+        pulsar-region-face 'pulsar-cyan
+        pulsar-highlight-face 'pulsar-magenta)
+  :hook
+  ((next-error-hook . pulsar-pulse-line)
+   (minibuffer-setup-hook . pulsar-pulse-line-blue)
+   (consult-after-jump-hook . pulsar-recenter-top)
+   (consult-after-jump-hook . pulsar-reveal-entry)))
 #+end_src
+
+#+RESULTS:
+
 *** Mason
 ***** Configuration
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el

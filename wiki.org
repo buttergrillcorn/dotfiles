@@ -28,12 +28,18 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
     (and target (string-prefix-p root (expand-file-name target)))))
 
 (defun wiki//slugify (s)
-  "Slugify string S for Hugo anchors."
-  (thread-last s
-               (downcase)
-               (replace-regexp-in-string "[^a-z0-9-]" "-")
-               (replace-regexp-in-string "--+" "-")
-               (replace-regexp-in-string "\\`-\\|-\\'" "")))
+  "Slugify string S for Hugo filenames and anchors.
+Preserves leading underscores (for Hugo special files like _index)."
+  (let* ((has-leading-underscore (string-prefix-p "_" s))
+         (base (if has-leading-underscore (substring s 1) s))
+         (slugified (thread-last base
+                                 (downcase)
+                                 (replace-regexp-in-string "[^a-z0-9_-]" "-")
+                                 (replace-regexp-in-string "--+" "-")
+                                 (replace-regexp-in-string "\\`-\\|-\\'" ""))))
+    (if has-leading-underscore
+        (concat "_" slugified)
+      slugified)))
 
 (defun wiki//ensure-heading-id ()
   "Create or return an ID for the current heading and persist it."
@@ -41,6 +47,28 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
     (when (and (buffer-file-name) (wiki//in-wiki-buffer-p))
       (org-id-update-id-locations (list (buffer-file-name))))
     id))
+
+(defun wiki/rebuild-id-database ()
+  "Rebuild the entire org-id database for wiki notes.
+Useful after renaming files or when the database becomes stale."
+  (interactive)
+  (message "Rebuilding wiki ID database...")
+  (let ((files (directory-files-recursively org-directory "\\.org$")))
+    (org-id-update-id-locations files)
+    (message "✓ Rebuilt ID database for %d files" (length files))))
+
+(defun wiki//refresh-buffer-id-location ()
+  "Update ID locations for current buffer when opening wiki files.
+This ensures renamed files are properly tracked."
+  (when (and buffer-file-name
+             (string-suffix-p ".org" buffer-file-name)
+             (wiki//in-wiki-buffer-p))
+    ;; Update locations for this file silently
+    (let ((message-log-max nil)) ; Suppress messages
+      (org-id-update-id-locations (list buffer-file-name)))))
+
+;; Auto-refresh ID locations when opening wiki files
+(add-hook 'org-mode-hook #'wiki//refresh-buffer-id-location)
 #+end_src
 
 ** Navigation & Search
@@ -57,13 +85,16 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
                                 :require-match nil)))
     (if (member choice files)
         (find-file (expand-file-name choice org-directory))
-      (let ((new-file (if (string-suffix-p ".org" choice)
-                          choice
-                        (concat choice ".org"))))
+      ;; Slugify the filename for new notes
+      (let* ((slugified-name (wiki//slugify (if (string-suffix-p ".org" choice)
+                                                (file-name-sans-extension choice)
+                                              choice)))
+             (new-file (concat slugified-name ".org"))
+             (original-title (file-name-sans-extension choice)))
         (find-file (expand-file-name new-file org-directory))
         (when (= (buffer-size) 0)
           (insert (format "#+title: %s\n#+date: [%s]\n\n"
-                          (file-name-sans-extension new-file)
+                          original-title
                           (format-time-string "%Y-%m-%d %a %H:%M")))
           (insert "* Content\n\n")
           (forward-line -2)
@@ -96,16 +127,17 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
                 :state (consult--file-preview)
                 :require-match nil)))
     (when file
-      (let* ((file-with-ext (if (string-suffix-p ".org" file)
-                                file
-                              (concat file ".org")))
+      ;; Slugify filename for new files
+      (let* ((original-title (file-name-sans-extension file))
+             (slugified-name (wiki//slugify original-title))
+             (file-with-ext (concat slugified-name ".org"))
              (full-path (expand-file-name file-with-ext org-directory))
              (file-existed (file-exists-p full-path)))
         ;; Create file if it doesn't exist
         (unless file-existed
           (with-current-buffer (find-file-noselect full-path)
             (insert (format "#+title: %s\n#+date: [%s]\n\n"
-                            (file-name-sans-extension file-with-ext)
+                            original-title
                             (format-time-string "%Y-%m-%d %a %H:%M")))
             (insert "* Content\n\n")
             (forward-line -2)
@@ -371,14 +403,17 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
   "Prefix for generated wiki links. Use \"/\" for absolute-from-site-root (default) or \"\" for relative.")
 
 (defun wiki/hugo--ensure-front-matter ()
-  "Ensure wiki org files have Hugo front matter."
+  "Ensure wiki org files have Hugo front matter with error protection."
   (when (and buffer-file-name
+             (stringp buffer-file-name)
+             (file-exists-p buffer-file-name)
              (string-suffix-p ".org" buffer-file-name)
              (wiki//in-wiki-buffer-p)
              (not wiki/hugo--exporting)
              (not (string-match-p "/\\.site/" buffer-file-name))
              (not (string-match-p "/\\.git/" buffer-file-name)))
-    (save-excursion
+    (condition-case err
+        (save-excursion
       (let* ((case-fold-search t)
              (updated nil)
              (date (progn
@@ -391,7 +426,8 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
                        (string-join
                         (split-string (string-trim (match-string-no-properties 1)) ":" t)
                         " "))))
-            (export-name (file-name-sans-extension (file-name-nondirectory buffer-file-name))))
+            ;; Slugify export name to avoid spaces and special characters
+            (export-name (wiki//slugify (file-name-sans-extension (file-name-nondirectory buffer-file-name)))))
 
         ;; Add date if missing
         (unless date
@@ -442,8 +478,14 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
             (while (looking-at "\n\n+") (replace-match "\n"))
             (setq updated t)))
 
-      (when updated
-        (message "Updated Hugo front matter for %s" (buffer-name)))))))
+          (when updated
+            (message "Updated Hugo front matter for %s" (buffer-name)))))
+      (error
+       (display-warning 'wiki
+                        (format "Failed to update front matter for %s: %s"
+                                (buffer-name)
+                                (error-message-string err))
+                        :warning)))))
 
 (defun wiki//enable-hugo-front-matter ()
   "Attach wiki Hugo metadata hook locally for org buffers in wiki directory."
@@ -473,58 +515,158 @@ Simple wiki workflow with ID-based links, Hugo export, search, and git sync for 
     (save-buffer)))
 
 (defun wiki/hugo-export-current ()
-  "Export current wiki note to Hugo markdown."
+  "Export current wiki note to Hugo markdown with comprehensive error handling."
   (interactive)
-  (if (wiki//in-wiki-buffer-p)
-      (let ((wiki/hugo--exporting t)
-            (orig-default-directory default-directory)
-            (orig-buffer (current-buffer)))
-        (save-window-excursion
-          (save-current-buffer
-            (let ((wiki/hugo--exporting nil))
-              (wiki/hugo--ensure-front-matter))
-            (wiki/hugo--save-buffer-sans-hook)
-            (let ((default-directory org-directory))
-              (org-hugo-export-to-md)))
-          (when (buffer-live-p orig-buffer)
-            (set-buffer orig-buffer))
-          (setq default-directory orig-default-directory)))
-    (user-error "Not in a wiki note")))
+  (condition-case err
+      (progn
+        ;; Validation checks
+        (unless (wiki//in-wiki-buffer-p)
+          (user-error "Not in a wiki note (must be in %s)" org-directory))
+        (unless buffer-file-name
+          (user-error "Buffer not associated with a file. Save the buffer first"))
+        (unless (file-exists-p buffer-file-name)
+          (user-error "File does not exist: %s" buffer-file-name))
+        (when (buffer-modified-p)
+          (if (y-or-n-p "Buffer modified. Save before exporting? ")
+              (save-buffer)
+            (user-error "Export cancelled. Save buffer first")))
+
+        ;; Check ox-hugo is available
+        (unless (featurep 'ox-hugo)
+          (require 'ox-hugo nil t)
+          (unless (featurep 'ox-hugo)
+            (user-error "ox-hugo not available. Install it with: doom sync")))
+
+        ;; Ensure Hugo base directory exists
+        (let ((hugo-dir (expand-file-name wiki/hugo-base-dir)))
+          (unless (file-exists-p hugo-dir)
+            (if (y-or-n-p (format "Hugo directory %s doesn't exist. Create it? " hugo-dir))
+                (make-directory hugo-dir t)
+              (user-error "Export cancelled. Hugo directory required"))))
+
+        (let ((wiki/hugo--exporting t)
+              (orig-default-directory default-directory)
+              (orig-buffer (current-buffer)))
+          ;; Refresh ID database before export to ensure links are current
+          (let ((message-log-max nil))  ; Suppress message
+            (org-id-update-id-locations (list (buffer-file-name))))
+
+          (save-window-excursion
+            (save-current-buffer
+              (let ((wiki/hugo--exporting nil))
+                (wiki/hugo--ensure-front-matter))
+              (wiki/hugo--save-buffer-sans-hook)
+              (let ((default-directory org-directory))
+                (condition-case export-err
+                    (progn
+                      (org-hugo-export-to-md)
+                      (message "✓ Exported %s to Hugo" (file-name-nondirectory buffer-file-name)))
+                  (error
+                   (display-warning 'wiki
+                                    (format "Export failed for %s: %s"
+                                            (file-name-nondirectory buffer-file-name)
+                                            (error-message-string export-err))
+                                    :error)
+                   (signal (car export-err) (cdr export-err))))))
+            (when (buffer-live-p orig-buffer)
+              (set-buffer orig-buffer))
+            (setq default-directory orig-default-directory))))
+    (user-error (message "✗ %s" (error-message-string err)))
+    (error (progn
+             (display-warning 'wiki
+                              (format "Unexpected export error: %s" (error-message-string err))
+                              :error)
+             (message "✗ Export failed: %s" (error-message-string err))))))
 
 (defun wiki/hugo-export-all ()
-  "Export all wiki notes to Hugo markdown without disrupting your current buffer."
+  "Export all wiki notes to Hugo markdown with comprehensive error handling."
   (interactive)
-  (let ((files (wiki/hugo--org-files))
-        (count 0)
-        (orig-default-directory default-directory)
-        (orig-buffer (current-buffer))
-        (opened-buffers nil)
-        (wconfig (current-window-configuration)))
-    (unwind-protect
-        (save-current-buffer
-          (let ((wiki/hugo--exporting t))
-            (dolist (file files)
-              (let ((buf (find-file-noselect file)))
-                (unless (eq buf orig-buffer)
-                  (push buf opened-buffers))
-                (with-current-buffer buf
-                  (let ((wiki/hugo--exporting nil))
-                    (wiki/hugo--ensure-front-matter))
-                  (wiki/hugo--save-buffer-sans-hook)
-                  (let ((default-directory org-directory)
-                        (org-hugo-base-directory wiki/hugo-base-dir)
-                        (org-hugo-default-section-directory wiki/hugo-section))
-                    (org-hugo-export-to-md))
-                  (setq count (1+ count)))))))
-      (dolist (buf opened-buffers)
-        (when (buffer-live-p buf)
-          (kill-buffer buf)))
-      (when (window-configuration-p wconfig)
-        (set-window-configuration wconfig))
-      (when (buffer-live-p orig-buffer)
-        (set-buffer orig-buffer))
-      (setq default-directory orig-default-directory))
-    (message "Exported %d wiki notes to Hugo" count)))
+  (condition-case err
+      (progn
+        ;; Check ox-hugo is available
+        (unless (featurep 'ox-hugo)
+          (require 'ox-hugo nil t)
+          (unless (featurep 'ox-hugo)
+            (user-error "ox-hugo not available. Install it with: doom sync")))
+
+        ;; Ensure Hugo base directory exists
+        (let ((hugo-dir (expand-file-name wiki/hugo-base-dir)))
+          (unless (file-exists-p hugo-dir)
+            (if (y-or-n-p (format "Hugo directory %s doesn't exist. Create it? " hugo-dir))
+                (make-directory hugo-dir t)
+              (user-error "Export cancelled. Hugo directory required"))))
+
+        (let ((files (wiki/hugo--org-files))
+              (count 0)
+              (failed 0)
+              (failed-files nil)
+              (orig-default-directory default-directory)
+              (orig-buffer (current-buffer))
+              (opened-buffers nil)
+              (wconfig (current-window-configuration)))
+
+          (unless files
+            (user-error "No wiki files found in %s" org-directory))
+
+          (message "Exporting %d wiki notes..." (length files))
+
+          ;; Rebuild entire ID database before exporting all files
+          (let ((message-log-max nil))
+            (org-id-update-id-locations files))
+
+          (unwind-protect
+              (save-current-buffer
+                (let ((wiki/hugo--exporting t))
+                  (dolist (file files)
+                    (condition-case file-err
+                        (progn
+                          (let ((buf (find-file-noselect file)))
+                            (unless (eq buf orig-buffer)
+                              (push buf opened-buffers))
+                            (with-current-buffer buf
+                              (let ((wiki/hugo--exporting nil))
+                                (wiki/hugo--ensure-front-matter))
+                              (wiki/hugo--save-buffer-sans-hook)
+                              (let ((default-directory org-directory)
+                                    (org-hugo-base-directory wiki/hugo-base-dir)
+                                    (org-hugo-default-section-directory wiki/hugo-section))
+                                (org-hugo-export-to-md))
+                              (setq count (1+ count)))))
+                      (error
+                       (setq failed (1+ failed))
+                       (push (cons file (error-message-string file-err)) failed-files)
+                       (message "⚠ Failed to export %s: %s"
+                                (file-name-nondirectory file)
+                                (error-message-string file-err)))))))
+            (dolist (buf opened-buffers)
+              (when (buffer-live-p buf)
+                (kill-buffer buf)))
+            (when (window-configuration-p wconfig)
+              (set-window-configuration wconfig))
+            (when (buffer-live-p orig-buffer)
+              (set-buffer orig-buffer))
+            (setq default-directory orig-default-directory))
+
+          ;; Summary message
+          (if (> failed 0)
+              (progn
+                (display-warning 'wiki
+                                 (format "Exported %d/%d files. %d failed:\n%s"
+                                         count (length files) failed
+                                         (mapconcat (lambda (f)
+                                                      (format "  - %s: %s"
+                                                              (file-name-nondirectory (car f))
+                                                              (cdr f)))
+                                                    (reverse failed-files) "\n"))
+                                 :warning)
+                (message "✓ Exported %d/%d wiki notes (%d failed)" count (length files) failed))
+            (message "✓ Exported all %d wiki notes to Hugo" count))))
+    (user-error (message "✗ %s" (error-message-string err)))
+    (error (progn
+             (display-warning 'wiki
+                              (format "Unexpected export error: %s" (error-message-string err))
+                              :error)
+             (message "✗ Export failed: %s" (error-message-string err))))))
 
 (defvar wiki/hugo-auto-export-on-save t
   "When non-nil, export wiki notes to Hugo on save.")
@@ -550,17 +692,33 @@ Kept for backward compatibility if called manually."
 (after! ox-hugo
   (defun org-hugo-link--org-id-to-path (link)
     "Convert org-id LINK to Hugo-compatible path with anchors for heading links."
-    (let* ((id (org-element-property :path link))
-           (location (org-id-find id)))
-      (when location
+    (condition-case err
+        (let* ((id (org-element-property :path link))
+               (location (org-id-find id)))
+      (if (not location)
+          (progn
+            (warn "⚠ Broken link: ID '%s' not found in database. Run M-x wiki/rebuild-id-database" id)
+            nil)
         (let* ((marker (cond ((markerp location) location)
                              ((consp location)
                               (let ((file (car location))
                                     (line (cdr location)))
-                                (with-current-buffer (find-file-noselect file)
-                                  (goto-char (point-min))
-                                  (forward-line (1- line))
-                                  (point-marker))))))
+                                ;; Safety checks: ensure file is a string, not nil, and exists
+                                (cond
+                                 ((not (stringp file))
+                                  (warn "⚠ Broken link: ID '%s' has invalid file type. Run M-x wiki/rebuild-id-database" id)
+                                  nil)
+                                 ((string-empty-p file)
+                                  (warn "⚠ Broken link: ID '%s' has empty file path. Run M-x wiki/rebuild-id-database" id)
+                                  nil)
+                                 ((not (file-exists-p file))
+                                  (warn "⚠ Broken link: ID '%s' points to missing file '%s'. Run M-x wiki/rebuild-id-database" id file)
+                                  nil)
+                                 (t
+                                  (with-current-buffer (find-file-noselect file)
+                                    (goto-char (point-min))
+                                    (forward-line (1- line))
+                                    (point-marker))))))))
                path title)
           (when marker
             (with-current-buffer (marker-buffer marker)
@@ -585,7 +743,10 @@ Kept for backward compatibility if called manually."
                                   (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
                                   export-name))))))
           (when (and path title)
-            (cons path title))))))
+            (cons path title)))))
+      (error
+       (warn "⚠ Link conversion error: %s" (error-message-string err))
+       nil)))
 
   (defun wiki/ox-hugo-link (orig-fn link desc info)
     "Export org-id links for Hugo, fall back to default for other link types."
@@ -899,6 +1060,7 @@ Kept for backward compatibility if called manually."
        :desc "Create ID (heading)" "i" #'org-id-get-create
        :desc "Add file ID" "I" #'wiki/add-file-id
        :desc "Insert file link" "l" #'wiki/insert-link
+       :desc "Rebuild ID database" "R" #'wiki/rebuild-id-database
        ;; Graph visualization
        (:prefix ("g" . "graph")
         :desc "Graph statistics" "s" #'wiki/graph-stats

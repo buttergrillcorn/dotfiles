@@ -4798,13 +4798,13 @@ take_screenshot() {
     # Take screenshot based on mode using hyprshot
     case "$mode" in
         "screen")
-            hyprshot -m output -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
+            hyprshot -m output -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" 
             ;;
         "area")
-            hyprshot -m region -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
+            hyprshot -m region -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")"
             ;;
         "window")
-            hyprshot -m window -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")" --clipboard-only
+            hyprshot -m window -o "$SCREENSHOT_DIR" -f "$(basename "$FILENAME")"
             ;;
     esac
 
