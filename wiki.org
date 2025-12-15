@@ -96,7 +96,7 @@ This ensures renamed files are properly tracked."
           (insert (format "#+title: %s\n#+date: [%s]\n\n"
                           original-title
                           (format-time-string "%Y-%m-%d %a %H:%M")))
-          (insert "* Content\n\n")
+          (insert "* TODO\n\n")
           (forward-line -2)
           (wiki//ensure-heading-id)
           (goto-char (point-max)))))))
@@ -139,7 +139,7 @@ This ensures renamed files are properly tracked."
             (insert (format "#+title: %s\n#+date: [%s]\n\n"
                             original-title
                             (format-time-string "%Y-%m-%d %a %H:%M")))
-            (insert "* Content\n\n")
+            (insert "* TODO\n\n")
             (forward-line -2)
             (wiki//ensure-heading-id)
             (save-buffer)
