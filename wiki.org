@@ -514,8 +514,9 @@ This ensures renamed files are properly tracked."
   (let ((before-save-hook (remove #'wiki/hugo--ensure-front-matter before-save-hook)))
     (save-buffer)))
 
-(defun wiki/hugo-export-current ()
-  "Export current wiki note to Hugo markdown with comprehensive error handling."
+(defun wiki/hugo-export-current (&optional non-interactive)
+  "Export current wiki note to Hugo markdown with comprehensive error handling.
+When NON-INTERACTIVE is non-nil, skip user prompts (used for auto-export)."
   (interactive)
   (condition-case err
       (progn
@@ -526,10 +527,16 @@ This ensures renamed files are properly tracked."
           (user-error "Buffer not associated with a file. Save the buffer first"))
         (unless (file-exists-p buffer-file-name)
           (user-error "File does not exist: %s" buffer-file-name))
+
+        ;; Handle modified buffer
         (when (buffer-modified-p)
-          (if (y-or-n-p "Buffer modified. Save before exporting? ")
+          (if non-interactive
+              ;; Auto-save without prompting when called automatically
               (save-buffer)
-            (user-error "Export cancelled. Save buffer first")))
+            ;; Prompt user when called interactively
+            (if (y-or-n-p "Buffer modified. Save before exporting? ")
+                (save-buffer)
+              (user-error "Export cancelled. Save buffer first"))))
 
         ;; Check ox-hugo is available
         (unless (featurep 'ox-hugo)
@@ -540,9 +547,13 @@ This ensures renamed files are properly tracked."
         ;; Ensure Hugo base directory exists
         (let ((hugo-dir (expand-file-name wiki/hugo-base-dir)))
           (unless (file-exists-p hugo-dir)
-            (if (y-or-n-p (format "Hugo directory %s doesn't exist. Create it? " hugo-dir))
+            (if non-interactive
+                ;; Auto-create without prompting when called automatically
                 (make-directory hugo-dir t)
-              (user-error "Export cancelled. Hugo directory required"))))
+              ;; Prompt user when called interactively
+              (if (y-or-n-p (format "Hugo directory %s doesn't exist. Create it? " hugo-dir))
+                  (make-directory hugo-dir t)
+                (user-error "Export cancelled. Hugo directory required")))))
 
         (let ((wiki/hugo--exporting t)
               (orig-default-directory default-directory)
@@ -556,7 +567,9 @@ This ensures renamed files are properly tracked."
               (let ((wiki/hugo--exporting nil))
                 (wiki/hugo--ensure-front-matter))
               (wiki/hugo--save-buffer-sans-hook)
-              (let ((default-directory org-directory))
+              (let ((default-directory org-directory)
+                    (org-hugo-base-directory wiki/hugo-base-dir)
+                    (org-hugo-default-section-directory wiki/hugo-section))
                 (condition-case export-err
                     (progn
                       (org-hugo-export-to-md)
@@ -908,7 +921,7 @@ Kept for backward compatibility if called manually."
     ;; First, export to Hugo if auto-export is enabled
     (when (and wiki/hugo-auto-export-on-save
                (not wiki/hugo--exporting))
-      (wiki/hugo-export-current))
+      (wiki/hugo-export-current t))  ; Pass t for non-interactive mode
     ;; Then sync to git after a delay to ensure export completes and file writes settle
     (run-with-idle-timer 3 nil #'wiki/git-sync)))
 
