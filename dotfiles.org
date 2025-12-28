@@ -2413,8 +2413,8 @@ c.editor.command = ['emacsclient', '-c', '-a', ' ', '+{line}:{column}', '{}']
 #+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
 # Custom search engines
 # c.url.searchengines['DEFAULT'] = 'https://duckduckgo.com/?q={}'
-# c.url.searchengines['DEFAULT'] = 'https://kagi.com/search?q={}'
-c.url.searchengines['DEFAULT'] = 'https://www.startpage.com/sp/search?q={}'
+c.url.searchengines['DEFAULT'] = 'https://kagi.com/search?q={}'
+# c.url.searchengines['DEFAULT'] = 'https://www.startpage.com/sp/search?q={}'
 c.url.searchengines['gg'] = 'https://www.google.com/search?q={}'
 c.url.searchengines['mar'] = 'https://marginalia-search.com/search?query={}'
 c.url.searchengines['am'] = 'https://www.amazon.co.uk/s?k={}'
@@ -5463,7 +5463,7 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 
 # NPM global packages
-export PATH="$HOME/.npm/bin:$PATH"
+export PATH="$HOME/.local/share/npm-global/bin:$PATH"
 
 # Rust cargo
 [[ -d "$HOME/.cargo/bin" ]] && export PATH="$HOME/.cargo/bin:$PATH"
