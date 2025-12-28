@@ -128,7 +128,9 @@ This ensures renamed files are properly tracked."
                 :require-match nil)))
     (when file
       ;; Slugify filename for new files
-      (let* ((original-title (file-name-sans-extension file))
+      (let* ((original-title (if (string-suffix-p ".org" file)
+                                 (file-name-sans-extension file)
+                               file))
              (slugified-name (wiki//slugify original-title))
              (file-with-ext (concat slugified-name ".org"))
              (full-path (expand-file-name file-with-ext org-directory))
@@ -139,7 +141,7 @@ This ensures renamed files are properly tracked."
             (insert (format "#+title: %s\n#+date: [%s]\n\n"
                             original-title
                             (format-time-string "%Y-%m-%d %a %H:%M")))
-            (insert "* TODO\n\n")
+            (insert "* TODO Content\n\n")
             (forward-line -2)
             (wiki//ensure-heading-id)
             (save-buffer)
@@ -160,57 +162,81 @@ This ensures renamed files are properly tracked."
           (insert (format "[[id:%s][%s]]" id title)))))))
 
 (defun wiki//prompt-for-heading (file)
-  "Prompt for a heading in FILE and return its line number."
-  (with-current-buffer (find-file-noselect file)
-    (let ((headings nil))
-      (save-excursion
-        (goto-char (point-min))
-        (while (re-search-forward org-outline-regexp nil t)
-          (let* ((heading (org-get-heading t t t t))
-                 (line (line-number-at-pos)))
-            (push (cons heading line) headings))))
-      (setq headings (nreverse headings))
-      (when headings
-        (let* ((selection (consult--read headings
-                                         :prompt "Heading: "
-                                         :category 'consult-location
-                                         :require-match t
-                                         :sort nil
-                                         :state (lambda (action cand)
-                                                  (when (eq action 'preview)
-                                                    (let ((line-num (cdr (assoc cand headings))))
-                                                      (when line-num
-                                                        (consult--preview-at-point
-                                                         (consult--position-marker (find-file-noselect file) line-num 0)))))))))
-          (when selection
-            (cdr (assoc selection headings))))))))
+  "Prompt for a heading in FILE and return its line number.
+Handles duplicate headings by including outline path."
+  (let ((file-path (expand-file-name file org-directory)))
+    (with-current-buffer (find-file-noselect file-path)
+      (let ((candidates nil))
+        (save-excursion
+          (goto-char (point-min))
+          (while (re-search-forward org-outline-regexp nil t)
+            (let* ((heading (org-get-heading t t t t))
+                   (line (line-number-at-pos))
+                   (path (org-get-outline-path t))
+                   ;; Format: "Parent / Child / Heading" to ensure uniqueness and context
+                   (candidate (if path
+                                  (format "%s / %s" (string-join path " / ") heading)
+                                heading)))
+              ;; Handle exact duplicates (same path + heading) by appending spaces
+              (while (assoc candidate candidates)
+                (setq candidate (concat candidate " ")))
+              (push (cons candidate line) candidates))))
+        (setq candidates (nreverse candidates))
+        (if (not candidates)
+            (progn (message "No headings found in %s" file) nil)
+          (consult--read candidates
+                         :prompt (format "Heading (%s): " (file-name-nondirectory file))
+                         :category 'consult-location
+                         :require-match t
+                         :sort nil
+                         :lookup #'consult--lookup-cdr
+                         :state (lambda (action cand)
+                                  (when (and (eq action 'preview) cand)
+                                    (let ((line (cdr (assoc cand candidates))))
+                                      (when line
+                                        (consult--preview-at-point
+                                         (consult--position-marker (find-file-noselect file-path) line 0))))))))))))
 
 (defun wiki/insert-heading-link ()
-  "Insert an org-id link to a heading in a wiki file."
+  "Insert an org-id link to a heading in a wiki file.
+If text is selected, use it as the link description and replace it.
+Uses markers to safely track selection even if buffer is modified (e.g. ID creation)."
   (interactive)
   (let* ((default-directory org-directory)
-         (description (when (use-region-p)
-                        (buffer-substring-no-properties (region-beginning) (region-end))))
-         (selected-file-path (consult--read
-                              (directory-files org-directory nil "\\.org$")
-                              :prompt "Link to file: "
-                              :category 'file
-                              :state (consult--file-preview))))
-    (when selected-file-path
-      (let* ((line-number (wiki//prompt-for-heading selected-file-path)))
+         ;; Use markers to track positions robustly across buffer modifications
+         (start-marker (when (use-region-p) (copy-marker (region-beginning))))
+         (end-marker   (when (use-region-p) (copy-marker (region-end))))
+         (description  (when (and start-marker end-marker)
+                         (buffer-substring-no-properties start-marker end-marker)))
+         (selected-file (consult--read
+                         (directory-files org-directory nil "\\.org$")
+                         :prompt "Link to file: "
+                         :category 'file
+                         :state (consult--file-preview)
+                         :require-match t)))
+    (when selected-file
+      (let ((line-number (wiki//prompt-for-heading selected-file)))
         (when line-number
-          (let* ((heading-data
-                  (save-window-excursion
-                    (with-current-buffer (find-file selected-file-path)
+          (let* ((full-path (expand-file-name selected-file org-directory))
+                 (id-title
+                  (with-current-buffer (find-file-noselect full-path)
+                    (save-excursion
                       (goto-char (point-min))
                       (forward-line (1- line-number))
                       (org-back-to-heading t)
-                      (cons (wiki//ensure-heading-id) (org-get-heading t t t t)))))
-                 (id (car heading-data))
-                 (title (cdr heading-data)))
-            (when (use-region-p)
-              (delete-region (region-beginning) (region-end)))
-            (insert (format "[[id:%s][%s]]" id (or description title)))))))))
+                      (cons (wiki//ensure-heading-id)
+                            (org-get-heading t t t t))))))
+            ;; Delete the original selection if it existed
+            (when (and start-marker end-marker)
+              (goto-char start-marker)
+              (delete-region start-marker end-marker)
+              ;; Clean up markers
+              (set-marker start-marker nil)
+              (set-marker end-marker nil))
+            ;; Insert the link
+            (insert (format "[[id:%s][%s]]"
+                            (car id-title)
+                            (or description (cdr id-title))))))))))
 
 (defun wiki/backlinks ()
   "Show all notes that link to the current note with context."
@@ -703,11 +729,13 @@ Kept for backward compatibility if called manually."
 ;; (add-hook 'after-save-hook #'wiki//maybe-export-on-save)
 
 (after! ox-hugo
-  (defun org-hugo-link--org-id-to-path (link)
+(defun org-hugo-link--org-id-to-path (link)
     "Convert org-id LINK to Hugo-compatible path with anchors for heading links."
     (condition-case err
         (let* ((id (org-element-property :path link))
-               (location (org-id-find id)))
+               (location (org-id-find id))
+               ;; Capture source file to detect same-page links
+               (source-file (buffer-file-name)))
       (if (not location)
           (progn
             (warn "⚠ Broken link: ID '%s' not found in database. Run M-x wiki/rebuild-id-database" id)
@@ -746,12 +774,26 @@ Kept for backward compatibility if called manually."
                        (export-name-down (downcase export-name))
                        ;; Hugo renders pages at /slugified-name/; treat README/_index/index as site root.
                        (page-path (wiki//slugify export-name))
-                       (heading-text (org-element-property :raw-value (org-element-at-point)))
-                       (slug (when heading-text (wiki//slugify heading-text)))
+                       ;; Use org-get-heading to strip TODOs, priorities, and tags cleanly
+                       (heading-text (org-get-heading t t t t))
+                       ;; Use org-hugo-slug if available to match Hugo's anchor generation exactly
+                       (slug (when heading-text
+                               (if (fboundp 'org-hugo-slug)
+                                   (org-hugo-slug heading-text)
+                                 (wiki//slugify heading-text))))
                        (base-path (if (member export-name-down '("readme" "_index" "index"))
                                       (or wiki/hugo-link-prefix "/")
                                     (concat (or wiki/hugo-link-prefix "/") page-path "/"))))
-                  (setq path (if slug (concat base-path "#" slug) base-path))
+                  
+                  ;; If linking to the same file, use relative hash to ensure smooth scrolling
+                  (if (and slug 
+                           source-file 
+                           buffer-file-name
+                           (string= (expand-file-name source-file) 
+                                    (expand-file-name buffer-file-name)))
+                      (setq path (concat "#" slug))
+                    (setq path (if slug (concat base-path "#" slug) base-path)))
+
                   (setq title (or heading-text
                                   (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
                                   export-name))))))
@@ -764,7 +806,7 @@ Kept for backward compatibility if called manually."
   (defun wiki/ox-hugo-link (orig-fn link desc info)
     "Export org-id links for Hugo, fall back to default for other link types."
     (let ((type (org-element-property :type link)))
-      (if (string= type "id")
+      (if (and type (string= type "id"))
           ;; Handle id: links specially
           (let ((path-title (org-hugo-link--org-id-to-path link)))
             (if (consp path-title)
