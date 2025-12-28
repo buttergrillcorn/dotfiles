@@ -254,8 +254,6 @@ Extensible text editor and integrated development environment built on Emacs.
        ;; literate
        (default +bindings +smartparens))
 #+end_src
-** 
-
 ** packages.el
 #+begin_src elisp :tangle packages/doom/.config/doom/packages.el
 ;; no-byte-compile: t; -*-
@@ -285,6 +283,10 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ;; Mason
 (package! mason)
+
+;; Grease
+(package! grease
+  :recipe (:host github :repo "mwac-dev/grease.el"))
 #+end_src
 
 ** config.el
@@ -445,7 +447,7 @@ Extensible text editor and integrated development environment built on Emacs.
 (projectile-add-known-project "~/stow")
 #+end_src
 *** Claude Code
-***** Configuration
+**** Configuration
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (use-package! claude-code
   :after inheritenv
@@ -456,7 +458,7 @@ Extensible text editor and integrated development environment built on Emacs.
   (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode)))
 #+end_src
 
-***** Key Binds
+**** Key Binds
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (map! :leader :desc "Claude Code" "e" #'claude-code-transient)
 ;; (:prefix-map ("e" . "Claude")
@@ -485,7 +487,7 @@ Pulse highlight line on demand or after running select functions
 #+RESULTS:
 
 *** Mason
-***** Configuration
+**** Configuration
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (use-package mason
   :ensure t
@@ -494,4 +496,25 @@ Pulse highlight line on demand or after running select functions
   ;; or
   :hook
   (after-init-hook . mason-ensure))
+#+end_src
+*** Grease
+Oil.nvim but for Emacs - Editable buffer file manager.
+**** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package! grease
+  :commands (grease-open grease-toggle grease-here)
+  :init
+  (setq grease-sort-method 'type
+        grease-show-hidden t
+        grease-preview-window-width 0.4
+        grease-preview-writable t))
+#+end_src
+
+**** Key Binds
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(map! :leader
+        (:prefix ("o g" . "Grease")
+         :desc "Toggle Grease"           "g" #'grease-toggle
+         :desc "Open Grease (current)"   "o" #'grease-open
+         :desc "Open at project root"    "h" #'grease-here)))
 #+end_src
