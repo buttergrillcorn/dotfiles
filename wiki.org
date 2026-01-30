@@ -57,6 +57,47 @@ Useful after renaming files or when the database becomes stale."
     (org-id-update-id-locations files)
     (message "✓ Rebuilt ID database for %d files" (length files))))
 
+(defun wiki/rename-note ()
+  "Rename the current wiki note and update its title and filename.
+Updates the #+TITLE property, renames the file (slugified), and updates
+the org-id database to maintain link validity."
+  (interactive)
+  (unless (and (buffer-file-name) (wiki//in-wiki-buffer-p))
+    (user-error "Not in a wiki note"))
+  (let* ((current-title (or (cadr (assoc "TITLE" (org-collect-keywords '("TITLE"))))
+                            (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
+         (new-title (read-string "New note title: " current-title))
+         (new-slug (wiki//slugify new-title))
+         (new-filename (concat new-slug ".org"))
+         (new-path (expand-file-name new-filename org-directory))
+         (old-path (buffer-file-name)))
+    (when (string-equal new-title current-title)
+      (user-error "Title unchanged"))
+    (when (and (not (string-equal (file-name-nondirectory old-path) new-filename))
+               (file-exists-p new-path))
+      (user-error "File %s already exists" new-filename))
+    
+    ;; Rename file and buffer
+    (rename-file old-path new-path)
+    (set-visited-file-name new-path)
+    (rename-buffer new-filename)
+    
+    ;; Update #+TITLE
+    (save-excursion
+      (goto-char (point-min))
+      (if (re-search-forward "^#\\+TITLE:.*$" nil t)
+          (replace-match (format "#+TITLE: %s" new-title))
+        ;; Insert title if missing
+        (goto-char (point-min))
+        (insert (format "#+TITLE: %s\n" new-title))))
+    
+    ;; Update org-id database with new location
+    (org-id-update-id-locations (list new-path))
+    
+    ;; Save to trigger front-matter updates (EXPORT_FILE_NAME)
+    (save-buffer)
+    (message "Renamed to %s" new-filename)))
+
 (defun wiki//refresh-buffer-id-location ()
   "Update ID locations for current buffer when opening wiki files.
 This ensures renamed files are properly tracked."
@@ -1109,6 +1150,7 @@ Kept for backward compatibility if called manually."
 (map! :leader
       (:prefix ("n" . "notes")
        :desc "Find/create note" "n" #'wiki/find-note
+       :desc "Rename note" "r" #'wiki/rename-note
        :desc "Search notes" "s" #'wiki/search
        :desc "Backlinks" "b" #'wiki/backlinks
        :desc "Insert heading link" "h" #'wiki/insert-heading-link
