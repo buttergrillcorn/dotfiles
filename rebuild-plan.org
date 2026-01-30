@@ -1,0 +1,73 @@
+#+title: Rebuild Plan
+
+* The purpose of this rebuild
+
+1. To organise everything in a clearer and efficient way.
+2. Further break down of org files into smaller files.
+   
+* Changes planned
+
+** =dotfile.org= ( and other =.org= configurations )
+
+*** TODO Streamlining the main dotfile.org into smaller parts
+
+The =dotfile.org= was THE main configuration file that had everything under different headings.
+This quickly got too large for my liking, making it clunky to navigate around and edit code.
+
+The new approach should be carefully thought out. 
+
+*** TODO Plan out the new approach, on the foundation level.
+
+**** Potential approaches
+
+***** The "literate" way
+   
+This means to write the configuration out almost as if you're telling a story.
+
+For instance, you would start with something like:
+
+#+begin_example
+The first thing we will need to set up is ... and to do that, we will have to write the config like so ...
+[ insert code block for tangling ]
+#+end_example
+
+And then as you tweak and add things, you would go on to explain the reasons and write them down with the actual code blocks.
+
+****** Why doing it this way?
+
+This is the "literate programming" method of writing code. It is a way to write code for human readability, as the code
+is literally explained in human language.
+
+***** The "traditional" way
+   
+
+** README and ( docs )
+
+*** TODO Re-write README.org
+
+The README should serve as an entry point for viewers to have an overview of the project, not to get overwhelmed with information.
+
+**** TODO Break it into smaller parts under =./doc/=
+
+* Steps 
+
+Maybe start with an entry point, something along the lines of =main.org= or =meta.org=?
+
+And then go on to re-write other moving parts, starting with more crucial things.
+
+* New structure
+
+#+begin_example
+~/.dotfiles/
+    ├── README.org          # Master file (Aggregator)
+    ├── modules/            # Your modular org files
+    │   ├── niri.org
+    │   ├── shell.org
+    │   └── emacs.org
+    ├── templates/          # Snippets for Noweb (Boilerplates)
+    │   └── license.org
+    ├── src/                # Source files (config dir and files) for stow
+    │   ├── niri/.config/...
+    │   └── niri.kdl
+    └── bin/                # Helper scripts (e.g., a  "tangle-all" script)
+#+end_example

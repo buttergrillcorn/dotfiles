@@ -85,7 +85,11 @@ source = ~/.cache/matugen/colors-hyprland.conf
 **** Monitor
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Monitor configuration
+monitor = , preferred, auto, 1
+
 monitor = eDP-1, 1920x1080@60, 0x0, 1
+
+monitor = desc:Samsung Electric Company LS27R75 HTHM501280, 2560x1440@144, auto-center-up, 1
 #+end_src
 
 **** Auto-start
@@ -107,6 +111,7 @@ exec-once = emacs --daemon &
 exec-once = systemctl --user start hyprpolkitagent
 exec-once = wl-paste --type text --watch cliphist store
 exec-once = wl-paste --type image --watch cliphist store
+exec-once = hyprpm reload
 #+end_src
 
 **** Environment Variables
@@ -129,7 +134,7 @@ env = XMODIFIERS,@im=fcitx
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 input {
 kb_layout = us
-kb_options = ctrl:swapcaps
+kb_options = ctrl:nocaps
 
 follow_mouse = 1
 float_switch_override_focus = 1
@@ -137,11 +142,26 @@ float_switch_override_focus = 1
 touchpad {
 disable_while_typing = true
 natural_scroll = true
-scroll_factor = 0.7
 middle_button_emulation = true
 }
 
 sensitivity = 0
+}
+#+end_src
+
+**** Device
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+device {
+    name = tpps/2-ibm-trackpoint 
+    accel_profile = custom 0.2 0.0 0.05 0.3 0.5 1.0 
+    drag_lock = 2
+    disable_while_typing = true
+}
+
+device {
+    name = synaptics-tm3276-022
+    scroll_factor = 0.7
+    disable_while_typing = true
 }
 #+end_src
 
@@ -153,7 +173,7 @@ border_size = 3
 gaps_in = 3
 gaps_out = 5
 
-layout = dwindle
+# layout = dwindle
 allow_tearing = false
 resize_on_border = true
 hover_icon_on_border = true
@@ -169,13 +189,15 @@ decoration {
 rounding = 0
 
 active_opacity = 1
-inactive_opacity = 0.75
+inactive_opacity = 1
 
 dim_modal = false
+dim_inactive = true
+dim_strength = 0.25
 dim_special = 0.2
 
 blur {
-enabled = true
+enabled = false
 special = true
 popups = true
 size = 5
@@ -215,7 +237,7 @@ col.locked_inactive = $tertiary_container
 **** Animations
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 animations {
-enabled = true
+enabled = false
 
 # Smooth bezier curves (Material Design inspired)
 bezier = smoothOut, 0.36, 0, 0.66, -0.56
@@ -278,45 +300,54 @@ gestures {
 ***** Window
 #+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
 # Floating terminal
-windowrule = float, class:($terminal-float-id)
-windowrule = size 30% 30%, class:($terminal-float-id)
-windowrule = move 20 100%-w-20, class:($terminal-float-id)
-
-# # Terminal blur
-# windowrulev2 = opacity 0.75 override 0.75 override 1.0 override, class:$terminal # Set opacity to 0.75 active, 0.75 inactive and 1.0 fullscreen for terminal
-# windowrule = opacity 0.75 override 0.75 override 1.0 override, class:$terminal-float-id
+windowrule {
+    name = floating-terminal 
+    match:class = $terminal-float-id
+    float = on
+    size = 30% 30%
+    move = 20 100%-w-20
+}
 
 # Picture-in-Picture
-windowrule = float, title:^(Picture-in-Picture)$
-windowrule = pin, title:^(Picture-in-Picture)$
-windowrule = move 100%-w-20, title:^(Picture-in-Picture)$
-windowrule = move 100%-h-20, title:^(Picture-in-Picture)$
-windowrule = size 30% 30%, title:^(Picture-in-Picture)$
-windowrule = noborder, title:^(Picture-in-Picture)$
-windowrule = opacity 1.0 override 1.0 override 1.0 override, title:^(Picture-in-Picture)$
+windowrule {
+    name = PiP
+    match:title = ^(Picture-in-Picture)$
+    float = on
+    pin = on
+    move = 100%-w-20 100%-h-20
+    size = 30% 30%
+    border_size = 0
+    opacity = 1.0 override 1.0 override 1.0 override
+    no_initial_focus = on
+}
+
+# Wiremix
+windowrule {
+    name = wiremix
+    match:class = Wiremix
+    float = on
+    size = 50% 50%
+    center = on
+}
 
 # Floating windows
-windowrule = float, class:(blueman-manager)
-windowrule = float, class:(pavucontrol)
-windowrule = float, class:(Wiremix)
-windowrule = size 50% 50%, class:(Wiremix)
-windowrule = center, class:(Wiremix)
-windowrule = float, class:(nm-connection-editor)
-windowrule = float, class:(kdeconnect.*)
-windowrule = float, title:(Volume Control)
-windowrule = float, class:(blueberry.py)
-windowrule = float, class:(org.kde.kdeconnect.daemon)
-windowrule = float, title:(File Operation Progress)
+windowrule = match:class blueman-manager, float on
+windowrule = match:class pavucontrol, float on
+windowrule = match:class nm-connection-editor, float on
+windowrule = match:class kdeconnect.*, float on
+windowrule = match:class blueberry.py, float on
+windowrule = match:class org.kde.kdeconnect.daemon, float on
+windowrule = match:title Volume\ \Control, float on
+windowrule = match:title File\ \Operation\ \Progress, float on
 
 # Inhibit idle for fullscreen
-windowrule = idleinhibit fullscreen, class:.*
+windowrule = match:class .*, idle_inhibit fullscreen
 
 # No focus stealing
-windowrule = noinitialfocus, class:(mako)
-windowrule = noinitialfocus, title:^(Picture-in-Picture)$
+windowrule = match:class mako, no_initial_focus on
 
 # No transparency
-windowrule = opacity 1.0 override 1.0 override 1.0 override, class:(.*)(.exe)
+windowrule = match:class (.*)(.exe), opacity 1.0 override 1.0 override 1.0 override
 #+end_src
 
 ***** Workspace
@@ -354,8 +385,8 @@ bind = $mainMod SHIFT, P, exec, ~/.local/bin/select-wallpaper.sh
 # Window management
 bind = $mainMod, Q, killactive
 bind = $mainMod CTRL, F, fullscreen, 0
-bind = $mainMod SHIFT, F, fullscreen, 1
-bind = $mainMod, F, togglefloating
+bind = $mainMod, F, fullscreen, 1
+bind = $mainMod SHIFT, F, togglefloating
 bind = $mainMod, T, focuscurrentorlast
 bind = $mainMod ALT, S, pin
 
@@ -371,7 +402,7 @@ bind = $mainMod, P, pseudo
 #+end_src
 
 ***** Navigation
-#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+#+begin_src conf :tangle no
 # Focus windows
 bind = $mainMod, H, movefocus, l
 bind = $mainMod, J, movefocus, d
@@ -469,12 +500,14 @@ bind = , XF86MonBrightnessDown, exec, ~/.local/bin/brightness-notify down
 
 # Screenshots
 bind = , Print, exec, ~/.local/bin/screenshot.sh
+bind = , XF86Keyboard, exec, ~/.local/bin/toggle-touchpad
 bind = $mainMod SHIFT, S, exec, ~/.local/bin/screenshot.sh
 bind = SHIFT, Print, exec, ~/.local/bin/screenshot.sh screen
 bind = $mainMod SHIFT CTRL, S, exec, ~/.local/bin/screenshot.sh screen
 
 # Laptop Lid
-bindl = , switch:on:[Lid Switch], exec, systemctl suspend-then-hibernate
+bindl = , switch:on:Lid Switch, exec, hyprctl keyword monitor "eDP-1, disable"
+bindl = , switch:off:Lid Switch, exec, hyprctl keyword monitor "eDP-1, 1920x1080@60, 0x1080, 1"
 #+end_src
 
 ***** Utilities
@@ -506,7 +539,7 @@ bind = $mainMod, slash, exec, ~/.local/bin/help-menu
 #+end_src
 
 ***** Resizing
-#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+#+begin_src conf :tangle no 
 # Resize mode
 bind = $mainMod, R, submap, resize
 submap = resize
@@ -581,11 +614,15 @@ Wallpaper manager for Hyprland.
 # Hyprpaper Configuration
 # Wallpaper daemon for Hyprland
 
-preload = <<wallpaper>>
-wallpaper = , <<wallpaper>>
-
 splash = false
-ipc = on
+
+ipc = true
+
+wallpaper {
+    monitor =
+    path = <<wallpaper>>
+    fit_mode = cover
+}
 #+end_src
 
 **** Hypridle
@@ -599,6 +636,12 @@ lock_cmd = pidof hyprlock || hyprlock
 before_sleep_cmd = loginctl lock-session && rm -f ${XDG_RUNTIME_DIR:-/tmp}/bw_session ${XDG_RUNTIME_DIR:-/tmp}/bw_cache
 after_sleep_cmd = hyprctl dispatch dpms on
 ignore_dbus_inhibit = false
+}
+
+listener {
+    event = sw_on:Lid Switch
+    # This script checks if any monitor other than the laptop (eDP-1) is connected
+    on-status-changed = bash -c "if [[ $(hyprctl monitors | grep -c 'Monitor') -eq 1 ]]; then systemctl suspend-then-hibernate; fi"
 }
 
 # Screen off (5 minutes on battery, 10 minutes on AC)
@@ -701,6 +744,37 @@ profile {
 time = 20:00
 temperature = 2500
 }
+#+end_src
+**** Hypr-Plugins
+***** Hyprscrolling
+#+begin_src conf :tangle packages/hyprland/.config/hypr/hyprland.conf
+general {
+    layout = scrolling
+}
+
+plugin {
+    hyprscrolling {
+        column_width = 0.5
+        explicit_column_widths = 0.333, 0.5, 0.667, 1.0 
+        fullscreen_on_one_column = true
+        focus_fit_method = 1
+    }
+}
+
+bind = $mainMod SHIFT, h, layoutmsg, movewindowto l
+bind = $mainMod SHIFT, l, layoutmsg, movewindowto r
+bind = $mainMod SHIFT, j, layoutmsg, movewindowto d
+bind = $mainMod SHIFT, k, layoutmsg, movewindowto u
+bind = $mainMod, H, layoutmsg, focus l
+bind = $mainMod, J, layoutmsg, focus d
+bind = $mainMod, K, layoutmsg, focus u
+bind = $mainMod, L, layoutmsg, focus r
+bind = $mainMod, Left, layoutmsg, focus l
+bind = $mainMod, Down, layoutmsg, focus d
+bind = $mainMod, Up, layoutmsg, focus u
+bind = $mainMod, Right, layoutmsg, focus r
+bind = $mainMod, r, layoutmsg, colresize +conf
+# bind = $mainMod SHIFT, r, layoutmsg, colresize +conf
 #+end_src
 ** Sway
 Alternative i3-compatible Wayland compositor with mature stability and broad support.
@@ -2340,10 +2414,6 @@ c.content.blocking.adblock.lists = [
 # Privacy
 c.content.cookies.accept = 'no-3rdparty'
 c.content.headers.do_not_track = True
-c.content.webgl = False
-
-# Smooth scrolling
-c.scrolling.smooth = True
 
 # Downloads
 c.downloads.location.directory = '~/Downloads'
@@ -2352,6 +2422,29 @@ c.downloads.remove_finished = 5000
 
 # Zoom
 c.zoom.default = '110%'
+
+# Performance
+c.qt.workarounds.disable_accelerated_2d_canvas = "never"
+c.scrolling.smooth = False
+c.content.webgl = True
+
+# Force GPU hardware acceleration and rasterization
+c.qt.args = [
+    'ignore-gpu-blocklist',
+    'enable-gpu-rasterization',
+    'enable-zero-copy',
+    'enable-accelerated-2d-canvas',
+    # 'use-gl=desktop',
+    'enable-webgl',
+    'enable-webgl2',
+    'canvas-msaa-sample-count=0', # Lower quality canvas for speed
+    # Wayland
+    'ozone-platform-hint=wayland',      # Use Wayland natively
+    'enable-features=UseOzonePlatform',  # Force Ozone platform
+    'enable-accelerated-video-decode',
+    'enable-features=VaapiVideoDecoder',
+    # 'disable-features=UseChromeOSDirectVideoDecoder', # Often needed on Linux
+]
 #+end_src
 
 **** Fonts
@@ -2412,16 +2505,18 @@ c.editor.command = ['emacsclient', '-c', '-a', ' ', '+{line}:{column}', '{}']
 **** Search Engines
 #+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
 # Custom search engines
-# c.url.searchengines['DEFAULT'] = 'https://duckduckgo.com/?q={}'
-c.url.searchengines['DEFAULT'] = 'https://kagi.com/search?q={}'
+c.url.searchengines['DEFAULT'] = 'https://marginalia-search.com/search?query={}'
+# c.url.searchengines['DEFAULT'] = 'https://kagi.com/search?q={}'
 # c.url.searchengines['DEFAULT'] = 'https://www.startpage.com/sp/search?q={}'
-c.url.searchengines['gg'] = 'https://www.google.com/search?q={}'
+c.url.searchengines['g'] = 'https://www.google.com/search?q={}'
+c.url.searchengines['gem'] = 'https://gemini.google.com/app?q={}'
 c.url.searchengines['mar'] = 'https://marginalia-search.com/search?query={}'
 c.url.searchengines['am'] = 'https://www.amazon.co.uk/s?k={}'
 c.url.searchengines['yt'] = 'https://www.youtube.com/results?search_query={}'
 c.url.searchengines['aur'] = 'https://aur.archlinux.org/packages?O=0&K={}'
 c.url.searchengines['arp'] = 'https://archlinux.org/packages/?sort=&q={}&maintainer=&flagged='
 c.url.searchengines['ar'] = 'https://wiki.archlinux.org/index.php?search={}'
+c.url.searchengines['r'] = 'https://old.reddit.com/search?q={}'
 c.url.searchengines['rd'] = 'https://www.reddit.com/search/?q={}'
 c.url.searchengines['ghr'] = 'https://github.com/search?q={}&type=repositories'
 c.url.searchengines['ghc'] = 'https://github.com/search?q={}&type=code'
@@ -2464,7 +2559,6 @@ config.bind('<Ctrl-k>', 'completion-item-focus prev', mode='command')
 config.bind('<Ctrl-j>', 'prompt-item-focus next', mode='prompt')
 config.bind('<Ctrl-k>', 'prompt-item-focus prev', mode='prompt')
 #+end_src
-
 **** Colours (Matugen)
 #+begin_src python :tangle packages/qutebrowser/.config/qutebrowser/config.py
 # Source matugen colors
@@ -3312,7 +3406,7 @@ c.colors.webpage.darkmode.enabled = (mode.lower() == 'dark')
       event.preventDefault();
       const query = document.getElementById('search-input').value.trim();
       if (query) {
-      window.location.href = 'https://www.startpage.com//search?query=' + encodeURIComponent(query);
+      window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
       }
       }
     </script>
@@ -4614,9 +4708,9 @@ if matugen image "$wallpaper_path" -m "$mode" -t "$scheme"; then
     sudo papirus-folders -C "$papirus_color" --theme Papirus-Dark 2>/dev/null || true
 
     # Set wallpaper with hyprpaper
-    hyprctl hyprpaper unload all
-    hyprctl hyprpaper preload "$wallpaper_path"
-    hyprctl hyprpaper wallpaper ",$wallpaper_path"
+    for monitor in $(hyprctl monitors | grep "Monitor" | awk '{print $2}'); do
+        hyprctl hyprpaper wallpaper "$monitor,$wallpaper_path"
+    done
 
     # Reload hyprland
     hyprctl reload
@@ -4848,6 +4942,35 @@ case "$MODE" in
         take_screenshot "window"
         ;;
 esac
+#+end_src
+
+**** Toggle Touchpad
+#+begin_src bash :tangle packages/hyprland/.local/bin/toggle-touchpad :shebang "#!/usr/bin/env bash"
+#!/usr/bin/env bash
+
+DEVICE="synaptics-tm3276-022"
+# Correct syntax per user: device[name]:enabled
+HYPRCTL_DEVICE="device[$DEVICE]:enabled"
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/touchpad_state"
+
+# Initialize state file if missing. Assume enabled (1) by default.
+if [ ! -f "$STATE_FILE" ]; then
+    echo "1" > "$STATE_FILE"
+fi
+
+STATE=$(cat "$STATE_FILE")
+
+if [ "$STATE" = "1" ]; then
+    # Currently enabled, so disable
+    hyprctl keyword "$HYPRCTL_DEVICE" false
+    echo "0" > "$STATE_FILE"
+    notify-send -u low -i input-touchpad-off "Touchpad" "Disabled"
+else
+    # Currently disabled, so enable
+    hyprctl keyword "$HYPRCTL_DEVICE" true
+    echo "1" > "$STATE_FILE"
+    notify-send -u low -i input-touchpad-on "Touchpad" "Enabled"
+fi
 #+end_src
 
 **** Layout Indicator Script
@@ -5369,6 +5492,9 @@ zinit light hlissner/zsh-autopair
 
 # Colorize man pages
 zinit light ael-code/zsh-colored-man-pages
+
+# SSH-agent
+zinit snippet OMZP::ssh-agent
 #+end_src
 
 *** Completion System Configuration
@@ -5402,6 +5528,9 @@ compdef _gnu_generic bat
 compdef _gnu_generic eza
 compdef _gnu_generic fd
 compdef _gnu_generic rg
+
+# SSH
+zstyle :omz:plugins:ssh-agent identities id_rsa_remarkable T480
 #+end_src
 
 *** Key Bindings

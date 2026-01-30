@@ -1,0 +1,86 @@
+#+TITLE: Niri
+#+AUTHOR: James
+#+PROPERTY: header-args :mkdirp yes :noweb yes
+#+STARTUP: overview
+
+* Introduction
+
+** Why Niri?
+
+I have tried quite a handful of tiling window managers and have been daily driving Hyprland for the most part. At one point of exploring my options, I came across [[https://github.com/jbuchermn/newm][newm]]. It opened up a whole new different kind of experience; A way of navigating, interacting and using my computer that I've no idea is possible. It's almost like when I first discovered that window managers exists outside of desktop environments like Gnome and KDE. 
+
+I fell in love with the scrolling logic. You can imagine how sad I was to find out that it's no longer in active development. That threw me off for a while, until I found [[https://github.com/YaLTeR/niri][Niri]].
+
+** What is Niri and how does it differ?
+
+In essence, Niri is what I would describe as a *scrollable* tiling window manager.
+Now, it is probably better for you to read about the details and features on their [[https://yalter.github.io/niri/][official doc]].
+
+What I can tell you is that I find the scrolling logic ( and how it works ) to be the most intuitive workflow that I've ever used. I was satisfied with dynamic tiling and found it to improve the interaction between me and my computer. This is like the a step up from that. An infinite desktop where windows are tiled next to each other. It's hard to describe why it's better but I find it to be more *"freeing"*.
+
+* Configuration
+
+Config for Niri is normally load from =$XDG_CONFIG_HOME/niri/config.kdl=, which is usually at =~/.config/niri/config.kdl=.
+
+Now since I'm writing a literate config and use Stow to manage my config. I will tangle the file(s) in my repository with other packages.
+
+** Annoyance
+
+One of the things I find annoying is the fact that many sections in Niri config cannot be repeated.
+
+So for instance, if you have =input= defined at one point of the config file, you cannot have it defined again elsewhere. Whether that's in the same config file or another file.
+
+#+begin_src kdl :tangle no
+input {
+    focus-follows-mouse
+}
+
+// Only one "input" is allowed,
+// having another "input" like below
+// will not be valid.
+
+input {
+    keyboard {
+        /// ...
+    }
+}
+#+end_src
+
+You can however, include other files to be sourced by Niri.
+#+begin_src kdl :tangle no
+/// Some configuration...
+include "example.kdl"
+/// Some more configuration...
+#+end_src
+
+** My approach
+
+My solution to solve the annoyance is to utilise =noweb=.
+
+So for example, if I want to define settings for =input= in more than one place. I would use something like this:
+
++ The main config:
+
+#+begin_src kdl :tangle no
+input {
+    /// ... Settings
+    <<<keyboard>>>
+}
+#+end_src
+
++ More settings for =input= elsewhere in my config:
+
+#+name: keyboard
+#+begin_src kdl :tangle no
+keyboard {
+    /// Keyboard settings...
+}
+#+end_src
+
+* Main file 
+
+This is going to be the main config file where all settings will end up in.
+
+#+begin_src kdl :tangle src/niri/.config/niri/config.kdl
+
+#+end_src

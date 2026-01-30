@@ -1,0 +1,251 @@
+#+title:     Yazi Configuration 
+#+author:    James
+#+email:     jamesyuli@outlook.com
+#+property:  header-args :mkdirp yes :comments yes :noweb yes
+
+* Introduction
+
+Blazing fast terminal file manager with modern features and vim-like keybindings.
+
+* Configuration
+** Main
+#+begin_src toml :tangle ../src/yazi/.config/yazi/yazi.toml
+[manager]
+ratio = [1, 4, 3]
+#+end_src
+** Chmod
+#+begin_src toml :tangle ../src/yazi/.config/yazi/keymap.toml
+[[mgr.prepend_keymap]]
+on   = [ "c", "m" ]
+run  = "plugin chmod"
+desc = "Chmod on selected files"
+#+end_src
+** Media Info
+#+begin_src toml :tangle ../src/yazi/.config/yazi/yazi.toml
+[plugin]
+prepend_preloaders = [
+# Replace magick, image, video with mediainfo
+{ mime = "{audio,video,image}/*", run = "mediainfo" },
+{ mime = "application/subrip", run = "mediainfo" },
+# Adobe Illustrator, Adobe Photoshop is image/adobe.photoshop, already handled above
+{ mime = "application/postscript", run = "mediainfo" },
+]
+prepend_previewers = [
+# Replace magick, image, video with mediainfo
+{ mime = "{audio,video,image}/*", run = "mediainfo"},
+{ mime = "application/subrip", run = "mediainfo" },
+# Adobe Illustrator, Adobe Photoshop is image/adobe.photoshop, already handled above
+{ mime = "application/postscript", run = "mediainfo" },
+]
+# There are more extensions which are supported by mediainfo.
+# Just add file's MIME type to `previewers`, `preloaders` above.
+# https://mediaarea.net/en/MediaInfo/Support/Formats
+
+# For a large file like Adobe Illustrator, Adobe Photoshop, etc
+# you may need to increase the memory limit if no image is rendered.
+# https://yazi-rs.github.io/docs/configuration/yazi#tasks
+[tasks]
+image_alloc      = 1073741824        # = 1024*1024*1024 = 1024MB
+#+end_src
+** Zoom
+#+begin_src toml :tangle ../src/yazi/.config/yazi/keymap.toml
+[[mgr.prepend_keymap]]
+on   = [ "z", "i" ]
+run  = "plugin zoom 1"
+desc = "Zoom in hovered file"
+
+[[mgr.prepend_keymap]]
+on   = [ "z", "o" ]
+run  = "plugin zoom -1"
+desc = "Zoom out hovered file"
+#+end_src
+** Trash Restore
+*** Configuration
+#+begin_src lua :tangle ../src/yazi/.config/yazi/init.lua
+require("recycle-bin"):setup({
+    -- Optional: Override automatic trash directory discovery
+    -- trash_dir = "~/.local/share/Trash/",  -- Uncomment to use specific directory
+                            })
+#+end_src
+*** Keybinding
+#+begin_src toml :tangle ../src/yazi/.config/yazi/keymap.toml
+[[mgr.prepend_keymap]]
+on =  "R"
+run = "plugin recycle-bin"
+desc = "Open Recycle Bin menu"
+#+end_src
+** Kdeconnect-send
+*** Configuration (optional)
+Un-comment/enable this to always show a prompt for selecting a target device, even when there's only one device connected.
+#+begin_src lua :tangle ../src/yazi/.config/yazi/init.lua
+-- Always show device selection
+-- require("kdeconnect-send"):setup({
+-- auto_select_single = false,
+-- })
+#+end_src
+*** Keybinding
+#+begin_src toml :tangle ../src/yazi/.config/yazi/keymap.toml
+[[mgr.prepend_keymap]]
+on   = [ "<C-s>" ]
+run  = "plugin kdeconnect-send"
+desc = "Send selected files via KDE Connect"
+#+end_src
+** Git Status
+*** Configuration
+#+begin_src lua :tangle ../src/yazi/.config/yazi/init.lua
+-- Custom status signs
+th.git = th.git or {}
+th.git.modified_sign = "M"
+th.git.added_sign = "A"
+th.git.untracked_sign = "U"
+th.git.ignored_sign = "I"
+th.git.deleted_sign = "D"
+th.git.updated_sign = "U"
+
+-- Init
+require("git"):setup()
+#+end_src
+*** Setup
+#+begin_src toml :tangle ../src/yazi/.config/yazi/yazi.toml
+[[plugin.prepend_fetchers]]
+id   = "git"
+name = "*"
+run  = "git"
+
+[[plugin.prepend_fetchers]]
+id   = "git"
+name = "*/"
+run  = "git"
+#+end_src
+** Lazygit
+*** Keybinding
+#+begin_src toml :tangle ../src/yazi/.config/yazi/keymap.toml
+[[mgr.prepend_keymap]]
+on   = [ "g", "l" ]
+run  = "plugin lazygit"
+desc = "run lazygit"
+#+end_src
+** Clipboard
+*** Keybinding
+#+begin_src toml :tangle ../src/yazi/.config/yazi/keymap.toml
+[[mgr.prepend_keymap]]
+on  = "y"
+run = [ "yank", 'plugin clipboard -- --action=copy' ]
+#+end_src
+** Mount/un-mount
+*** Keybinding
+#+begin_src toml :tangle ../src/yazi/.config/yazi/keymap.toml
+[[mgr.prepend_keymap]]
+on  = "M"
+run = "plugin mount"
+#+end_src
+** Yatline
+*** Configuration
+#+begin_src lua :tangle ../src/yazi/.config/yazi/init.lua
+require("yatline"):setup({
+	--theme = my_theme,
+	section_separator = { open = "", close = "" },
+	part_separator = { open = "", close = "" },
+	inverse_separator = { open = "", close = "" },
+
+	style_a = {
+      fg = "black",
+      bg_mode = {
+        normal = "white",
+        select = "brightyellow",
+        un_set = "brightred"
+      }
+	},
+	style_b = { bg = "brightblack", fg = "brightwhite" },
+	style_c = { bg = "black", fg = "brightwhite" },
+
+	permissions_t_fg = "green",
+	permissions_r_fg = "yellow",
+	permissions_w_fg = "red",
+	permissions_x_fg = "cyan",
+	permissions_s_fg = "white",
+
+	tab_width = 20,
+	tab_use_inverse = false,
+
+	selected = { icon = "󰻭", fg = "yellow" },
+	copied = { icon = "", fg = "green" },
+	cut = { icon = "", fg = "red" },
+
+	total = { icon = "󰮍", fg = "yellow" },
+	succ = { icon = "", fg = "green" },
+	fail = { icon = "", fg = "red" },
+	found = { icon = "󰮕", fg = "blue" },
+	processed = { icon = "󰐍", fg = "green" },
+
+	show_background = true,
+
+	display_header_line = true,
+	display_status_line = true,
+
+	component_positions = { "header", "tab", "status" },
+
+	header_line = {
+      left = {
+        section_a = {
+          {type = "line", custom = false, name = "tabs", params = {"left"}},
+        },
+        section_b = {
+        },
+        section_c = {
+        }
+      },
+      right = {
+        section_a = {
+          {type = "string", custom = false, name = "date", params = {"%A, %d %B %Y"}},
+        },
+        section_b = {
+          {type = "string", custom = false, name = "date", params = {"%X"}},
+        },
+        section_c = {
+        }
+      }
+	},
+
+	status_line = {
+      left = {
+        section_a = {
+          {type = "string", custom = false, name = "tab_mode"},
+        },
+        section_b = {
+          {type = "string", custom = false, name = "hovered_size"},
+        },
+        section_c = {
+          {type = "string", custom = false, name = "hovered_path"},
+          {type = "coloreds", custom = false, name = "count"},
+        }
+      },
+      right = {
+        section_a = {
+          {type = "string", custom = false, name = "cursor_position"},
+        },
+        section_b = {
+          {type = "string", custom = false, name = "cursor_percentage"},
+        },
+        section_c = {
+          {type = "string", custom = false, name = "hovered_file_extension", params = {true}},
+          {type = "coloreds", custom = false, name = "permissions"},
+        }
+      }
+	},
+                        })
+#+end_src
+** Toggle-pane
+*** Keybinding
+#+begin_src toml :tangle ../src/yazi/.config/yazi/keymap.toml
+[[mgr.prepend_keymap]]
+on   = "T"
+run  = "plugin toggle-pane min-preview"
+desc = "Show or hide the preview pane"
+
+[[mgr.prepend_keymap]]
+on   = "P"
+run  = "plugin toggle-pane max-preview"
+desc = "Maximize or restore the preview pane"
+
+#+end_src

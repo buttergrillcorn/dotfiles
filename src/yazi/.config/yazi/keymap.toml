@@ -1,0 +1,63 @@
+# [[file:../../../../modules/yazi.org::*Chmod][Chmod:1]]
+[[mgr.prepend_keymap]]
+on   = [ "c", "m" ]
+run  = "plugin chmod"
+desc = "Chmod on selected files"
+# Chmod:1 ends here
+
+# [[file:../../../../modules/yazi.org::*Zoom][Zoom:1]]
+[[mgr.prepend_keymap]]
+on   = [ "z", "i" ]
+run  = "plugin zoom 1"
+desc = "Zoom in hovered file"
+
+[[mgr.prepend_keymap]]
+on   = [ "z", "o" ]
+run  = "plugin zoom -1"
+desc = "Zoom out hovered file"
+# Zoom:1 ends here
+
+# [[file:../../../../modules/yazi.org::*Keybinding][Keybinding:1]]
+[[mgr.prepend_keymap]]
+on =  "R"
+run = "plugin recycle-bin"
+desc = "Open Recycle Bin menu"
+# Keybinding:1 ends here
+
+# [[file:../../../../modules/yazi.org::*Keybinding][Keybinding:1]]
+[[mgr.prepend_keymap]]
+on   = [ "<C-s>" ]
+run  = "plugin kdeconnect-send"
+desc = "Send selected files via KDE Connect"
+# Keybinding:1 ends here
+
+# [[file:../../../../modules/yazi.org::*Keybinding][Keybinding:1]]
+[[mgr.prepend_keymap]]
+on   = [ "g", "l" ]
+run  = "plugin lazygit"
+desc = "run lazygit"
+# Keybinding:1 ends here
+
+# [[file:../../../../modules/yazi.org::*Keybinding][Keybinding:1]]
+[[mgr.prepend_keymap]]
+on  = "y"
+run = [ "yank", 'plugin clipboard -- --action=copy' ]
+# Keybinding:1 ends here
+
+# [[file:../../../../modules/yazi.org::*Keybinding][Keybinding:1]]
+[[mgr.prepend_keymap]]
+on  = "M"
+run = "plugin mount"
+# Keybinding:1 ends here
+
+# [[file:../../../../modules/yazi.org::*Keybinding][Keybinding:1]]
+[[mgr.prepend_keymap]]
+on   = "T"
+run  = "plugin toggle-pane min-preview"
+desc = "Show or hide the preview pane"
+
+[[mgr.prepend_keymap]]
+on   = "P"
+run  = "plugin toggle-pane max-preview"
+desc = "Maximize or restore the preview pane"
+# Keybinding:1 ends here
