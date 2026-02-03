@@ -2,7 +2,6 @@
 #+AUTHOR: James
 #+PROPERTY: header-args :mkdirp yes :noweb yes
 #+STARTUP: overview
-
 * Doom Emacs
 Extensible text editor and integrated development environment built on Emacs.
 
@@ -66,7 +65,7 @@ Extensible text editor and integrated development environment built on Emacs.
        ;; neotree           ; a project drawer, like NERDTree for vim
        ophints           ; highlight the region an operation acts on
        popup   ; tame sudden yet inevitable temporary windows
-       ;; tabs              ; a tab bar for Emacs
+       tabs              ; a tab bar for Emacs
        (treemacs          ; a project drawer, like neotree but cooler
         +lsp)
        unicode           ; extended unicode support for various languages
@@ -201,11 +200,9 @@ Extensible text editor and integrated development environment built on Emacs.
        (org              ; organize your plain life in plain text
         +dragndrop
         +hugo
-        ;; +noter
         +pandoc
         +pomodoro
         +present)
-        ;; +pretty)
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
@@ -254,6 +251,9 @@ Extensible text editor and integrated development environment built on Emacs.
        ;; literate
        (default +bindings +smartparens))
 #+end_src
+
+#+RESULTS:
+
 ** packages.el
 #+begin_src elisp :tangle packages/doom/.config/doom/packages.el
 ;; no-byte-compile: t; -*-
@@ -269,7 +269,7 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ;; Orgmode
 (package! org-autolist)
-(package! org-appear)
+;; (package! org-appear)
 (package! org-auto-tangle)
 
 ;; Claude Code
@@ -308,31 +308,33 @@ Extensible text editor and integrated development environment built on Emacs.
 ;; sync' after modifying this file!
 #+end_src
 
-*** Wiki (external config)
+*** Wiki (external config) :DISABLED:
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 ;; Load wiki workflow from separate tangled file to keep this config lean.
-(let ((wiki-file (expand-file-name "wiki.el" doom-user-dir)))
-  (when (file-exists-p wiki-file)
-    (load! "wiki")))
+;; (let ((wiki-file (expand-file-name "wiki.el" doom-user-dir)))
+;;   (when (file-exists-p wiki-file)
+;;     (load! "wiki")))
 #+end_src
 
 *** User Information
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(setq user-full-name "James"
+(setq user-full-name "Yu Li (James)"
       user-mail-address "jamesyuli@outlook.com")
 #+end_src
 
 *** UI
 **** Font
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(setq doom-font (font-spec :family "Sarasa Term SC Nerd" :size 16 :weight 'Regular)
-      doom-variable-pitch-font (font-spec :family "Noto Sans CJK SC" :size 16)
-      doom-unicode-font (font-spec :family "Symbols Nerd Font Mono" :size 16))
+(setq doom-font (font-spec :family "Sarasa Term SC Nerd" :size 18 :weight 'Regular)
+      doom-variable-pitch-font (font-spec :family "Noto Sans CJK SC" :size 18)
+      doom-serif-font (font-spec :family "Noto Serif CJK SC" :size 18)
+      doom-symbol-font (font-spec :family "Symbols Nerd Font Mono" :size 18)
+      doom-unicode-font (font-spec :family "Symbols Nerd Font Mono" :size 18))
 #+end_src
 
 **** Theme
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(setq doom-theme 'doom-gruvbox)
+(setq doom-theme 'doom-one)
 #+end_src
 **** Line Numbers
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
@@ -372,14 +374,11 @@ Extensible text editor and integrated development environment built on Emacs.
 #+RESULTS:
 
 *** Org Mode
-
 **** Basic
-
 ***** Directory
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(setq org-directory "~/wiki/")
+(setq org-directory "~/notes/")
 #+end_src
-
 ***** Babel
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! org
@@ -399,9 +398,9 @@ Extensible text editor and integrated development environment built on Emacs.
 
 ***** Appearance
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(after! org
-  (setq org-hide-emphasis-markers t)
-  (setq org-pretty-entities t))
+;; (after! org
+;;   (setq org-hide-emphasis-markers t)
+;;   (setq org-pretty-entities t))
 #+end_src
 
 ***** Pomodoro
@@ -410,33 +409,26 @@ Extensible text editor and integrated development environment built on Emacs.
 #+end_src
 
 **** Agenda
-
 ***** Directory
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (after! org
-  (setq org-agenda-files '("~/wiki")))
+  (setq org-agenda-files '("~/notes/")))
 #+end_src
-
 **** Extension Packages
-
 ***** Auto List
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(add-hook 'org-mode-hook
-          (lambda () (org-autolist-mode)))
+(add-hook! org-mode-hook #'org-autolist-mode)
 #+end_src
 
-***** Org Appear
-#+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(after! org
-  (add-hook 'org-mode-hook 'org-appear-mode))
+***** Org Appear :DISABLED:
+#+begin_src elisp :tangle no 
+(add-hook! org-mode-hook #'org-appear-mode)
 #+end_src
 
 ***** Org Auto Tangle
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
-(after! org
-  (add-hook 'org-mode-hook 'org-auto-tangle-mode))
+(add-hook! org-mode-hook #'org-auto-tangle-mode)
 #+end_src
-
 ***** Safe List
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
 (setq org-auto-tangle-babel-safelist '(
@@ -444,7 +436,107 @@ Extensible text editor and integrated development environment built on Emacs.
                                        "~/example2.org"
                                        ))
 #+end_src
+***** Org Node
+****** Package 
+#+begin_src elisp :tangle packages/doom/.config/doom/packages.el
+(package! org-mem)
+(package! org-node)
+#+end_src
+****** Configuration
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(use-package org-mem
+  :defer
+  :config
+  (setq org-mem-watch-dirs
+        (list "~/notes"))
+  (org-mem-updater-mode))
 
+(use-package org-node
+  :config
+  (org-node-cache-mode)
+  (org-node-complete-at-point-mode)
+
+  ;; Backlinks drawer
+  (setq org-node-backlink-do-drawers t)
+  (org-node-backlink-mode)
+
+  ;; Time_Modified Property
+  (setq org-node-property-mtime "TIME_MODIFIED")
+  (add-hook 'org-node-modification-hook
+            #'org-node-update-mtime-property)
+  ;; Lining up Properties
+  (add-hook 'org-node-modification-hook
+            (defun my-sort-properties ()
+              (org-back-to-heading-or-point-min)
+              (re-search-forward org-property-drawer-re (org-entry-end-position))
+              (let ((end (pos-bol))
+                    (beg (progn (goto-char (match-beginning 0))
+                                (forward-line 1)
+                                (point))))
+                (sort-lines nil beg end)))
+            50)
+  ;; The above is so the following properties will come in predictable order.
+  (setq org-node-property-crtime "TIME_CREATED")
+  (setq org-node-property-mtime "TIME_MODIFIED")
+
+  ;; Backlinks buffer
+  (org-node-context-follow-mode)
+
+  ;; Duplicate Titles
+  (setq org-node-alter-candidates t)
+
+  ;; Sort completion
+  (setq org-node-display-sort-fn
+        #'org-node-sort-by-mtime-property))
+#+end_src
+
+****** Key Binds
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(map! :leader
+      (:prefix ("r" . "Roam")
+       :desc "Find Node" "f" #'org-node-find
+       :desc "Insert Node" "i" #'org-node-insert-link
+       :desc "Backlinks" "b" #'org-node-context-dwim
+       :desc "Search" "s" #'org-node-grep
+       :desc "Refile" "r" #'org-node-refile
+       :desc "Random" "R" #'org-node-visit-random
+       :desc "Set Tags" "t" #'org-node-set-tags
+       :desc "Add Alias" "a" #'org-node-add-alias
+       :desc "Add Refs" "a" #'org-node-add-refs
+       :desc "Convert" "c" #'org-node-nodeify-entry
+       (:prefix ("o" . "Operations")
+        :desc "Rewrite Link" "l" #'org-node-rewrite-links-ask
+        :desc "Rename by Title" "t" #'org-node-rename-file-by-title
+        :desc "Dead Links" "d" #'org-node-list-dead-links
+        :desc "Lint All Files" "L" #'org-node-lint-all-files
+        :desc "List Reflinks" "r" #'org-node-list-reflinks)))
+#+end_src
+
+***** Org Tidy :DISABLED:
+****** Package 
+#+begin_src elisp :tangle no
+(package! org-tidy)
+#+end_src
+****** Configuration
+#+begin_src elisp :tangle no
+(use-package org-tidy
+  :ensure t
+  :hook
+  (org-mode . org-tidy-mode)
+  :config
+  (setq org-tidy-top-property-style 'keep))
+#+end_src
+
+****** Key Binds
+#+begin_src elisp :tangle no
+(map! :leader :desc "Pomodoro" "t T" #'org-pomodoro)
+(map! :leader :desc "Tidy Mode" "t t" #'org-tidy-mode)
+#+end_src
+**** Doc Mode
+#+begin_src elisp :tangle packages/doom/.config/doom/config.el
+(map! :leader :desc "Diff Highlights" "t D" #'diff-hl-mode)
+(map! :leader :desc "Doc Mode" "t d" #'doom-docs-mode)
+#+end_src
 *** Projectile
 **** Add Projects
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
@@ -540,8 +632,7 @@ Add support for =.kdl= files.
   (add-to-list 'org-src-lang-modes '("kdl" . kdl)))
 #+end_src
 
-
-*** Ultra Scrool
+*** Ultra Scroll
 Smooth scrolling
 **** Configuration
 #+begin_src elisp :tangle packages/doom/.config/doom/config.el
@@ -552,4 +643,3 @@ Smooth scrolling
   :config
   (ultra-scroll-mode 1))
 #+end_src
-

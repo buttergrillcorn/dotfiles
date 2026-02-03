@@ -1,5 +1,5 @@
 #+TITLE: Wiki Workflow
-#+PROPERTY: header-args :tangle packages/doom/.config/doom/wiki.el :mkdirp yes
+#+PROPERTY: header-args :tangle no :mkdirp yes
 #+STARTUP: overview
 
 * Wiki
